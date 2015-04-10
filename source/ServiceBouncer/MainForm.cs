@@ -64,6 +64,15 @@ namespace ServiceBouncer
             }
         }
 
+        private void RestartClicked(object sender, EventArgs e)
+        {
+            var servicesToRestart = GetSelectedServices();
+            foreach (var model in servicesToRestart)
+            {
+                model.Restart();
+            }
+        }
+
         private void StopClicked(object sender, EventArgs e)
         {
             var servicesToStop = GetSelectedServices();
