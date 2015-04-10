@@ -1,12 +1,8 @@
-As a developer building multiple Windows Services, the workflow can be a bit annoying. Launching the Services MMC snapin, finding the services, stopping them, starting them again, and so on. And sometimes you just need to delete a service. 
+As a developer building Windows Services, the workflow of constantly stopping and starting services can be a bit annoying, especially if your solution consists of multiple services. **ServiceBouncer** is a simple tool that helps to streamline this workflow. 
 
+**Download**: 
 
-
-**ServiceBouncer** is a little tool that helps to streamline the workflow:
-
- - Filter Windows services so that you don't accidentally stop the wrong one.
- - Select multiple services and stop or start them
- - Delete services
+The tool shows a data grid for the services, and their status. Since it's a grid, you can easily select multiple services. You can then start or stop them. You can also filter the services shown, so that you don't accidentally stop the wrong one. There's even a button to delete services you no longer need. 
 
 ![ServiceBouncer main window - stop, start, delete and filter services](https://res.cloudinary.com/octopusdeploy/image/upload/v1428624736/2015-04-10_10_04_37-Untitled_-_Notepad_hakd1d.png)
 
