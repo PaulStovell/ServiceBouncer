@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Windows.Forms;
 
 namespace ServiceBouncer
@@ -15,6 +13,7 @@ namespace ServiceBouncer
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            Application.ThreadException += (sender, args) => MessageBox.Show(args.Exception.Message, "Unhandled error", MessageBoxButtons.OK);
             Application.Run(new MainForm());
         }
     }
