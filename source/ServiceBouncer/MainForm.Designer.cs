@@ -79,6 +79,7 @@
             this.servicesDataGridView.AllowUserToAddRows = false;
             this.servicesDataGridView.AllowUserToDeleteRows = false;
             this.servicesDataGridView.AllowUserToOrderColumns = true;
+            this.servicesDataGridView.AllowUserToResizeRows = false;
             this.servicesDataGridView.AutoGenerateColumns = false;
             this.servicesDataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.servicesDataGridView.BackgroundColor = System.Drawing.Color.White;
