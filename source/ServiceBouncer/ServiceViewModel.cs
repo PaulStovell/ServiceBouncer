@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.ServiceProcess;
+using System.Threading;
 using ServiceBouncer.Annotations;
 
 namespace ServiceBouncer
@@ -65,9 +66,18 @@ namespace ServiceBouncer
         {
             if (controller.Status == ServiceControllerStatus.Running)
             {
-                controller.Stop();
-                controller.WaitForStatus(ServiceControllerStatus.Stopped, new TimeSpan(0, 0, 5, 0));
-                controller.Start();
+                ThreadPool.QueueUserWorkItem(delegate
+                {
+                    try
+                    {
+                        controller.Stop();
+                        controller.WaitForStatus(ServiceControllerStatus.Stopped, TimeSpan.FromSeconds(30));
+                        controller.Start();
+                    }
+                    catch (Exception)
+                    {
+                    }
+                });
             }
         }
 
