@@ -4,6 +4,8 @@ using ServiceBouncer.Annotations;
 
 namespace ServiceBouncer
 {
+    using System;
+
     public sealed class ServiceViewModel : INotifyPropertyChanged
     {
         private readonly ServiceController controller;
@@ -55,6 +57,16 @@ namespace ServiceBouncer
         {
             if (controller.Status == ServiceControllerStatus.Stopped || controller.Status == ServiceControllerStatus.Paused)
             {
+                controller.Start();
+            }
+        }
+
+        public void Restart()
+        {
+            if (controller.Status == ServiceControllerStatus.Running)
+            {
+                controller.Stop();
+                controller.WaitForStatus(ServiceControllerStatus.Stopped, new TimeSpan(0, 0, 5, 0));
                 controller.Start();
             }
         }
