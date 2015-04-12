@@ -6,7 +6,7 @@ The tool shows a data grid for the services, and their status. Since it's a grid
 
 ![ServiceBouncer main window - stop, start, delete and filter services](https://res.cloudinary.com/octopusdeploy/image/upload/v1428816191/2015-04-12_15_22_48-Untitled_-_Notepad_l3a2kf.png)
 
-Helpfully, the window witle tells you the status of the services, so you can quickly tell if your service is running without switching windows:
+The window title tells you the status of the services, so you can quickly tell if your service is running without switching windows:
 
 ![ServiceBouncer window title](https://res.cloudinary.com/octopusdeploy/image/upload/v1428624736/2015-04-10_10_11_33-_nfnnn1.png)
 
