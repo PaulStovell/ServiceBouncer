@@ -4,7 +4,7 @@ As a developer building Windows Services, the workflow of constantly stopping an
 
 The tool shows a data grid for the services, and their status. Since it's a grid, you can easily select multiple services. You can then start or stop them. You can also filter the services shown, so that you don't accidentally stop the wrong one. There's even a button to delete services you no longer need. 
 
-![ServiceBouncer main window - stop, start, delete and filter services](https://res.cloudinary.com/octopusdeploy/image/upload/v1428626940/2015-04-10_10_48_34-Untitled_-_Notepad_v9yooc.png)
+![ServiceBouncer main window - stop, start, delete and filter services](https://res.cloudinary.com/octopusdeploy/image/upload/v1428816191/2015-04-12_15_22_48-Untitled_-_Notepad_l3a2kf.png)
 
 Helpfully, the window witle tells you the status of the services, so you can quickly tell if your service is running without switching windows:
 
