@@ -5,13 +5,14 @@ using System.Diagnostics;
 using System.Linq;
 using System.ServiceProcess;
 using System.Windows.Forms;
+using ServiceBouncer.ComponentModel;
 
 namespace ServiceBouncer
 {
 
     public partial class MainForm : Form
     {
-        readonly BindingList<ServiceViewModel> services = new BindingList<ServiceViewModel>(); 
+        readonly BindingList<ServiceViewModel> services = new SortableBindingList<ServiceViewModel>();
 
         public MainForm()
         {
@@ -53,6 +54,8 @@ namespace ServiceBouncer
             {
                 services.Add(model);
             }
+
+            servicesDataGridView.Sort(servicesDataGridView.Columns[0], ListSortDirection.Ascending);
         }
 
         private void StartClicked(object sender, EventArgs e)
