@@ -96,15 +96,45 @@ namespace ServiceBouncer
             {
                 foreach (var service in servicesToDelete)
                 {
+                    service.Stop();
                     Process.Start("sc.exe", "delete \"" + service.ServiceName + "\"");
                 }
+                Reload();
             }
-            
         }
 
         private IEnumerable<ServiceViewModel> GetSelectedServices()
         {
             return servicesDataGridView.SelectedRows.OfType<DataGridViewRow>().Select(g => g.DataBoundItem).OfType<ServiceViewModel>().ToList();
+        }
+
+        private void InstallClicked(object sender, EventArgs e)
+        {
+            InstallationForm installationForm = new InstallationForm();
+            installationForm.ShowDialog();
+            if (installationForm.InstalledServices.Count > 0)
+            {
+                Reload();
+
+                servicesDataGridView.ClearSelection();
+
+                List<int> installedServiceIndexes = new List<int>(installationForm.InstalledServices.Count);
+                foreach (var installedSvc in installationForm.InstalledServices)
+                {
+                    int index = serviceViewModelBindingSource.List.Cast<ServiceViewModel>().ToList().FindIndex(c => c.Name == installedSvc);
+                    installedServiceIndexes.Add(index);
+                }
+
+                servicesDataGridView
+                    .Rows
+                    .OfType<DataGridViewRow>()
+                    .Where(x => installedServiceIndexes.Contains(x.Index))
+                    .ToList()
+                    .ForEach(r => r.Selected = true);
+
+                if (servicesDataGridView.SelectedRows.Count > 0)
+                    servicesDataGridView.FirstDisplayedScrollingRowIndex = servicesDataGridView.SelectedRows[0].Index;
+            }
         }
     }
 }
