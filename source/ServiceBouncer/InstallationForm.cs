@@ -47,14 +47,28 @@ namespace ServiceBouncer
                 this.txtBxServiceName.SelectAll();
 
                 this.btnInstall.Enabled = true;
+                this.btnInstall.Text = "Install";
+                this.lblProcessResult.Text = "";
             }
         }
+        private bool m_installationInProgress = false;
 
         private void btnInstall_Click(object sender, EventArgs e)
         {
-            this.lblProcessResult.ForeColor = Color.Orange;
+            if (m_installationInProgress)
+            {
+                MessageBox.Show("One installation is in progress. Please wait until completion.", "One installation is in progress");
+                return;
+            }
+
+            m_installationInProgress = true;
+
+            this.SetUIForInstallationPhase();
             this.lblProcessResult.Text = "Installing...";
+            this.lblProcessResult.ForeColor = Color.Orange;
             this.lblProcessResult.Refresh();
+            this.btnInstall.Text = "Installing...";
+            this.btnInstall.Refresh();
 
             StringBuilder installCmdBuilder = new StringBuilder();
             installCmdBuilder.Append("create");
@@ -88,7 +102,26 @@ namespace ServiceBouncer
                     }));
                     MessageBox.Show(ex.Message, "An error occurred during installation", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
+                finally
+                {
+                    m_installationInProgress = false;
+                    this.SetUIForInstallationPhase();
+                    this.btnInstall.Invoke(new MethodInvoker(() => { this.btnInstall.Text = "Install"; }));
+                }
             }).Start();
+        }
+
+        private void SetUIForInstallationPhase()
+        {
+            this.Invoke(new MethodInvoker(() => {
+                this.Enabled = !m_installationInProgress;
+                this.Refresh();
+            }));
+
+            this.txtBxServiceExePath.Invoke(new MethodInvoker(() => {
+                this.txtBxServiceExePath.Enabled = false; //everytime must be false.
+                this.txtBxServiceExePath.Refresh();
+            }));
         }
 
         private void InstallationProcess_OutputDataReceived(object sender, DataReceivedEventArgs e)
@@ -115,6 +148,15 @@ namespace ServiceBouncer
 
                 this.lblProcessResult.Refresh();
             }));
+        }
+
+        private void InstallationForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (m_installationInProgress)
+            {
+                MessageBox.Show("One installation is in progress. Please wait until completion.", "One installation is in progress");
+                e.Cancel = true;
+            }
         }
     }
 }

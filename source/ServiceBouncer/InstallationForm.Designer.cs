@@ -171,6 +171,7 @@
             this.Name = "InstallationForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "New Windows Service Installation";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.InstallationForm_FormClosing);
             this.ResumeLayout(false);
             this.PerformLayout();
 
