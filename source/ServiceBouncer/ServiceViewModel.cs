@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Management;
 using System.ServiceProcess;
 using System.Threading;
 using ServiceBouncer.Annotations;
@@ -38,6 +39,27 @@ namespace ServiceBouncer
                 if (value == status) return;
                 status = value;
                 OnPropertyChanged("Status");
+            }
+        }
+
+        public string StartupType
+        {
+            get
+            {
+                var wmiManagementObject =
+                    new ManagementObject(new ManagementPath(string.Format("Win32_Service.Name='{0}'", this.ServiceName)));
+
+                return wmiManagementObject["StartMode"].ToString();
+            }
+            set
+            {
+                var wmiManagementObject =
+                    new ManagementObject(new ManagementPath(string.Format("Win32_Service.Name='{0}'", this.ServiceName)));
+
+                var parameters = new object[1];
+                parameters[0] = value.ToString();
+                wmiManagementObject.InvokeMethod("ChangeStartMode", parameters);
+                OnPropertyChanged("Startuptype");
             }
         }
 

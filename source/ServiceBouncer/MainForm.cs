@@ -102,6 +102,33 @@ namespace ServiceBouncer
             
         }
 
+        private void toolStripMenuItem3_Click(object sender, EventArgs e)
+        {
+            var servicesToSetStartup = GetSelectedServices();
+            foreach (var model in servicesToSetStartup)
+            {
+                model.StartupType=ServiceStartMode.Automatic.ToString();
+            }
+        }
+
+        private void toolStripMenuItem4_Click(object sender, EventArgs e)
+        {
+            var servicesToSetStartup = GetSelectedServices();
+            foreach (var model in servicesToSetStartup)
+            {
+                model.StartupType = ServiceStartMode.Manual.ToString();
+            }
+        }
+
+        private void toolStripMenuItem5_Click(object sender, EventArgs e)
+        {
+            var servicesToSetStartup = GetSelectedServices();
+            foreach (var model in servicesToSetStartup)
+            {
+                model.StartupType = ServiceStartMode.Disabled.ToString();
+            }
+        }
+
         private IEnumerable<ServiceViewModel> GetSelectedServices()
         {
             return servicesDataGridView.SelectedRows.OfType<DataGridViewRow>().Select(g => g.DataBoundItem).OfType<ServiceViewModel>().ToList();
