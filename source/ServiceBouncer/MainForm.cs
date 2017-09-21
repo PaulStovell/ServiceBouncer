@@ -1,18 +1,18 @@
-﻿using System;
+﻿using ServiceBouncer.ComponentModel;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Linq;
 using System.ServiceProcess;
+using System.Threading.Tasks;
 using System.Windows.Forms;
-using ServiceBouncer.ComponentModel;
 
 namespace ServiceBouncer
 {
 
     public partial class MainForm : Form
     {
-        readonly BindingList<ServiceViewModel> services = new SortableBindingList<ServiceViewModel>();
+        private readonly BindingList<ServiceViewModel> services = new SortableBindingList<ServiceViewModel>();
 
         public MainForm()
         {
@@ -22,12 +22,9 @@ namespace ServiceBouncer
 
         private void RefreshTimerTicked(object sender, EventArgs e)
         {
-            foreach (var item in services)
-            {
-                item.Refresh();
-            }
+            PerformOperation(x => x.Refresh(), services.ToList());
 
-            var titles = services.GroupBy(s => s.Status).Select(s => s.Key + ": " + s.Count());
+            var titles = services.GroupBy(s => s.Status).Select(s => (string.IsNullOrWhiteSpace(s.Key) ? "Unknown" : s.Key) + ": " + s.Count());
             Text = string.Join(", ", titles);
         }
 
@@ -46,92 +43,103 @@ namespace ServiceBouncer
             Reload();
         }
 
-        private void Reload()
-        {
-            services.Clear();
-            var systemServices = ServiceController.GetServices().Where(service => service.DisplayName.IndexOf(filterBox.Text, StringComparison.OrdinalIgnoreCase) >= 0);
-            foreach (var model in systemServices.Select(service => new ServiceViewModel(service)))
-            {
-                services.Add(model);
-            }
-
-            servicesDataGridView.Sort(servicesDataGridView.Columns[0], ListSortDirection.Ascending);
-        }
-
         private void StartClicked(object sender, EventArgs e)
         {
-            var servicesToStart = GetSelectedServices();
-            foreach (var model in servicesToStart)
-            {
-                model.Start();
-            }
+            PerformOperation(x => x.Start());
         }
 
         private void RestartClicked(object sender, EventArgs e)
         {
-            var servicesToRestart = GetSelectedServices();
-            foreach (var model in servicesToRestart)
-            {
-                model.Restart();
-            }
+            PerformOperation(x => x.Restart());
         }
 
         private void StopClicked(object sender, EventArgs e)
         {
-            var servicesToStop = GetSelectedServices();
-            foreach (var model in servicesToStop)
-            {
-                model.Stop();
-            }
+            PerformOperation(x => x.Stop());
         }
 
         private void DeleteClicked(object sender, EventArgs e)
         {
-            var servicesToDelete = GetSelectedServices();
-            if (
-                MessageBox.Show("Are you sure you want to delete the following services: " +
-                    string.Concat(servicesToDelete.Select(s => Environment.NewLine + s.Name)),
-                    "Confirm delete", MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
+            PerformOperation(x =>
             {
-                foreach (var service in servicesToDelete)
+                if (MessageBox.Show($"Are you sure you want to delete the '{x.Name}'", "Confirm delete", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
                 {
-                    Process.Start("sc.exe", "delete \"" + service.ServiceName + "\"");
+                    x.Delete();
+                }
+            });
+
+            Reload();
+        }
+
+        private void StartupAutomaticClicked(object sender, EventArgs e)
+        {
+            PerformOperation(x => x.SetStartupType(ServiceStartMode.Automatic));
+        }
+
+        private void StartupManualClicked(object sender, EventArgs e)
+        {
+            PerformOperation(x => x.SetStartupType(ServiceStartMode.Manual));
+        }
+
+        private void StartupDisabledClick(object sender, EventArgs e)
+        {
+            PerformOperation(x => x.SetStartupType(ServiceStartMode.Disabled));
+        }
+
+        private void Reload()
+        {
+            PerformOperation(async () =>
+            {
+                var systemServices = await Task.Run(() => ServiceController.GetServices().Where(service => service.DisplayName.IndexOf(filterBox.Text, StringComparison.OrdinalIgnoreCase) >= 0));
+                services.Clear();
+                foreach (var model in systemServices.Select(service => new ServiceViewModel(service)).OrderBy(x => x.Name))
+                {
+                    services.Add(model);
+                }
+            });
+        }
+
+        private void PerformOperation(Action<ServiceViewModel> actionToPerform)
+        {
+            PerformOperation(() =>
+            {
+                var selectedServices = servicesDataGridView.SelectedRows.OfType<DataGridViewRow>().Select(g => g.DataBoundItem).OfType<ServiceViewModel>().ToList();
+                PerformOperation(actionToPerform, selectedServices);
+            });
+        }
+
+        private async void PerformOperation(Action<ServiceViewModel> actionToPerform, List<ServiceViewModel> servicesToAction)
+        {
+            foreach (var model in servicesToAction)
+            {
+                try
+                {
+                    await Task.Run(() => actionToPerform(model));
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show($"An Error Occured\n{e.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
-            
         }
 
-        private void toolStripMenuItem3_Click(object sender, EventArgs e)
+        private void PerformOperation(Action actionToPerform)
         {
-            var servicesToSetStartup = GetSelectedServices();
-            foreach (var model in servicesToSetStartup)
+            contextMenuStrip1.Enabled = false;
+            toolStrip1.Enabled = false;
+            foreach (ToolStripItem item in toolStrip1.Items)
             {
-                model.StartupType=ServiceStartMode.Automatic.ToString();
+                item.Enabled = false;
             }
-        }
 
-        private void toolStripMenuItem4_Click(object sender, EventArgs e)
-        {
-            var servicesToSetStartup = GetSelectedServices();
-            foreach (var model in servicesToSetStartup)
+            actionToPerform();
+
+            contextMenuStrip1.Enabled = true;
+            toolStrip1.Enabled = true;
+            foreach (ToolStripItem item in toolStrip1.Items)
             {
-                model.StartupType = ServiceStartMode.Manual.ToString();
+                item.Enabled = true;
             }
-        }
-
-        private void toolStripMenuItem5_Click(object sender, EventArgs e)
-        {
-            var servicesToSetStartup = GetSelectedServices();
-            foreach (var model in servicesToSetStartup)
-            {
-                model.StartupType = ServiceStartMode.Disabled.ToString();
-            }
-        }
-
-        private IEnumerable<ServiceViewModel> GetSelectedServices()
-        {
-            return servicesDataGridView.SelectedRows.OfType<DataGridViewRow>().Select(g => g.DataBoundItem).OfType<ServiceViewModel>().ToList();
         }
     }
 }
