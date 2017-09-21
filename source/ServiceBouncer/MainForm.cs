@@ -13,6 +13,7 @@ namespace ServiceBouncer
     public partial class MainForm : Form
     {
         private readonly BindingList<ServiceViewModel> services = new SortableBindingList<ServiceViewModel>();
+        private bool autoRefresh = false;
 
         public MainForm()
         {
@@ -22,7 +23,10 @@ namespace ServiceBouncer
 
         private void RefreshTimerTicked(object sender, EventArgs e)
         {
-            PerformOperation(x => x.Refresh(), services.ToList());
+            if (autoRefresh)
+            {
+                PerformOperation(x => x.Refresh(), services.ToList());
+            }
 
             var titles = services.GroupBy(s => s.Status).Select(s => (string.IsNullOrWhiteSpace(s.Key) ? "Unknown" : s.Key) + ": " + s.Count());
             Text = string.Join(", ", titles);
@@ -86,59 +90,51 @@ namespace ServiceBouncer
             PerformOperation(x => x.SetStartupType(ServiceStartMode.Disabled));
         }
 
-        private void Reload()
+        private void AutoRefreshToggle(object sender, EventArgs e)
         {
-            PerformOperation(async () =>
+            if (autoRefresh)
             {
-                var systemServices = await Task.Run(() => ServiceController.GetServices().Where(service => service.DisplayName.IndexOf(filterBox.Text, StringComparison.OrdinalIgnoreCase) >= 0));
-                services.Clear();
-                foreach (var model in systemServices.Select(service => new ServiceViewModel(service)).OrderBy(x => x.Name))
-                {
-                    services.Add(model);
-                }
-            });
+                autoRefresh = false;
+                toolStripButton6.Text = "Enable Auto Refresh";
+            }
+            else
+            {
+                autoRefresh = true;
+                toolStripButton6.Text = "Disable Auto Refresh";
+            }
+        }
+
+        private async void Reload()
+        {
+            var systemServices = await Task.Run(() => ServiceController.GetServices().Where(service => service.DisplayName.IndexOf(filterBox.Text, StringComparison.OrdinalIgnoreCase) >= 0));
+            services.Clear();
+            foreach (var model in systemServices.Select(service => new ServiceViewModel(service)).OrderBy(x => x.Name))
+            {
+                services.Add(model);
+            }
+
+            var titles = services.GroupBy(s => s.Status).Select(s => (string.IsNullOrWhiteSpace(s.Key) ? "Unknown" : s.Key) + ": " + s.Count());
+            Text = string.Join(", ", titles);
         }
 
         private void PerformOperation(Action<ServiceViewModel> actionToPerform)
         {
-            PerformOperation(() =>
-            {
-                var selectedServices = servicesDataGridView.SelectedRows.OfType<DataGridViewRow>().Select(g => g.DataBoundItem).OfType<ServiceViewModel>().ToList();
-                PerformOperation(actionToPerform, selectedServices);
-            });
+            var selectedServices = servicesDataGridView.SelectedRows.OfType<DataGridViewRow>().Select(g => g.DataBoundItem).OfType<ServiceViewModel>().ToList();
+            PerformOperation(actionToPerform, selectedServices);
         }
 
-        private async void PerformOperation(Action<ServiceViewModel> actionToPerform, List<ServiceViewModel> servicesToAction)
+        private void PerformOperation(Action<ServiceViewModel> actionToPerform, List<ServiceViewModel> servicesToAction)
         {
-            foreach (var model in servicesToAction)
+            try
             {
-                try
+                foreach (var model in servicesToAction)
                 {
-                    await Task.Run(() => actionToPerform(model));
-                }
-                catch (Exception e)
-                {
-                    MessageBox.Show($"An Error Occured\n{e.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    actionToPerform(model);
                 }
             }
-        }
-
-        private void PerformOperation(Action actionToPerform)
-        {
-            contextMenuStrip1.Enabled = false;
-            toolStrip1.Enabled = false;
-            foreach (ToolStripItem item in toolStrip1.Items)
+            catch (Exception e)
             {
-                item.Enabled = false;
-            }
-
-            actionToPerform();
-
-            contextMenuStrip1.Enabled = true;
-            toolStrip1.Enabled = true;
-            foreach (ToolStripItem item in toolStrip1.Items)
-            {
-                item.Enabled = true;
+                MessageBox.Show($"An Error Occured\n{e.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }

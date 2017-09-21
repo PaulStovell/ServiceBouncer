@@ -1,12 +1,12 @@
+using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Drawing;
 using System.ServiceProcess;
-using System.Threading;
+using System.Threading.Tasks;
 
 namespace ServiceBouncer
 {
-    using System;
-
     public sealed class ServiceViewModel : INotifyPropertyChanged
     {
         private readonly ServiceController controller;
@@ -15,78 +15,137 @@ namespace ServiceBouncer
         public string ServiceName { get; private set; }
         public string Status { get; private set; }
         public string StartupType { get; private set; }
+        public Image StatusIcon { get; private set; }
 
         public ServiceViewModel(ServiceController controller)
         {
             this.controller = controller;
+            Name = controller.DisplayName;
+            ServiceName = controller.ServiceName;
+            Status = controller.Status.ToString();
+            StatusIcon = GetIcon(Status);
+            StartupType = controller.StartUpType();
         }
 
-        public void Start()
+        public async void Start()
         {
             if (controller.Status == ServiceControllerStatus.Stopped || controller.Status == ServiceControllerStatus.Paused)
             {
-                controller.Start();
+                await Task.Run(() => controller.Start());
                 Refresh();
             }
         }
 
-        public void Restart()
+        public async void Restart()
         {
             if (controller.Status == ServiceControllerStatus.Running)
             {
-                ThreadPool.QueueUserWorkItem(delegate
+                await Task.Run(() =>
                 {
                     controller.Stop();
                     controller.WaitForStatus(ServiceControllerStatus.Stopped, TimeSpan.FromSeconds(30));
                     controller.Start();
-                    Refresh();
                 });
-            }
-        }
 
-        public void Stop()
-        {
-            if (controller.Status == ServiceControllerStatus.Running)
-            {
-                controller.Stop();
                 Refresh();
             }
         }
 
-        public void Delete()
+        public async void Stop()
         {
             if (controller.Status == ServiceControllerStatus.Running)
             {
-                controller.Stop();
+                await Task.Run(() => controller.Stop());
+                Refresh();
             }
-            Process.Start("sc.exe", "delete \"" + ServiceName + "\"");
         }
 
-        public void SetStartupType(ServiceStartMode newType)
+        public async void Delete()
         {
-            controller.SetStartupType(newType);
+            if (controller.Status == ServiceControllerStatus.Running)
+            {
+                await Task.Run(() => controller.Stop());
+            }
+            await Task.Run(() => Process.Start("sc.exe", "delete \"" + ServiceName + "\""));
+        }
+
+        public async void SetStartupType(ServiceStartMode newType)
+        {
+            await Task.Run(() => controller.SetStartupType(newType));
             Refresh();
         }
 
-        public void Refresh()
+        public async void Refresh()
         {
-            controller.Refresh();
-            Name = controller.DisplayName;
-            ServiceName = controller.ServiceName;
-            Status = controller.Status.ToString();
-            StartupType = controller.StartUpType();
-
             try
             {
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name"));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ServiceName"));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Status"));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("StartupType"));
+                await Task.Run(() =>
+                {
+                    controller.Refresh();
+
+                    if (Name != controller.DisplayName)
+                    {
+                        Name = controller.DisplayName;
+                        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name"));
+                    }
+
+                    if (ServiceName != controller.ServiceName)
+                    {
+                        ServiceName = controller.ServiceName;
+                        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ServiceName"));
+                    }
+
+
+                    var statusText = controller.Status.ToString();
+                    if (Status != statusText)
+                    {
+                        Status = controller.Status.ToString();
+                        StatusIcon = GetIcon(Status);
+                        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Status"));
+                        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("StatusIcon"));
+                    }
+
+                    var startup = controller.StartUpType();
+                    if (StartupType != startup)
+                    {
+                        StartupType = startup;
+                        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("StartupType"));
+                    }
+                });
             }
             catch (Exception)
             {
                 //Ignored
             }
+        }
+
+        private Image GetIcon(string status)
+        {
+            string colour;
+            switch (status.ToLower())
+            {
+                case "running":
+                    colour = "#00ff45";
+                    break;
+                case "stopped":
+                    colour = "#db5b5b";
+                    break;
+                default:
+                    colour = "#ff9a00";
+                    break;
+            }
+
+            var bitmap = new Bitmap(20, 20);
+
+            using (var g = Graphics.FromImage(bitmap))
+            {
+                using (Brush b = new SolidBrush(ColorTranslator.FromHtml(colour)))
+                {
+                    g.FillEllipse(b, 0, 0, 19, 19);
+                }
+            }
+
+            return bitmap;
         }
     }
 }
