@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
@@ -24,43 +25,49 @@ namespace ServiceBouncer
             ServiceName = controller.ServiceName;
             Status = controller.Status.ToString();
             StatusIcon = GetIcon(Status);
-            StartupType = controller.StartUpType();
+            StartupType = controller.StartType.ToString();
         }
 
-        public async void Start()
+        public async Task Start()
         {
             if (controller.Status == ServiceControllerStatus.Stopped || controller.Status == ServiceControllerStatus.Paused)
             {
                 await Task.Run(() => controller.Start());
-                Refresh();
+                await Refresh();
             }
         }
 
-        public async void Restart()
+        public async Task Restart()
         {
             if (controller.Status == ServiceControllerStatus.Running)
             {
                 await Task.Run(() =>
                 {
                     controller.Stop();
-                    controller.WaitForStatus(ServiceControllerStatus.Stopped, TimeSpan.FromSeconds(30));
+                    controller.WaitForStatus(ServiceControllerStatus.Stopped, TimeSpan.FromSeconds(60));
+
+                    if (controller.Status != ServiceControllerStatus.Stopped)
+                    {
+                        throw new Exception("The service did not stop within 60 seconds, you will need to start manually");
+                    }
+
                     controller.Start();
                 });
 
-                Refresh();
+                await Refresh();
             }
         }
 
-        public async void Stop()
+        public async Task Stop()
         {
             if (controller.Status == ServiceControllerStatus.Running)
             {
                 await Task.Run(() => controller.Stop());
-                Refresh();
+                await Refresh();
             }
         }
 
-        public async void Delete()
+        public async Task Delete()
         {
             if (controller.Status == ServiceControllerStatus.Running)
             {
@@ -69,49 +76,57 @@ namespace ServiceBouncer
             await Task.Run(() => Process.Start("sc.exe", "delete \"" + ServiceName + "\""));
         }
 
-        public async void SetStartupType(ServiceStartMode newType)
+        public async Task SetStartupType(ServiceStartMode newType)
         {
             await Task.Run(() => controller.SetStartupType(newType));
-            Refresh();
+            await Refresh();
         }
 
-        public async void Refresh()
+        public async Task Refresh()
         {
             try
             {
-                await Task.Run(() =>
+                var changed = await Task.Run(() =>
                 {
                     controller.Refresh();
+
+                    var changedEvents = new List<string>();
 
                     if (Name != controller.DisplayName)
                     {
                         Name = controller.DisplayName;
-                        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name"));
+                        changedEvents.Add("Name");
                     }
 
                     if (ServiceName != controller.ServiceName)
                     {
                         ServiceName = controller.ServiceName;
-                        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ServiceName"));
+                        changedEvents.Add("ServiceName");
                     }
-
 
                     var statusText = controller.Status.ToString();
                     if (Status != statusText)
                     {
                         Status = controller.Status.ToString();
                         StatusIcon = GetIcon(Status);
-                        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Status"));
-                        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("StatusIcon"));
+                        changedEvents.Add("Status");
+                        changedEvents.Add("StatusIcon");
                     }
 
-                    var startup = controller.StartUpType();
+                    var startup = controller.StartType.ToString();
                     if (StartupType != startup)
                     {
                         StartupType = startup;
-                        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("StartupType"));
+                        changedEvents.Add("StartupType");
                     }
+
+                    return changedEvents;
                 });
+
+                foreach (var item in changed)
+                {
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(item));
+                }
             }
             catch (Exception)
             {

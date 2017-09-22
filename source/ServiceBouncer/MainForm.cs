@@ -9,27 +9,37 @@ using System.Windows.Forms;
 
 namespace ServiceBouncer
 {
-
     public partial class MainForm : Form
     {
         private readonly BindingList<ServiceViewModel> services = new SortableBindingList<ServiceViewModel>();
-        private bool autoRefresh = false;
+        private bool isActive;
 
         public MainForm()
         {
+            isActive = true;
             InitializeComponent();
             serviceViewModelBindingSource.DataSource = services;
         }
 
         private void RefreshTimerTicked(object sender, EventArgs e)
         {
-            if (autoRefresh)
+            if (isActive)
             {
                 PerformOperation(x => x.Refresh(), services.ToList());
-            }
 
-            var titles = services.GroupBy(s => s.Status).Select(s => (string.IsNullOrWhiteSpace(s.Key) ? "Unknown" : s.Key) + ": " + s.Count());
-            Text = string.Join(", ", titles);
+                var titles = services.GroupBy(s => s.Status).Select(s => (string.IsNullOrWhiteSpace(s.Key) ? "Unknown" : s.Key) + ": " + s.Count());
+                Text = "Total: " + services.Count + ", " + string.Join(", ", titles);
+            }
+        }
+
+        private void FormActivated(object sender, EventArgs e)
+        {
+            isActive = true;
+        }
+
+        private void FormDeactivated(object sender, EventArgs e)
+        {
+            isActive = false;
         }
 
         private void FormLoaded(object sender, EventArgs e)
@@ -49,26 +59,26 @@ namespace ServiceBouncer
 
         private void StartClicked(object sender, EventArgs e)
         {
-            PerformOperation(x => x.Start());
+            PerformOperation(async x => await x.Start());
         }
 
         private void RestartClicked(object sender, EventArgs e)
         {
-            PerformOperation(x => x.Restart());
+            PerformOperation(async x => await x.Restart());
         }
 
         private void StopClicked(object sender, EventArgs e)
         {
-            PerformOperation(x => x.Stop());
+            PerformOperation(async x => await x.Stop());
         }
 
         private void DeleteClicked(object sender, EventArgs e)
         {
-            PerformOperation(x =>
+            PerformOperation(async x =>
             {
                 if (MessageBox.Show($"Are you sure you want to delete the '{x.Name}'", "Confirm delete", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
                 {
-                    x.Delete();
+                    await x.Delete();
                 }
             });
 
@@ -77,31 +87,17 @@ namespace ServiceBouncer
 
         private void StartupAutomaticClicked(object sender, EventArgs e)
         {
-            PerformOperation(x => x.SetStartupType(ServiceStartMode.Automatic));
+            PerformOperation(async x => await x.SetStartupType(ServiceStartMode.Automatic));
         }
 
         private void StartupManualClicked(object sender, EventArgs e)
         {
-            PerformOperation(x => x.SetStartupType(ServiceStartMode.Manual));
+            PerformOperation(async x => await x.SetStartupType(ServiceStartMode.Manual));
         }
 
         private void StartupDisabledClick(object sender, EventArgs e)
         {
-            PerformOperation(x => x.SetStartupType(ServiceStartMode.Disabled));
-        }
-
-        private void AutoRefreshToggle(object sender, EventArgs e)
-        {
-            if (autoRefresh)
-            {
-                autoRefresh = false;
-                toolStripButton6.Text = "Enable Auto Refresh";
-            }
-            else
-            {
-                autoRefresh = true;
-                toolStripButton6.Text = "Disable Auto Refresh";
-            }
+            PerformOperation(async x => await x.SetStartupType(ServiceStartMode.Disabled));
         }
 
         private async void Reload()
@@ -117,24 +113,24 @@ namespace ServiceBouncer
             Text = string.Join(", ", titles);
         }
 
-        private void PerformOperation(Action<ServiceViewModel> actionToPerform)
+        private void PerformOperation(Func<ServiceViewModel, Task> actionToPerform)
         {
             var selectedServices = servicesDataGridView.SelectedRows.OfType<DataGridViewRow>().Select(g => g.DataBoundItem).OfType<ServiceViewModel>().ToList();
             PerformOperation(actionToPerform, selectedServices);
         }
 
-        private void PerformOperation(Action<ServiceViewModel> actionToPerform, List<ServiceViewModel> servicesToAction)
+        private async void PerformOperation(Func<ServiceViewModel, Task> actionToPerform, List<ServiceViewModel> servicesToAction)
         {
-            try
+            foreach (var model in servicesToAction)
             {
-                foreach (var model in servicesToAction)
+                try
                 {
-                    actionToPerform(model);
+                    await actionToPerform(model);
                 }
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show($"An Error Occured\n{e.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                catch (Exception e)
+                {
+                    MessageBox.Show($"An Error Occured Interacting With Service: {model.Name}\n{e.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
     }
