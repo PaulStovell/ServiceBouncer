@@ -38,7 +38,7 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>Properties\icon.ico</ApplicationIcon>
+    <ApplicationIcon>AppIcon.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject>ServiceBouncer.Program</StartupObject>
@@ -99,7 +99,43 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Properties\icon.ico" />
+    <None Include="Icons\AppIcon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Icons\AppIcon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Icons\Delete.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Icons\Refresh.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Icons\Restart.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Icons\Running-State-Running.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Icons\Running-State-Stopped.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Icons\Running-State-Unknown.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Icons\Start.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Icons\Startup.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="AppIcon.ico" />
+    <None Include="Icons\Pause.png" />
+    <None Include="Icons\Running-State-Paused.png" />
+    <None Include="Icons\Running-State-StopPending.png" />
+    <None Include="Icons\Running-State-StartPending.png" />
+    <None Include="Icons\Filter.png" />
+    <None Include="Icons\Stop.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

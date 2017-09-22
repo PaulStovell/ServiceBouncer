@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.ServiceProcess;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -26,9 +27,7 @@ namespace ServiceBouncer
             if (isActive)
             {
                 PerformOperation(x => x.Refresh(), services.ToList());
-
-                var titles = services.GroupBy(s => s.Status).Select(s => (string.IsNullOrWhiteSpace(s.Key) ? "Unknown" : s.Key) + ": " + s.Count());
-                Text = "Total: " + services.Count + ", " + string.Join(", ", titles);
+                SetTitle();
             }
         }
 
@@ -72,6 +71,11 @@ namespace ServiceBouncer
             PerformOperation(async x => await x.Stop());
         }
 
+        private void PauseClicked(object sender, EventArgs e)
+        {
+            PerformOperation(async x => await x.Pause());
+        }
+
         private void DeleteClicked(object sender, EventArgs e)
         {
             PerformOperation(async x =>
@@ -79,10 +83,10 @@ namespace ServiceBouncer
                 if (MessageBox.Show($"Are you sure you want to delete the '{x.Name}'", "Confirm delete", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
                 {
                     await x.Delete();
+                    Thread.Sleep(500);
+                    Reload();
                 }
             });
-
-            Reload();
         }
 
         private void StartupAutomaticClicked(object sender, EventArgs e)
@@ -109,8 +113,13 @@ namespace ServiceBouncer
                 services.Add(model);
             }
 
+            SetTitle();
+        }
+
+        private void SetTitle()
+        {
             var titles = services.GroupBy(s => s.Status).Select(s => (string.IsNullOrWhiteSpace(s.Key) ? "Unknown" : s.Key) + ": " + s.Count());
-            Text = string.Join(", ", titles);
+            Text = "Total: " + services.Count + ", " + string.Join(", ", titles);
         }
 
         private void PerformOperation(Func<ServiceViewModel, Task> actionToPerform)
@@ -129,7 +138,7 @@ namespace ServiceBouncer
                 }
                 catch (Exception e)
                 {
-                    MessageBox.Show($"An Error Occured Interacting With Service: {model.Name}\n{e.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"An Error Occured Interacting With Service: {model.Name}\nError Message: {e.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }

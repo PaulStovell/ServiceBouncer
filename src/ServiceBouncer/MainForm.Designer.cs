@@ -29,14 +29,14 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.toolStripContainer = new System.Windows.Forms.ToolStripContainer();
             this.servicesDataGridView = new System.Windows.Forms.DataGridView();
-            this.nameDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.StatusIcon = new System.Windows.Forms.DataGridViewImageColumn();
+            this.nameDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.statusDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.StartupType = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.contextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
@@ -50,15 +50,20 @@
             this.serviceViewModelBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.toolStrip = new System.Windows.Forms.ToolStrip();
             this.toolStripStartButton = new System.Windows.Forms.ToolStripButton();
+            this.toolStripPauseButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripRestartButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripStopButton = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripDeleteButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripStartupTypeButton = new System.Windows.Forms.ToolStripDropDownButton();
             this.startupTypeAutomaticItem = new System.Windows.Forms.ToolStripMenuItem();
             this.startupTypeManualItem = new System.Windows.Forms.ToolStripMenuItem();
             this.startupTypeDisabledItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.filterBox = new System.Windows.Forms.ToolStripTextBox();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripRefreshButton = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.FilterIcon = new System.Windows.Forms.ToolStripLabel();
+            this.filterBox = new System.Windows.Forms.ToolStripTextBox();
             this.refreshTimer = new System.Windows.Forms.Timer(this.components);
             this.toolStripContainer.ContentPanel.SuspendLayout();
             this.toolStripContainer.TopToolStripPanel.SuspendLayout();
@@ -75,11 +80,11 @@
             // toolStripContainer.ContentPanel
             // 
             this.toolStripContainer.ContentPanel.Controls.Add(this.servicesDataGridView);
-            this.toolStripContainer.ContentPanel.Size = new System.Drawing.Size(766, 288);
+            this.toolStripContainer.ContentPanel.Size = new System.Drawing.Size(724, 315);
             this.toolStripContainer.Dock = System.Windows.Forms.DockStyle.Fill;
             this.toolStripContainer.Location = new System.Drawing.Point(0, 0);
             this.toolStripContainer.Name = "toolStripContainer";
-            this.toolStripContainer.Size = new System.Drawing.Size(766, 311);
+            this.toolStripContainer.Size = new System.Drawing.Size(724, 354);
             this.toolStripContainer.TabIndex = 0;
             this.toolStripContainer.Text = "toolStripContainer";
             // 
@@ -102,62 +107,66 @@
             this.servicesDataGridView.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.SingleHorizontal;
             this.servicesDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.servicesDataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.nameDataGridViewTextBoxColumn,
             this.StatusIcon,
+            this.nameDataGridViewTextBoxColumn,
             this.statusDataGridViewTextBoxColumn,
             this.StartupType});
             this.servicesDataGridView.ContextMenuStrip = this.contextMenu;
             this.servicesDataGridView.DataSource = this.serviceViewModelBindingSource;
-            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle5.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle5.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle5.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle5.Padding = new System.Windows.Forms.Padding(4, 0, 0, 0);
-            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.servicesDataGridView.DefaultCellStyle = dataGridViewCellStyle5;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle2.Padding = new System.Windows.Forms.Padding(4, 0, 0, 0);
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.servicesDataGridView.DefaultCellStyle = dataGridViewCellStyle2;
             this.servicesDataGridView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.servicesDataGridView.GridColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
             this.servicesDataGridView.Location = new System.Drawing.Point(0, 0);
             this.servicesDataGridView.Margin = new System.Windows.Forms.Padding(7);
             this.servicesDataGridView.Name = "servicesDataGridView";
             this.servicesDataGridView.ReadOnly = true;
-            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle6.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle6.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle6.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle6.Padding = new System.Windows.Forms.Padding(2);
-            dataGridViewCellStyle6.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle6.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.servicesDataGridView.RowHeadersDefaultCellStyle = dataGridViewCellStyle6;
+            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle3.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle3.Padding = new System.Windows.Forms.Padding(2);
+            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.servicesDataGridView.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
             this.servicesDataGridView.RowHeadersVisible = false;
             this.servicesDataGridView.RowTemplate.Height = 25;
             this.servicesDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.servicesDataGridView.Size = new System.Drawing.Size(766, 288);
+            this.servicesDataGridView.Size = new System.Drawing.Size(724, 315);
             this.servicesDataGridView.TabIndex = 0;
-            // 
-            // nameDataGridViewTextBoxColumn
-            // 
-            this.nameDataGridViewTextBoxColumn.DataPropertyName = "Name";
-            dataGridViewCellStyle4.Padding = new System.Windows.Forms.Padding(10, 0, 0, 0);
-            this.nameDataGridViewTextBoxColumn.DefaultCellStyle = dataGridViewCellStyle4;
-            this.nameDataGridViewTextBoxColumn.FillWeight = 341.7259F;
-            this.nameDataGridViewTextBoxColumn.HeaderText = "Display name";
-            this.nameDataGridViewTextBoxColumn.Name = "nameDataGridViewTextBoxColumn";
-            this.nameDataGridViewTextBoxColumn.ReadOnly = true;
             // 
             // StatusIcon
             // 
             this.StatusIcon.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
             this.StatusIcon.DataPropertyName = "StatusIcon";
             this.StatusIcon.FillWeight = 30.45685F;
+            this.StatusIcon.Frozen = true;
             this.StatusIcon.HeaderText = "";
             this.StatusIcon.Name = "StatusIcon";
             this.StatusIcon.ReadOnly = true;
             this.StatusIcon.Resizable = System.Windows.Forms.DataGridViewTriState.False;
             this.StatusIcon.Width = 7;
+            // 
+            // nameDataGridViewTextBoxColumn
+            // 
+            this.nameDataGridViewTextBoxColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.nameDataGridViewTextBoxColumn.DataPropertyName = "Name";
+            dataGridViewCellStyle1.Padding = new System.Windows.Forms.Padding(10, 0, 0, 0);
+            this.nameDataGridViewTextBoxColumn.DefaultCellStyle = dataGridViewCellStyle1;
+            this.nameDataGridViewTextBoxColumn.FillWeight = 341.7259F;
+            this.nameDataGridViewTextBoxColumn.Frozen = true;
+            this.nameDataGridViewTextBoxColumn.HeaderText = "Display name";
+            this.nameDataGridViewTextBoxColumn.Name = "nameDataGridViewTextBoxColumn";
+            this.nameDataGridViewTextBoxColumn.ReadOnly = true;
+            this.nameDataGridViewTextBoxColumn.Width = 539;
             // 
             // statusDataGridViewTextBoxColumn
             // 
@@ -241,55 +250,77 @@
             // 
             this.toolStrip.AllowMerge = false;
             this.toolStrip.Dock = System.Windows.Forms.DockStyle.None;
+            this.toolStrip.ImageScalingSize = new System.Drawing.Size(32, 32);
             this.toolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStartButton,
+            this.toolStripPauseButton,
             this.toolStripRestartButton,
             this.toolStripStopButton,
+            this.toolStripSeparator1,
             this.toolStripDeleteButton,
             this.toolStripStartupTypeButton,
-            this.filterBox,
-            this.toolStripRefreshButton});
+            this.toolStripSeparator2,
+            this.toolStripRefreshButton,
+            this.toolStripSeparator3,
+            this.FilterIcon,
+            this.filterBox});
             this.toolStrip.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Flow;
             this.toolStrip.Location = new System.Drawing.Point(3, 0);
             this.toolStrip.Name = "toolStrip";
-            this.toolStrip.Size = new System.Drawing.Size(510, 23);
+            this.toolStrip.Size = new System.Drawing.Size(721, 39);
             this.toolStrip.TabIndex = 0;
             // 
             // toolStripStartButton
             // 
-            this.toolStripStartButton.Image = ((System.Drawing.Image)(resources.GetObject("toolStripStartButton.Image")));
+            this.toolStripStartButton.Image = global::ServiceBouncer.Properties.Resources.Start;
             this.toolStripStartButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripStartButton.Margin = new System.Windows.Forms.Padding(7, 1, 0, 2);
             this.toolStripStartButton.Name = "toolStripStartButton";
-            this.toolStripStartButton.Size = new System.Drawing.Size(51, 20);
+            this.toolStripStartButton.Size = new System.Drawing.Size(67, 36);
             this.toolStripStartButton.Text = "Start";
             this.toolStripStartButton.Click += new System.EventHandler(this.StartClicked);
             // 
+            // toolStripPauseButton
+            // 
+            this.toolStripPauseButton.Image = global::ServiceBouncer.Properties.Resources.Pause;
+            this.toolStripPauseButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripPauseButton.Margin = new System.Windows.Forms.Padding(7, 1, 0, 2);
+            this.toolStripPauseButton.Name = "toolStripPauseButton";
+            this.toolStripPauseButton.Size = new System.Drawing.Size(74, 36);
+            this.toolStripPauseButton.Text = "Pause";
+            this.toolStripPauseButton.Click += new System.EventHandler(this.PauseClicked);
+            // 
             // toolStripRestartButton
             // 
-            this.toolStripRestartButton.Image = ((System.Drawing.Image)(resources.GetObject("toolStripRestartButton.Image")));
+            this.toolStripRestartButton.Image = global::ServiceBouncer.Properties.Resources.Restart;
             this.toolStripRestartButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripRestartButton.Name = "toolStripRestartButton";
-            this.toolStripRestartButton.Size = new System.Drawing.Size(63, 20);
+            this.toolStripRestartButton.Size = new System.Drawing.Size(79, 36);
             this.toolStripRestartButton.Text = "Restart";
             this.toolStripRestartButton.ToolTipText = "Stop, wait, then start";
             this.toolStripRestartButton.Click += new System.EventHandler(this.RestartClicked);
             // 
             // toolStripStopButton
             // 
-            this.toolStripStopButton.Image = ((System.Drawing.Image)(resources.GetObject("toolStripStopButton.Image")));
+            this.toolStripStopButton.Image = global::ServiceBouncer.Properties.Resources.Stop;
             this.toolStripStopButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripStopButton.Name = "toolStripStopButton";
-            this.toolStripStopButton.Size = new System.Drawing.Size(51, 20);
+            this.toolStripStopButton.Size = new System.Drawing.Size(67, 36);
             this.toolStripStopButton.Text = "Stop";
             this.toolStripStopButton.Click += new System.EventHandler(this.StopClicked);
             // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.AutoSize = false;
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 39);
+            // 
             // toolStripDeleteButton
             // 
-            this.toolStripDeleteButton.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDeleteButton.Image")));
+            this.toolStripDeleteButton.Image = global::ServiceBouncer.Properties.Resources.Delete;
             this.toolStripDeleteButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripDeleteButton.Name = "toolStripDeleteButton";
-            this.toolStripDeleteButton.Size = new System.Drawing.Size(60, 20);
+            this.toolStripDeleteButton.Size = new System.Drawing.Size(76, 36);
             this.toolStripDeleteButton.Text = "Delete";
             this.toolStripDeleteButton.Click += new System.EventHandler(this.DeleteClicked);
             // 
@@ -299,10 +330,10 @@
             this.startupTypeAutomaticItem,
             this.startupTypeManualItem,
             this.startupTypeDisabledItem});
-            this.toolStripStartupTypeButton.Image = ((System.Drawing.Image)(resources.GetObject("toolStripStartupTypeButton.Image")));
+            this.toolStripStartupTypeButton.Image = global::ServiceBouncer.Properties.Resources.Startup;
             this.toolStripStartupTypeButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripStartupTypeButton.Name = "toolStripStartupTypeButton";
-            this.toolStripStartupTypeButton.Size = new System.Drawing.Size(102, 20);
+            this.toolStripStartupTypeButton.Size = new System.Drawing.Size(118, 36);
             this.toolStripStartupTypeButton.Text = "Startup Type";
             // 
             // startupTypeAutomaticItem
@@ -326,37 +357,57 @@
             this.startupTypeDisabledItem.Text = "Disabled";
             this.startupTypeDisabledItem.Click += new System.EventHandler(this.StartupDisabledClick);
             // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.AutoSize = false;
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 39);
+            // 
+            // toolStripRefreshButton
+            // 
+            this.toolStripRefreshButton.Image = global::ServiceBouncer.Properties.Resources.Refresh;
+            this.toolStripRefreshButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripRefreshButton.Name = "toolStripRefreshButton";
+            this.toolStripRefreshButton.Size = new System.Drawing.Size(82, 36);
+            this.toolStripRefreshButton.Text = "Refresh";
+            this.toolStripRefreshButton.Click += new System.EventHandler(this.RefreshClicked);
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.AutoSize = false;
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 39);
+            // 
+            // FilterIcon
+            // 
+            this.FilterIcon.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.FilterIcon.Image = global::ServiceBouncer.Properties.Resources.Filter;
+            this.FilterIcon.Name = "FilterIcon";
+            this.FilterIcon.Size = new System.Drawing.Size(32, 32);
+            // 
             // filterBox
             // 
+            this.filterBox.Margin = new System.Windows.Forms.Padding(1, 8, 10, 0);
             this.filterBox.Name = "filterBox";
             this.filterBox.Size = new System.Drawing.Size(150, 23);
             this.filterBox.ToolTipText = "Type a name here to filter";
             this.filterBox.TextChanged += new System.EventHandler(this.FilterBoxTextChanged);
             // 
-            // toolStripRefreshButton
-            // 
-            this.toolStripRefreshButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripRefreshButton.Image = ((System.Drawing.Image)(resources.GetObject("toolStripRefreshButton.Image")));
-            this.toolStripRefreshButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripRefreshButton.Name = "toolStripRefreshButton";
-            this.toolStripRefreshButton.Size = new System.Drawing.Size(23, 20);
-            this.toolStripRefreshButton.Text = "Refresh";
-            this.toolStripRefreshButton.Click += new System.EventHandler(this.RefreshClicked);
-            // 
             // refreshTimer
             // 
             this.refreshTimer.Enabled = true;
-            this.refreshTimer.Interval = 1000;
+            this.refreshTimer.Interval = 750;
             this.refreshTimer.Tick += new System.EventHandler(this.RefreshTimerTicked);
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(766, 311);
+            this.ClientSize = new System.Drawing.Size(724, 354);
             this.Controls.Add(this.toolStripContainer);
             this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MinimumSize = new System.Drawing.Size(740, 200);
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Service Bouncer";
@@ -402,10 +453,15 @@
         private System.Windows.Forms.ToolStripMenuItem startupTypeAutomaticItem;
         private System.Windows.Forms.ToolStripMenuItem startupTypeManualItem;
         private System.Windows.Forms.ToolStripMenuItem startupTypeDisabledItem;
-        private System.Windows.Forms.DataGridViewTextBoxColumn nameDataGridViewTextBoxColumn;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
+        private System.Windows.Forms.ToolStripLabel FilterIcon;
         private System.Windows.Forms.DataGridViewImageColumn StatusIcon;
+        private System.Windows.Forms.DataGridViewTextBoxColumn nameDataGridViewTextBoxColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn statusDataGridViewTextBoxColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn StartupType;
+        private System.Windows.Forms.ToolStripButton toolStripPauseButton;
     }
 }
 

@@ -10,3 +10,4 @@ The window title tells you the status of the services, so you can quickly tell i
 
 ![ServiceBouncer window title](https://res.cloudinary.com/octopusdeploy/image/upload/v1428624736/2015-04-10_10_11_33-_nfnnn1.png)
 
+Icons from https://icons8.com - [Color set](https://icons8.com/icon/new-icons/color)

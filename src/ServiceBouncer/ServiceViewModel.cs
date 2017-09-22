@@ -30,16 +30,21 @@ namespace ServiceBouncer
 
         public async Task Start()
         {
-            if (controller.Status == ServiceControllerStatus.Stopped || controller.Status == ServiceControllerStatus.Paused)
+            if (controller.Status == ServiceControllerStatus.Stopped)
             {
                 await Task.Run(() => controller.Start());
+                await Refresh();
+            }
+            else if (controller.Status == ServiceControllerStatus.Paused)
+            {
+                await Task.Run(() => controller.Continue());
                 await Refresh();
             }
         }
 
         public async Task Restart()
         {
-            if (controller.Status == ServiceControllerStatus.Running)
+            if (controller.Status == ServiceControllerStatus.Running || controller.Status == ServiceControllerStatus.Paused)
             {
                 await Task.Run(() =>
                 {
@@ -60,10 +65,26 @@ namespace ServiceBouncer
 
         public async Task Stop()
         {
-            if (controller.Status == ServiceControllerStatus.Running)
+            if (controller.Status == ServiceControllerStatus.Running || controller.Status == ServiceControllerStatus.Paused)
             {
                 await Task.Run(() => controller.Stop());
                 await Refresh();
+            }
+        }
+
+        public async Task Pause()
+        {
+            if (controller.Status == ServiceControllerStatus.Running)
+            {
+                if (controller.CanPauseAndContinue)
+                {
+                    await Task.Run(() => controller.Pause());
+                    await Refresh();
+                }
+                else
+                {
+                    throw new Exception("Cannot pause this service");
+                }
             }
         }
 
@@ -88,36 +109,43 @@ namespace ServiceBouncer
             {
                 var changed = await Task.Run(() =>
                 {
-                    controller.Refresh();
-
                     var changedEvents = new List<string>();
 
-                    if (Name != controller.DisplayName)
+                    try
                     {
-                        Name = controller.DisplayName;
-                        changedEvents.Add("Name");
-                    }
+                        controller.Refresh();
 
-                    if (ServiceName != controller.ServiceName)
-                    {
-                        ServiceName = controller.ServiceName;
-                        changedEvents.Add("ServiceName");
-                    }
+                        if (Name != controller.DisplayName)
+                        {
+                            Name = controller.DisplayName;
+                            changedEvents.Add("Name");
+                        }
 
-                    var statusText = controller.Status.ToString();
-                    if (Status != statusText)
-                    {
-                        Status = controller.Status.ToString();
-                        StatusIcon = GetIcon(Status);
-                        changedEvents.Add("Status");
-                        changedEvents.Add("StatusIcon");
-                    }
+                        if (ServiceName != controller.ServiceName)
+                        {
+                            ServiceName = controller.ServiceName;
+                            changedEvents.Add("ServiceName");
+                        }
 
-                    var startup = controller.StartType.ToString();
-                    if (StartupType != startup)
+                        var statusText = controller.Status.ToString();
+                        if (Status != statusText)
+                        {
+                            Status = controller.Status.ToString();
+                            StatusIcon = GetIcon(Status);
+                            changedEvents.Add("Status");
+                            changedEvents.Add("StatusIcon");
+                        }
+
+                        var startup = controller.StartType.ToString();
+                        if (StartupType != startup)
+                        {
+                            StartupType = startup;
+                            changedEvents.Add("StartupType");
+                        }
+                    }
+                    catch (Exception)
                     {
-                        StartupType = startup;
-                        changedEvents.Add("StartupType");
+                        //Ignored
                     }
 
                     return changedEvents;
@@ -136,31 +164,21 @@ namespace ServiceBouncer
 
         private Image GetIcon(string status)
         {
-            string colour;
             switch (status.ToLower())
             {
                 case "running":
-                    colour = "#00ff45";
-                    break;
+                    return Properties.Resources.Running_State_Running;
                 case "stopped":
-                    colour = "#db5b5b";
-                    break;
+                    return Properties.Resources.Running_State_Stopped;
+                case "startpending":
+                    return Properties.Resources.Running_State_StartPending;
+                case "stoppending":
+                    return Properties.Resources.Running_State_StopPending;
+                case "paused":
+                    return Properties.Resources.Running_State_Paused;
                 default:
-                    colour = "#ff9a00";
-                    break;
+                    return Properties.Resources.Running_State_Unknown;
             }
-
-            var bitmap = new Bitmap(20, 20);
-
-            using (var g = Graphics.FromImage(bitmap))
-            {
-                using (Brush b = new SolidBrush(ColorTranslator.FromHtml(colour)))
-                {
-                    g.FillEllipse(b, 0, 0, 19, 19);
-                }
-            }
-
-            return bitmap;
         }
     }
 }
