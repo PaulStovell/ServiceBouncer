@@ -45,25 +45,33 @@
             this.contextMenuRestartItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuSpacer1 = new System.Windows.Forms.ToolStripSeparator();
             this.contextMenuDeleteItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.contextMenuStartupTypeItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.contextStatupTypeAutomatic = new System.Windows.Forms.ToolStripMenuItem();
+            this.contextStartupTypeManual = new System.Windows.Forms.ToolStripMenuItem();
+            this.contextStartupTypeDisabled = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuSpacer2 = new System.Windows.Forms.ToolStripSeparator();
             this.contextMenuRefreshItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.contextMenuSpacer3 = new System.Windows.Forms.ToolStripSeparator();
+            this.contextMenuOpenLocation = new System.Windows.Forms.ToolStripMenuItem();
+            this.contextMenuAssemblyInfo = new System.Windows.Forms.ToolStripMenuItem();
             this.serviceViewModelBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.toolStrip = new System.Windows.Forms.ToolStrip();
             this.toolStripStartButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripPauseButton = new System.Windows.Forms.ToolStripButton();
-            this.toolStripRestartButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripStopButton = new System.Windows.Forms.ToolStripButton();
+            this.toolStripRestartButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripDeleteButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripStartupTypeButton = new System.Windows.Forms.ToolStripDropDownButton();
-            this.startupTypeAutomaticItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.startupTypeManualItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.startupTypeDisabledItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripStartupTypeAutomaticItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripStartupTypeManualItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripStartupTypeDisabledItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripExplorerButton = new System.Windows.Forms.ToolStripButton();
+            this.toolStripInfoButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripRefreshButton = new System.Windows.Forms.ToolStripButton();
-            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-            this.FilterIcon = new System.Windows.Forms.ToolStripLabel();
-            this.filterBox = new System.Windows.Forms.ToolStripTextBox();
+            this.toolStripFilterIcon = new System.Windows.Forms.ToolStripLabel();
+            this.toolStripFilterBox = new System.Windows.Forms.ToolStripTextBox();
             this.refreshTimer = new System.Windows.Forms.Timer(this.components);
             this.toolStripContainer.ContentPanel.SuspendLayout();
             this.toolStripContainer.TopToolStripPanel.SuspendLayout();
@@ -80,11 +88,11 @@
             // toolStripContainer.ContentPanel
             // 
             this.toolStripContainer.ContentPanel.Controls.Add(this.servicesDataGridView);
-            this.toolStripContainer.ContentPanel.Size = new System.Drawing.Size(724, 315);
+            this.toolStripContainer.ContentPanel.Size = new System.Drawing.Size(834, 329);
             this.toolStripContainer.Dock = System.Windows.Forms.DockStyle.Fill;
             this.toolStripContainer.Location = new System.Drawing.Point(0, 0);
             this.toolStripContainer.Name = "toolStripContainer";
-            this.toolStripContainer.Size = new System.Drawing.Size(724, 354);
+            this.toolStripContainer.Size = new System.Drawing.Size(834, 361);
             this.toolStripContainer.TabIndex = 0;
             this.toolStripContainer.Text = "toolStripContainer";
             // 
@@ -140,7 +148,7 @@
             this.servicesDataGridView.RowHeadersVisible = false;
             this.servicesDataGridView.RowTemplate.Height = 25;
             this.servicesDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.servicesDataGridView.Size = new System.Drawing.Size(724, 315);
+            this.servicesDataGridView.Size = new System.Drawing.Size(834, 329);
             this.servicesDataGridView.TabIndex = 0;
             // 
             // StatusIcon
@@ -157,32 +165,34 @@
             // 
             // nameDataGridViewTextBoxColumn
             // 
-            this.nameDataGridViewTextBoxColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.nameDataGridViewTextBoxColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
             this.nameDataGridViewTextBoxColumn.DataPropertyName = "Name";
             dataGridViewCellStyle1.Padding = new System.Windows.Forms.Padding(10, 0, 0, 0);
             this.nameDataGridViewTextBoxColumn.DefaultCellStyle = dataGridViewCellStyle1;
             this.nameDataGridViewTextBoxColumn.FillWeight = 341.7259F;
-            this.nameDataGridViewTextBoxColumn.Frozen = true;
             this.nameDataGridViewTextBoxColumn.HeaderText = "Display name";
             this.nameDataGridViewTextBoxColumn.Name = "nameDataGridViewTextBoxColumn";
             this.nameDataGridViewTextBoxColumn.ReadOnly = true;
-            this.nameDataGridViewTextBoxColumn.Width = 539;
             // 
             // statusDataGridViewTextBoxColumn
             // 
+            this.statusDataGridViewTextBoxColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
             this.statusDataGridViewTextBoxColumn.DataPropertyName = "Status";
             this.statusDataGridViewTextBoxColumn.FillWeight = 113.9086F;
             this.statusDataGridViewTextBoxColumn.HeaderText = "Status";
             this.statusDataGridViewTextBoxColumn.Name = "statusDataGridViewTextBoxColumn";
             this.statusDataGridViewTextBoxColumn.ReadOnly = true;
+            this.statusDataGridViewTextBoxColumn.Width = 68;
             // 
             // StartupType
             // 
+            this.StartupType.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
             this.StartupType.DataPropertyName = "StartupType";
             this.StartupType.FillWeight = 113.9086F;
             this.StartupType.HeaderText = "Startup Type";
             this.StartupType.Name = "StartupType";
             this.StartupType.ReadOnly = true;
+            this.StartupType.Width = 102;
             // 
             // contextMenu
             // 
@@ -192,55 +202,109 @@
             this.contextMenuRestartItem,
             this.contextMenuSpacer1,
             this.contextMenuDeleteItem,
+            this.contextMenuStartupTypeItem,
             this.contextMenuSpacer2,
-            this.contextMenuRefreshItem});
+            this.contextMenuRefreshItem,
+            this.contextMenuSpacer3,
+            this.contextMenuOpenLocation,
+            this.contextMenuAssemblyInfo});
             this.contextMenu.Name = "contextMenu";
-            this.contextMenu.Size = new System.Drawing.Size(114, 126);
+            this.contextMenu.Size = new System.Drawing.Size(180, 198);
             // 
             // contextMenuStartItem
             // 
             this.contextMenuStartItem.Name = "contextMenuStartItem";
-            this.contextMenuStartItem.Size = new System.Drawing.Size(113, 22);
+            this.contextMenuStartItem.Size = new System.Drawing.Size(179, 22);
             this.contextMenuStartItem.Text = "Start";
             this.contextMenuStartItem.Click += new System.EventHandler(this.StartClicked);
             // 
             // contextMenuStopItem
             // 
             this.contextMenuStopItem.Name = "contextMenuStopItem";
-            this.contextMenuStopItem.Size = new System.Drawing.Size(113, 22);
+            this.contextMenuStopItem.Size = new System.Drawing.Size(179, 22);
             this.contextMenuStopItem.Text = "Stop";
             this.contextMenuStopItem.Click += new System.EventHandler(this.StopClicked);
             // 
             // contextMenuRestartItem
             // 
             this.contextMenuRestartItem.Name = "contextMenuRestartItem";
-            this.contextMenuRestartItem.Size = new System.Drawing.Size(113, 22);
+            this.contextMenuRestartItem.Size = new System.Drawing.Size(179, 22);
             this.contextMenuRestartItem.Text = "Restart";
             this.contextMenuRestartItem.Click += new System.EventHandler(this.RestartClicked);
             // 
             // contextMenuSpacer1
             // 
             this.contextMenuSpacer1.Name = "contextMenuSpacer1";
-            this.contextMenuSpacer1.Size = new System.Drawing.Size(110, 6);
+            this.contextMenuSpacer1.Size = new System.Drawing.Size(176, 6);
             // 
             // contextMenuDeleteItem
             // 
             this.contextMenuDeleteItem.Name = "contextMenuDeleteItem";
-            this.contextMenuDeleteItem.Size = new System.Drawing.Size(113, 22);
+            this.contextMenuDeleteItem.Size = new System.Drawing.Size(179, 22);
             this.contextMenuDeleteItem.Text = "Delete";
             this.contextMenuDeleteItem.Click += new System.EventHandler(this.DeleteClicked);
+            // 
+            // contextMenuStartupTypeItem
+            // 
+            this.contextMenuStartupTypeItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.contextStatupTypeAutomatic,
+            this.contextStartupTypeManual,
+            this.contextStartupTypeDisabled});
+            this.contextMenuStartupTypeItem.Name = "contextMenuStartupTypeItem";
+            this.contextMenuStartupTypeItem.Size = new System.Drawing.Size(179, 22);
+            this.contextMenuStartupTypeItem.Text = "Startup Type";
+            // 
+            // contextStatupTypeAutomatic
+            // 
+            this.contextStatupTypeAutomatic.Name = "contextStatupTypeAutomatic";
+            this.contextStatupTypeAutomatic.Size = new System.Drawing.Size(130, 22);
+            this.contextStatupTypeAutomatic.Text = "Automatic";
+            this.contextStatupTypeAutomatic.Click += new System.EventHandler(this.StartupAutomaticClicked);
+            // 
+            // contextStartupTypeManual
+            // 
+            this.contextStartupTypeManual.Name = "contextStartupTypeManual";
+            this.contextStartupTypeManual.Size = new System.Drawing.Size(130, 22);
+            this.contextStartupTypeManual.Text = "Manual";
+            this.contextStartupTypeManual.Click += new System.EventHandler(this.StartupManualClicked);
+            // 
+            // contextStartupTypeDisabled
+            // 
+            this.contextStartupTypeDisabled.Name = "contextStartupTypeDisabled";
+            this.contextStartupTypeDisabled.Size = new System.Drawing.Size(130, 22);
+            this.contextStartupTypeDisabled.Text = "Disabled";
+            this.contextStartupTypeDisabled.Click += new System.EventHandler(this.StartupDisabledClick);
             // 
             // contextMenuSpacer2
             // 
             this.contextMenuSpacer2.Name = "contextMenuSpacer2";
-            this.contextMenuSpacer2.Size = new System.Drawing.Size(110, 6);
+            this.contextMenuSpacer2.Size = new System.Drawing.Size(176, 6);
             // 
             // contextMenuRefreshItem
             // 
             this.contextMenuRefreshItem.Name = "contextMenuRefreshItem";
-            this.contextMenuRefreshItem.Size = new System.Drawing.Size(113, 22);
+            this.contextMenuRefreshItem.Size = new System.Drawing.Size(179, 22);
             this.contextMenuRefreshItem.Text = "Refresh";
             this.contextMenuRefreshItem.Click += new System.EventHandler(this.RefreshClicked);
+            // 
+            // contextMenuSpacer3
+            // 
+            this.contextMenuSpacer3.Name = "contextMenuSpacer3";
+            this.contextMenuSpacer3.Size = new System.Drawing.Size(176, 6);
+            // 
+            // contextMenuOpenLocation
+            // 
+            this.contextMenuOpenLocation.Name = "contextMenuOpenLocation";
+            this.contextMenuOpenLocation.Size = new System.Drawing.Size(179, 22);
+            this.contextMenuOpenLocation.Text = "Open Service Folder";
+            this.contextMenuOpenLocation.Click += new System.EventHandler(this.OpenServiceLocationClick);
+            // 
+            // contextMenuAssemblyInfo
+            // 
+            this.contextMenuAssemblyInfo.Name = "contextMenuAssemblyInfo";
+            this.contextMenuAssemblyInfo.Size = new System.Drawing.Size(179, 22);
+            this.contextMenuAssemblyInfo.Text = "Assembly Info";
+            this.contextMenuAssemblyInfo.Click += new System.EventHandler(this.AssemblyInfoClick);
             // 
             // serviceViewModelBindingSource
             // 
@@ -250,24 +314,26 @@
             // 
             this.toolStrip.AllowMerge = false;
             this.toolStrip.Dock = System.Windows.Forms.DockStyle.None;
-            this.toolStrip.ImageScalingSize = new System.Drawing.Size(32, 32);
+            this.toolStrip.ImageScalingSize = new System.Drawing.Size(25, 25);
             this.toolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStartButton,
             this.toolStripPauseButton,
-            this.toolStripRestartButton,
             this.toolStripStopButton,
+            this.toolStripRestartButton,
             this.toolStripSeparator1,
             this.toolStripDeleteButton,
             this.toolStripStartupTypeButton,
+            this.toolStripExplorerButton,
+            this.toolStripInfoButton,
             this.toolStripSeparator2,
             this.toolStripRefreshButton,
-            this.toolStripSeparator3,
-            this.FilterIcon,
-            this.filterBox});
+            this.toolStripFilterIcon,
+            this.toolStripFilterBox});
             this.toolStrip.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Flow;
             this.toolStrip.Location = new System.Drawing.Point(3, 0);
             this.toolStrip.Name = "toolStrip";
-            this.toolStrip.Size = new System.Drawing.Size(721, 39);
+            this.toolStrip.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
+            this.toolStrip.Size = new System.Drawing.Size(831, 32);
             this.toolStrip.TabIndex = 0;
             // 
             // toolStripStartButton
@@ -276,7 +342,7 @@
             this.toolStripStartButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripStartButton.Margin = new System.Windows.Forms.Padding(7, 1, 0, 2);
             this.toolStripStartButton.Name = "toolStripStartButton";
-            this.toolStripStartButton.Size = new System.Drawing.Size(67, 36);
+            this.toolStripStartButton.Size = new System.Drawing.Size(60, 29);
             this.toolStripStartButton.Text = "Start";
             this.toolStripStartButton.Click += new System.EventHandler(this.StartClicked);
             // 
@@ -286,112 +352,124 @@
             this.toolStripPauseButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripPauseButton.Margin = new System.Windows.Forms.Padding(7, 1, 0, 2);
             this.toolStripPauseButton.Name = "toolStripPauseButton";
-            this.toolStripPauseButton.Size = new System.Drawing.Size(74, 36);
+            this.toolStripPauseButton.Size = new System.Drawing.Size(67, 29);
             this.toolStripPauseButton.Text = "Pause";
             this.toolStripPauseButton.Click += new System.EventHandler(this.PauseClicked);
-            // 
-            // toolStripRestartButton
-            // 
-            this.toolStripRestartButton.Image = global::ServiceBouncer.Properties.Resources.Restart;
-            this.toolStripRestartButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripRestartButton.Name = "toolStripRestartButton";
-            this.toolStripRestartButton.Size = new System.Drawing.Size(79, 36);
-            this.toolStripRestartButton.Text = "Restart";
-            this.toolStripRestartButton.ToolTipText = "Stop, wait, then start";
-            this.toolStripRestartButton.Click += new System.EventHandler(this.RestartClicked);
             // 
             // toolStripStopButton
             // 
             this.toolStripStopButton.Image = global::ServiceBouncer.Properties.Resources.Stop;
             this.toolStripStopButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripStopButton.Name = "toolStripStopButton";
-            this.toolStripStopButton.Size = new System.Drawing.Size(67, 36);
+            this.toolStripStopButton.Size = new System.Drawing.Size(60, 29);
             this.toolStripStopButton.Text = "Stop";
             this.toolStripStopButton.Click += new System.EventHandler(this.StopClicked);
+            // 
+            // toolStripRestartButton
+            // 
+            this.toolStripRestartButton.Image = global::ServiceBouncer.Properties.Resources.Restart;
+            this.toolStripRestartButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripRestartButton.Name = "toolStripRestartButton";
+            this.toolStripRestartButton.Size = new System.Drawing.Size(72, 29);
+            this.toolStripRestartButton.Text = "Restart";
+            this.toolStripRestartButton.ToolTipText = "Stop, wait, then start";
+            this.toolStripRestartButton.Click += new System.EventHandler(this.RestartClicked);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.AutoSize = false;
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 39);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 29);
             // 
             // toolStripDeleteButton
             // 
             this.toolStripDeleteButton.Image = global::ServiceBouncer.Properties.Resources.Delete;
             this.toolStripDeleteButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripDeleteButton.Name = "toolStripDeleteButton";
-            this.toolStripDeleteButton.Size = new System.Drawing.Size(76, 36);
+            this.toolStripDeleteButton.Size = new System.Drawing.Size(69, 29);
             this.toolStripDeleteButton.Text = "Delete";
             this.toolStripDeleteButton.Click += new System.EventHandler(this.DeleteClicked);
             // 
             // toolStripStartupTypeButton
             // 
             this.toolStripStartupTypeButton.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.startupTypeAutomaticItem,
-            this.startupTypeManualItem,
-            this.startupTypeDisabledItem});
+            this.toolStripStartupTypeAutomaticItem,
+            this.toolStripStartupTypeManualItem,
+            this.toolStripStartupTypeDisabledItem});
             this.toolStripStartupTypeButton.Image = global::ServiceBouncer.Properties.Resources.Startup;
             this.toolStripStartupTypeButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripStartupTypeButton.Name = "toolStripStartupTypeButton";
-            this.toolStripStartupTypeButton.Size = new System.Drawing.Size(118, 36);
-            this.toolStripStartupTypeButton.Text = "Startup Type";
+            this.toolStripStartupTypeButton.Size = new System.Drawing.Size(83, 29);
+            this.toolStripStartupTypeButton.Text = "Startup";
             // 
-            // startupTypeAutomaticItem
+            // toolStripStartupTypeAutomaticItem
             // 
-            this.startupTypeAutomaticItem.Name = "startupTypeAutomaticItem";
-            this.startupTypeAutomaticItem.Size = new System.Drawing.Size(130, 22);
-            this.startupTypeAutomaticItem.Text = "Automatic";
-            this.startupTypeAutomaticItem.Click += new System.EventHandler(this.StartupAutomaticClicked);
+            this.toolStripStartupTypeAutomaticItem.Name = "toolStripStartupTypeAutomaticItem";
+            this.toolStripStartupTypeAutomaticItem.Size = new System.Drawing.Size(130, 22);
+            this.toolStripStartupTypeAutomaticItem.Text = "Automatic";
+            this.toolStripStartupTypeAutomaticItem.Click += new System.EventHandler(this.StartupAutomaticClicked);
             // 
-            // startupTypeManualItem
+            // toolStripStartupTypeManualItem
             // 
-            this.startupTypeManualItem.Name = "startupTypeManualItem";
-            this.startupTypeManualItem.Size = new System.Drawing.Size(130, 22);
-            this.startupTypeManualItem.Text = "Manual";
-            this.startupTypeManualItem.Click += new System.EventHandler(this.StartupManualClicked);
+            this.toolStripStartupTypeManualItem.Name = "toolStripStartupTypeManualItem";
+            this.toolStripStartupTypeManualItem.Size = new System.Drawing.Size(130, 22);
+            this.toolStripStartupTypeManualItem.Text = "Manual";
+            this.toolStripStartupTypeManualItem.Click += new System.EventHandler(this.StartupManualClicked);
             // 
-            // startupTypeDisabledItem
+            // toolStripStartupTypeDisabledItem
             // 
-            this.startupTypeDisabledItem.Name = "startupTypeDisabledItem";
-            this.startupTypeDisabledItem.Size = new System.Drawing.Size(130, 22);
-            this.startupTypeDisabledItem.Text = "Disabled";
-            this.startupTypeDisabledItem.Click += new System.EventHandler(this.StartupDisabledClick);
+            this.toolStripStartupTypeDisabledItem.Name = "toolStripStartupTypeDisabledItem";
+            this.toolStripStartupTypeDisabledItem.Size = new System.Drawing.Size(130, 22);
+            this.toolStripStartupTypeDisabledItem.Text = "Disabled";
+            this.toolStripStartupTypeDisabledItem.Click += new System.EventHandler(this.StartupDisabledClick);
+            // 
+            // toolStripExplorerButton
+            // 
+            this.toolStripExplorerButton.Image = global::ServiceBouncer.Properties.Resources.Browse;
+            this.toolStripExplorerButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripExplorerButton.Name = "toolStripExplorerButton";
+            this.toolStripExplorerButton.Size = new System.Drawing.Size(74, 29);
+            this.toolStripExplorerButton.Text = "Browse";
+            this.toolStripExplorerButton.Click += new System.EventHandler(this.OpenServiceLocationClick);
+            // 
+            // toolStripInfoButton
+            // 
+            this.toolStripInfoButton.Image = global::ServiceBouncer.Properties.Resources.Info;
+            this.toolStripInfoButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripInfoButton.Name = "toolStripInfoButton";
+            this.toolStripInfoButton.Size = new System.Drawing.Size(57, 29);
+            this.toolStripInfoButton.Text = "Info";
+            this.toolStripInfoButton.Click += new System.EventHandler(this.AssemblyInfoClick);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.AutoSize = false;
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 39);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 29);
             // 
             // toolStripRefreshButton
             // 
             this.toolStripRefreshButton.Image = global::ServiceBouncer.Properties.Resources.Refresh;
             this.toolStripRefreshButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripRefreshButton.Name = "toolStripRefreshButton";
-            this.toolStripRefreshButton.Size = new System.Drawing.Size(82, 36);
+            this.toolStripRefreshButton.Size = new System.Drawing.Size(75, 29);
             this.toolStripRefreshButton.Text = "Refresh";
             this.toolStripRefreshButton.Click += new System.EventHandler(this.RefreshClicked);
             // 
-            // toolStripSeparator3
+            // toolStripFilterIcon
             // 
-            this.toolStripSeparator3.AutoSize = false;
-            this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 39);
+            this.toolStripFilterIcon.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripFilterIcon.Image = global::ServiceBouncer.Properties.Resources.Filter;
+            this.toolStripFilterIcon.Name = "toolStripFilterIcon";
+            this.toolStripFilterIcon.Size = new System.Drawing.Size(25, 25);
             // 
-            // FilterIcon
+            // toolStripFilterBox
             // 
-            this.FilterIcon.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.FilterIcon.Image = global::ServiceBouncer.Properties.Resources.Filter;
-            this.FilterIcon.Name = "FilterIcon";
-            this.FilterIcon.Size = new System.Drawing.Size(32, 32);
-            // 
-            // filterBox
-            // 
-            this.filterBox.Margin = new System.Windows.Forms.Padding(1, 8, 10, 0);
-            this.filterBox.Name = "filterBox";
-            this.filterBox.Size = new System.Drawing.Size(150, 23);
-            this.filterBox.ToolTipText = "Type a name here to filter";
-            this.filterBox.TextChanged += new System.EventHandler(this.FilterBoxTextChanged);
+            this.toolStripFilterBox.Margin = new System.Windows.Forms.Padding(1, 3, 10, 0);
+            this.toolStripFilterBox.Name = "toolStripFilterBox";
+            this.toolStripFilterBox.Size = new System.Drawing.Size(150, 23);
+            this.toolStripFilterBox.ToolTipText = "Type a name here to filter";
+            this.toolStripFilterBox.TextChanged += new System.EventHandler(this.FilterBoxTextChanged);
             // 
             // refreshTimer
             // 
@@ -403,11 +481,11 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(724, 354);
+            this.ClientSize = new System.Drawing.Size(834, 361);
             this.Controls.Add(this.toolStripContainer);
             this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.MinimumSize = new System.Drawing.Size(740, 200);
+            this.MinimumSize = new System.Drawing.Size(850, 300);
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Service Bouncer";
@@ -431,14 +509,13 @@
         #endregion
 
         private System.Windows.Forms.ToolStripContainer toolStripContainer;
-        private System.Windows.Forms.ToolStrip toolStrip;
         private System.Windows.Forms.ToolStripButton toolStripStartButton;
         private System.Windows.Forms.ToolStripButton toolStripStopButton;
         private System.Windows.Forms.Timer refreshTimer;
         private System.Windows.Forms.DataGridView servicesDataGridView;
         private System.Windows.Forms.BindingSource serviceViewModelBindingSource;
         private System.Windows.Forms.ToolStripButton toolStripRestartButton;
-        private System.Windows.Forms.ToolStripTextBox filterBox;
+        private System.Windows.Forms.ToolStripTextBox toolStripFilterBox;
         private System.Windows.Forms.ToolStripButton toolStripRefreshButton;
         private System.Windows.Forms.ToolStripButton toolStripDeleteButton;
         private System.Windows.Forms.ContextMenuStrip contextMenu;
@@ -450,18 +527,27 @@
         private System.Windows.Forms.ToolStripSeparator contextMenuSpacer1;
         private System.Windows.Forms.ToolStripMenuItem contextMenuDeleteItem;
         private System.Windows.Forms.ToolStripDropDownButton toolStripStartupTypeButton;
-        private System.Windows.Forms.ToolStripMenuItem startupTypeAutomaticItem;
-        private System.Windows.Forms.ToolStripMenuItem startupTypeManualItem;
-        private System.Windows.Forms.ToolStripMenuItem startupTypeDisabledItem;
+        private System.Windows.Forms.ToolStripMenuItem toolStripStartupTypeAutomaticItem;
+        private System.Windows.Forms.ToolStripMenuItem toolStripStartupTypeManualItem;
+        private System.Windows.Forms.ToolStripMenuItem toolStripStartupTypeDisabledItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
-        private System.Windows.Forms.ToolStripLabel FilterIcon;
+        private System.Windows.Forms.ToolStripLabel toolStripFilterIcon;
+        private System.Windows.Forms.ToolStripButton toolStripPauseButton;
+        private System.Windows.Forms.ToolStripMenuItem contextMenuStartupTypeItem;
+        private System.Windows.Forms.ToolStripMenuItem contextStatupTypeAutomatic;
+        private System.Windows.Forms.ToolStripMenuItem contextStartupTypeManual;
+        private System.Windows.Forms.ToolStripMenuItem contextStartupTypeDisabled;
         private System.Windows.Forms.DataGridViewImageColumn StatusIcon;
         private System.Windows.Forms.DataGridViewTextBoxColumn nameDataGridViewTextBoxColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn statusDataGridViewTextBoxColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn StartupType;
-        private System.Windows.Forms.ToolStripButton toolStripPauseButton;
+        private System.Windows.Forms.ToolStrip toolStrip;
+        private System.Windows.Forms.ToolStripSeparator contextMenuSpacer3;
+        private System.Windows.Forms.ToolStripMenuItem contextMenuOpenLocation;
+        private System.Windows.Forms.ToolStripMenuItem contextMenuAssemblyInfo;
+        private System.Windows.Forms.ToolStripButton toolStripExplorerButton;
+        private System.Windows.Forms.ToolStripButton toolStripInfoButton;
     }
 }
 

@@ -104,9 +104,23 @@ namespace ServiceBouncer
             PerformOperation(async x => await x.SetStartupType(ServiceStartMode.Disabled));
         }
 
+        private void OpenServiceLocationClick(object sender, EventArgs e)
+        {
+            PerformOperation(async x => await x.OpenServiceInExplorer());
+        }
+
+        private void AssemblyInfoClick(object sender, EventArgs e)
+        {
+            PerformOperation(async x =>
+            {
+                var value = await x.GetAssemblyInfo();
+                MessageBox.Show($"Service '{x.Name}' assembly info:\n{value}", "Assembly Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            });
+        }
+
         private async void Reload()
         {
-            var systemServices = await Task.Run(() => ServiceController.GetServices().Where(service => service.DisplayName.IndexOf(filterBox.Text, StringComparison.OrdinalIgnoreCase) >= 0));
+            var systemServices = await Task.Run(() => ServiceController.GetServices().Where(service => service.DisplayName.IndexOf(toolStripFilterBox.Text, StringComparison.OrdinalIgnoreCase) >= 0));
             services.Clear();
             foreach (var model in systemServices.Select(service => new ServiceViewModel(service)).OrderBy(x => x.Name))
             {
@@ -138,7 +152,7 @@ namespace ServiceBouncer
                 }
                 catch (Exception e)
                 {
-                    MessageBox.Show($"An Error Occured Interacting With Service: {model.Name}\nError Message: {e.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"An error occured interacting with service '{model.Name}'\nMessage: {e.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }

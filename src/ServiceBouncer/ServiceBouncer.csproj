@@ -58,6 +58,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AssemblyExtensions.cs" />
     <Compile Include="ComponentModel\SortableBindingList`1.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
@@ -130,6 +131,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="AppIcon.ico" />
+    <None Include="Icons\Install.png" />
+    <None Include="Icons\Info.png" />
+    <None Include="Icons\Browse.png" />
     <None Include="Icons\Pause.png" />
     <None Include="Icons\Running-State-Paused.png" />
     <None Include="Icons\Running-State-StopPending.png" />
