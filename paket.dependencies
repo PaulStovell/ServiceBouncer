@@ -1,0 +1,5 @@
+framework: auto-detect
+source https://www.nuget.org/api/v2
+
+nuget FAKE
+nuget NuGet.CommandLine

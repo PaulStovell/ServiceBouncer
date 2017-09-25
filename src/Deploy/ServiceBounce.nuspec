@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package>
+	<metadata>
+		<id>ServiceBounder</id>
+		<version>1.1.0</version>
+		<title>ServiceBouncer</title>
+    <authors>ServiceBouncer</authors>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>ServiceBouncer Service Management Application</description>
+	</metadata>
+	<files>
+		<file src="ServiceBouncer\bin\Release\*.exe" target="Content" />
+		<file src="Deploy\deploy.ps1" target="deploy.ps1" />
+	</files>
+</package>
