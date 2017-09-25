@@ -15,7 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".build", ".build", "{0BAE63
 		..\build.cmd = ..\build.cmd
 		..\build.fsx = ..\build.fsx
 		Deploy\deploy.ps1 = Deploy\deploy.ps1
-		Deploy\ServiceBounce.nuspec = Deploy\ServiceBounce.nuspec
+		Deploy\ServiceBouncer.nuspec = Deploy\ServiceBouncer.nuspec
 	EndProjectSection
 EndProject
 Global

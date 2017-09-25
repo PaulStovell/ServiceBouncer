@@ -30,7 +30,7 @@ Target "Package" (fun _ ->
     let buildOutput = srcDir @@ "ServiceBouncer" @@ "bin" @@ "Release"
     CreateZip buildOutput (outputDir @@ "ServiceBouncer.zip") "" DefaultZipLevel false (Directory.GetFiles(buildOutput, "*.exe", SearchOption.AllDirectories))
     
-    let nuspec = (srcDir @@ "Deploy" @@ "ServiceBounce.nuspec")
+    let nuspec = (srcDir @@ "Deploy" @@ "ServiceBouncer.nuspec")
     let nugetExePath = findNuget (currentDirectory @@ "packages" @@ "NuGet.CommandLine")
     let args = sprintf @"pack ""%s"" -OutputDirectory ""%s"" -Properties Configuration=%s -NoPackageAnalysis -BasePath %s" nuspec outputDir buildMode srcDir
     let result = ExecProcessWithLambdas (fun info -> info.FileName <- nugetExePath; info.Arguments <- args) (TimeSpan.FromMinutes 5.) true (fun err -> traceError err) (fun _ -> ())
