@@ -1,7 +1,7 @@
 using System;
 using System.Reflection;
 
-namespace ServiceBouncer
+namespace ServiceBouncer.Extensions
 {
     public static class AssemblyExtensions
     {

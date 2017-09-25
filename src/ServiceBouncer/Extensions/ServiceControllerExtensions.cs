@@ -2,7 +2,7 @@ using System.IO;
 using System.Management;
 using System.ServiceProcess;
 
-namespace ServiceBouncer
+namespace ServiceBouncer.Extensions
 {
     public static class ServiceControllerExtensions
     {
