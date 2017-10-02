@@ -10,5 +10,11 @@ if(Test-Path $DeployPath)
 Write-Host "Creating Directory at $DeployPath"
 New-Item $DeployPath -Type container
 
+$ServiceBouncer = Get-Process ServiceBouncer -ErrorAction SilentlyContinue
+if ($ServiceBouncer) {
+    Write-Host "Application Running, Attempting to Stop"
+  $ServiceBouncer | Stop-Process -Force
+}
+
 Write-Host "Deploying to $DeployPath"
 Copy-Item "$scriptDir\Content\*" $DeployPath -Force -Recurse
