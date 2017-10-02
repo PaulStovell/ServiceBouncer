@@ -85,6 +85,7 @@
             // 
             // txtBxServiceName
             // 
+            this.txtBxServiceName.Enabled = false;
             this.txtBxServiceName.Location = new System.Drawing.Point(12, 65);
             this.txtBxServiceName.Name = "txtBxServiceName";
             this.txtBxServiceName.Size = new System.Drawing.Size(183, 23);
@@ -95,9 +96,9 @@
             this.cmbBxOptionStart.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbBxOptionStart.FormattingEnabled = true;
             this.cmbBxOptionStart.Items.AddRange(new object[] {
-            "auto",
-            "demand",
-            "disabled"});
+            "Automatic",
+            "Manual",
+            "Disabled"});
             this.cmbBxOptionStart.Location = new System.Drawing.Point(390, 65);
             this.cmbBxOptionStart.Name = "cmbBxOptionStart";
             this.cmbBxOptionStart.Size = new System.Drawing.Size(120, 23);
@@ -123,6 +124,7 @@
             // 
             // txtBxDisplayName
             // 
+            this.txtBxDisplayName.Enabled = false;
             this.txtBxDisplayName.Location = new System.Drawing.Point(201, 65);
             this.txtBxDisplayName.Name = "txtBxDisplayName";
             this.txtBxDisplayName.Size = new System.Drawing.Size(183, 23);

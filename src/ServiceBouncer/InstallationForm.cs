@@ -1,59 +1,52 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
 using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace ServiceBouncer
 {
     public partial class InstallationForm : Form
     {
-        private HashSet<string> installedServiceHashSets = new HashSet<string>();
-        private ReadOnlyCollection<string> installedServicesCollection;
-        public ReadOnlyCollection<string> InstalledServices
-        {
-            get
-            {
-                if (installedServicesCollection != null && installedServicesCollection.Count == installedServiceHashSets.Count)
-                    return installedServicesCollection;
-
-                installedServicesCollection = new ReadOnlyCollection<string>(installedServiceHashSets.ToList());
-                return installedServicesCollection;
-            }
-        }
+        private bool m_installationInProgress;
 
         public InstallationForm()
         {
             InitializeComponent();
-            cmbBxOptionStart.SelectedItem = "demand";
         }
 
         private void btnSelectService_Click(object sender, EventArgs e)
         {
             if (installSvcFileSelectionDialog.ShowDialog() == DialogResult.OK)
             {
-                string winSvcExeFileName = installSvcFileSelectionDialog.SafeFileName.Replace(".exe", "");
-                txtBxDisplayName.Text = winSvcExeFileName;
-                txtBxServiceName.Text = winSvcExeFileName;
                 txtBxServiceExePath.Text = installSvcFileSelectionDialog.FileName;
-                txtBxServiceName.Focus();
-                txtBxServiceName.SelectAll();
+
+                if (installSvcFileSelectionDialog.SafeFileName != null)
+                {
+                    var winSvcExeFileName = installSvcFileSelectionDialog.SafeFileName.Replace(".exe", "");
+                    txtBxDisplayName.Text = winSvcExeFileName;
+                    txtBxServiceName.Text = winSvcExeFileName;
+                }
+                else
+                {
+                    txtBxDisplayName.Text = installSvcFileSelectionDialog.FileName;
+                    txtBxServiceName.Text = installSvcFileSelectionDialog.FileName;
+                }
+
+                txtBxDisplayName.Enabled = true;
+                txtBxServiceName.Enabled = true;
+
+                cmbBxOptionStart.SelectedItem = "Manual";
 
                 btnInstall.Enabled = true;
                 btnInstall.Text = "Install";
+                btnInstall.Focus();
+
                 lblProcessResult.Text = "";
             }
         }
-        private bool m_installationInProgress = false;
 
-        private void btnInstall_Click(object sender, EventArgs e)
+        private async void btnInstall_Click(object sender, EventArgs e)
         {
             if (m_installationInProgress)
             {
@@ -63,69 +56,67 @@ namespace ServiceBouncer
 
             m_installationInProgress = true;
 
-            SetUIForInstallationPhase();
+            Enabled = false;
+            Refresh();
             lblProcessResult.Text = "Installing...";
             lblProcessResult.ForeColor = Color.Orange;
             lblProcessResult.Refresh();
             btnInstall.Text = "Installing...";
             btnInstall.Refresh();
 
-            StringBuilder installCmdBuilder = new StringBuilder();
-            installCmdBuilder.Append("create");
-            installCmdBuilder.AppendFormat("  \"{0}\"", txtBxServiceName.Text);
-            installCmdBuilder.AppendFormat("  start=  {0}", cmbBxOptionStart.SelectedItem);
-            installCmdBuilder.AppendFormat("  binPath=  \"{0}\"", txtBxServiceExePath.Text);
-            installCmdBuilder.AppendFormat("  DisplayName=  \"{0}\"", txtBxDisplayName.Text);
+            txtBxServiceExePath.Enabled = false;
+            txtBxServiceExePath.Refresh();
 
-            ProcessStartInfo startInfo = new ProcessStartInfo();
-            startInfo.FileName = "sc.exe";
-            startInfo.Arguments = installCmdBuilder.ToString();
-            startInfo.CreateNoWindow = true;
-            startInfo.RedirectStandardOutput = true;
-            startInfo.UseShellExecute = false;
-
-            new Thread(() =>
+            string startMode;
+            switch (cmbBxOptionStart.SelectedItem)
             {
-                try
+                case "Automatic":
+                    startMode = "auto";
+                    break;
+                case "Manual":
+                    startMode = "demand";
+                    break;
+                default:
+                    startMode = "disabled";
+                    break;
+            }
+
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = "sc.exe",
+                Arguments = $"create \"{txtBxServiceName.Text}\" start={startMode} binPath=\"{txtBxServiceExePath.Text}\" DisplayName=\"{txtBxDisplayName.Text}\"",
+                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+                UseShellExecute = false
+            };
+
+            try
+            {
+                await Task.Run(() =>
                 {
-                    using (Process installationProcess = Process.Start(startInfo))
+                    using (var installationProcess = Process.Start(startInfo))
                     {
                         installationProcess.OutputDataReceived += InstallationProcess_OutputDataReceived;
                         installationProcess.BeginOutputReadLine();
                         installationProcess.WaitForExit();
                     }
-                }
-                catch (Exception ex)
-                {
-                    lblProcessResult.Invoke(new MethodInvoker(() =>
-                    {
-                        lblProcessResult.ForeColor = Color.Red;
-                        lblProcessResult.Text = "An error occurred during installation.";
-                    }));
-                    MessageBox.Show(ex.Message, "An error occurred during installation", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-                finally
-                {
-                    m_installationInProgress = false;
-                    SetUIForInstallationPhase();
-                    btnInstall.Invoke(new MethodInvoker(() => { btnInstall.Text = "Install"; }));
-                }
-            }).Start();
-        }
 
-        private void SetUIForInstallationPhase()
-        {
-            Invoke(new MethodInvoker(() =>
+                });
+            }
+            catch (Exception ex)
             {
-                Enabled = !m_installationInProgress;
-                Refresh();
-            }));
+                lblProcessResult.Invoke(new MethodInvoker(() =>
+                {
+                    lblProcessResult.ForeColor = Color.Red;
+                    lblProcessResult.Text = "An error occurred during installation.";
+                }));
+                MessageBox.Show(ex.Message, "An error occurred during installation", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
 
-            txtBxServiceExePath.Invoke(new MethodInvoker(() =>
-            {
-                txtBxServiceExePath.Enabled = false; //everytime must be false.
-                txtBxServiceExePath.Refresh();
-            }));
+            m_installationInProgress = false;
+            Enabled = true;
+            Refresh();
+            btnInstall.Text = "Install";
         }
 
         private void InstallationProcess_OutputDataReceived(object sender, DataReceivedEventArgs e)
@@ -135,22 +126,8 @@ namespace ServiceBouncer
                 if (string.IsNullOrEmpty(e.Data))
                     return;
 
-                if (lblProcessResult.Text == "Installing...")
-                    lblProcessResult.Text = "";
-
-                string output = e.Data;
-                lblProcessResult.Text += output;
-
-                if (lblProcessResult.Text.IndexOf("failed", StringComparison.OrdinalIgnoreCase) > -1)
-                {
-                    lblProcessResult.ForeColor = Color.Red;
-                }
-                else
-                {
-                    lblProcessResult.ForeColor = Color.Green;
-                    installedServiceHashSets.Add(txtBxDisplayName.Text);
-                }
-
+                lblProcessResult.Text += e.Data;
+                lblProcessResult.ForeColor = lblProcessResult.Text.IndexOf("failed", StringComparison.OrdinalIgnoreCase) > -1 ? Color.Red : Color.Green;
                 lblProcessResult.Refresh();
             }));
         }

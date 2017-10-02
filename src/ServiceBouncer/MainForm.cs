@@ -118,6 +118,12 @@ namespace ServiceBouncer
             });
         }
 
+        private void InstallClicked(object sender, EventArgs e)
+        {
+            new InstallationForm().ShowDialog();
+            Reload();
+        }
+
         private async void Reload()
         {
             var systemServices = await Task.Run(() => ServiceController.GetServices().Where(service => service.DisplayName.IndexOf(toolStripFilterBox.Text, StringComparison.OrdinalIgnoreCase) >= 0));
@@ -155,14 +161,6 @@ namespace ServiceBouncer
                     MessageBox.Show($"An error occured interacting with service '{model.Name}'\nMessage: {e.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
-        }
-
-        private void InstallClicked(object sender, EventArgs e)
-        {
-            var installationForm = new InstallationForm();
-            installationForm.ShowDialog();
-
-            Reload();
         }
     }
 }
