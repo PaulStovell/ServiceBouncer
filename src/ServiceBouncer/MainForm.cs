@@ -1,4 +1,5 @@
-﻿using ServiceBouncer.ComponentModel;
+﻿using Microsoft.Win32;
+using ServiceBouncer.ComponentModel;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -31,6 +32,21 @@ namespace ServiceBouncer
             }
         }
 
+        private void FormLoaded(object sender, EventArgs e)
+        {
+            Reload();
+
+            using (var ndpKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32).OpenSubKey("SOFTWARE\\Microsoft\\NET Framework Setup\\NDP\\v4\\Full\\"))
+            {
+                var releaseKey = Convert.ToInt32(ndpKey.GetValue("Release"));
+                if (releaseKey < 394254)
+                {
+                    MessageBox.Show("ServiceBouncer required .net 4.6.1 or higher to be installed", "Framework Upgrade Required", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Application.Exit();
+                }
+            }
+        }
+
         private void FormActivated(object sender, EventArgs e)
         {
             isActive = true;
@@ -39,11 +55,6 @@ namespace ServiceBouncer
         private void FormDeactivated(object sender, EventArgs e)
         {
             isActive = false;
-        }
-
-        private void FormLoaded(object sender, EventArgs e)
-        {
-            Reload();
         }
 
         private void RefreshClicked(object sender, EventArgs e)
