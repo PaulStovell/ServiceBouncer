@@ -156,5 +156,13 @@ namespace ServiceBouncer
                 }
             }
         }
+
+        private void InstallClicked(object sender, EventArgs e)
+        {
+            var installationForm = new InstallationForm();
+            installationForm.ShowDialog();
+
+            Reload();
+        }
     }
 }
