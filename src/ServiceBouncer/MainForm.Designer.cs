@@ -35,6 +35,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.toolStripContainer = new System.Windows.Forms.ToolStripContainer();
             this.servicesDataGridView = new System.Windows.Forms.DataGridView();
+            this.StatusIcon = new System.Windows.Forms.DataGridViewImageColumn();
             this.StartupType = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.contextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.contextMenuStartItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -52,18 +53,11 @@
             this.contextMenuOpenLocation = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuAssemblyInfo = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip = new System.Windows.Forms.ToolStrip();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripFilterBox = new System.Windows.Forms.ToolStripTextBox();
-            this.refreshTimer = new System.Windows.Forms.Timer(this.components);
-            this.StatusIcon = new System.Windows.Forms.DataGridViewImageColumn();
-            this.nameDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.statusDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.serviceViewModelBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.toolStripStartButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripPauseButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripStopButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripRestartButton = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripDeleteButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripInstallButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripStartupTypeButton = new System.Windows.Forms.ToolStripDropDownButton();
@@ -72,14 +66,28 @@
             this.toolStripStartupTypeDisabledItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripExplorerButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripInfoButton = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripRefreshButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripFilterIcon = new System.Windows.Forms.ToolStripLabel();
+            this.toolStripFilterBox = new System.Windows.Forms.ToolStripTextBox();
+            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.toolStripConnectToLabel = new System.Windows.Forms.ToolStripLabel();
+            this.toolStripConnectToTextBox = new System.Windows.Forms.ToolStripTextBox();
+            this.toolStripConnectButton = new System.Windows.Forms.ToolStripButton();
+            this.refreshTimer = new System.Windows.Forms.Timer(this.components);
+            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.toolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.nameDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.statusDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.serviceViewModelBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.toolStripContainer.ContentPanel.SuspendLayout();
             this.toolStripContainer.TopToolStripPanel.SuspendLayout();
             this.toolStripContainer.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.servicesDataGridView)).BeginInit();
             this.contextMenu.SuspendLayout();
             this.toolStrip.SuspendLayout();
+            this.toolStrip1.SuspendLayout();
+            this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.serviceViewModelBindingSource)).BeginInit();
             this.SuspendLayout();
             // 
@@ -88,8 +96,9 @@
             // 
             // toolStripContainer.ContentPanel
             // 
+            this.toolStripContainer.ContentPanel.Controls.Add(this.statusStrip1);
             this.toolStripContainer.ContentPanel.Controls.Add(this.servicesDataGridView);
-            this.toolStripContainer.ContentPanel.Size = new System.Drawing.Size(904, 329);
+            this.toolStripContainer.ContentPanel.Size = new System.Drawing.Size(904, 304);
             this.toolStripContainer.Dock = System.Windows.Forms.DockStyle.Fill;
             this.toolStripContainer.Location = new System.Drawing.Point(0, 0);
             this.toolStripContainer.Name = "toolStripContainer";
@@ -100,6 +109,7 @@
             // toolStripContainer.TopToolStripPanel
             // 
             this.toolStripContainer.TopToolStripPanel.Controls.Add(this.toolStrip);
+            this.toolStripContainer.TopToolStripPanel.Controls.Add(this.toolStrip1);
             this.toolStripContainer.TopToolStripPanel.Margin = new System.Windows.Forms.Padding(0, 3, 0, 0);
             this.toolStripContainer.TopToolStripPanel.Padding = new System.Windows.Forms.Padding(0, 3, 0, 0);
             // 
@@ -148,8 +158,20 @@
             this.servicesDataGridView.RowHeadersVisible = false;
             this.servicesDataGridView.RowTemplate.Height = 25;
             this.servicesDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.servicesDataGridView.Size = new System.Drawing.Size(904, 329);
+            this.servicesDataGridView.Size = new System.Drawing.Size(904, 304);
             this.servicesDataGridView.TabIndex = 0;
+            // 
+            // StatusIcon
+            // 
+            this.StatusIcon.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.StatusIcon.DataPropertyName = "StatusIcon";
+            this.StatusIcon.FillWeight = 30.45685F;
+            this.StatusIcon.Frozen = true;
+            this.StatusIcon.HeaderText = "";
+            this.StatusIcon.Name = "StatusIcon";
+            this.StatusIcon.ReadOnly = true;
+            this.StatusIcon.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.StatusIcon.Width = 7;
             // 
             // StartupType
             // 
@@ -298,71 +320,8 @@
             this.toolStrip.Location = new System.Drawing.Point(3, 0);
             this.toolStrip.Name = "toolStrip";
             this.toolStrip.RenderMode = System.Windows.Forms.ToolStripRenderMode.Professional;
-            this.toolStrip.Size = new System.Drawing.Size(901, 32);
+            this.toolStrip.Size = new System.Drawing.Size(897, 32);
             this.toolStrip.TabIndex = 0;
-            // 
-            // toolStripSeparator1
-            // 
-            this.toolStripSeparator1.AutoSize = false;
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 29);
-            // 
-            // toolStripSeparator2
-            // 
-            this.toolStripSeparator2.AutoSize = false;
-            this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 29);
-            // 
-            // toolStripFilterBox
-            // 
-            this.toolStripFilterBox.Margin = new System.Windows.Forms.Padding(1, 3, 10, 0);
-            this.toolStripFilterBox.Name = "toolStripFilterBox";
-            this.toolStripFilterBox.Size = new System.Drawing.Size(150, 23);
-            this.toolStripFilterBox.ToolTipText = "Type a name here to filter";
-            this.toolStripFilterBox.TextChanged += new System.EventHandler(this.FilterBoxTextChanged);
-            // 
-            // refreshTimer
-            // 
-            this.refreshTimer.Enabled = true;
-            this.refreshTimer.Interval = 750;
-            this.refreshTimer.Tick += new System.EventHandler(this.RefreshTimerTicked);
-            // 
-            // StatusIcon
-            // 
-            this.StatusIcon.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-            this.StatusIcon.DataPropertyName = "StatusIcon";
-            this.StatusIcon.FillWeight = 30.45685F;
-            this.StatusIcon.Frozen = true;
-            this.StatusIcon.HeaderText = "";
-            this.StatusIcon.Name = "StatusIcon";
-            this.StatusIcon.ReadOnly = true;
-            this.StatusIcon.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            this.StatusIcon.Width = 7;
-            // 
-            // nameDataGridViewTextBoxColumn
-            // 
-            this.nameDataGridViewTextBoxColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.nameDataGridViewTextBoxColumn.DataPropertyName = "Name";
-            dataGridViewCellStyle1.Padding = new System.Windows.Forms.Padding(10, 0, 0, 0);
-            this.nameDataGridViewTextBoxColumn.DefaultCellStyle = dataGridViewCellStyle1;
-            this.nameDataGridViewTextBoxColumn.FillWeight = 341.7259F;
-            this.nameDataGridViewTextBoxColumn.HeaderText = "Display name";
-            this.nameDataGridViewTextBoxColumn.Name = "nameDataGridViewTextBoxColumn";
-            this.nameDataGridViewTextBoxColumn.ReadOnly = true;
-            // 
-            // statusDataGridViewTextBoxColumn
-            // 
-            this.statusDataGridViewTextBoxColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-            this.statusDataGridViewTextBoxColumn.DataPropertyName = "Status";
-            this.statusDataGridViewTextBoxColumn.FillWeight = 113.9086F;
-            this.statusDataGridViewTextBoxColumn.HeaderText = "Status";
-            this.statusDataGridViewTextBoxColumn.Name = "statusDataGridViewTextBoxColumn";
-            this.statusDataGridViewTextBoxColumn.ReadOnly = true;
-            this.statusDataGridViewTextBoxColumn.Width = 68;
-            // 
-            // serviceViewModelBindingSource
-            // 
-            this.serviceViewModelBindingSource.DataSource = typeof(ServiceBouncer.ServiceViewModel);
             // 
             // toolStripStartButton
             // 
@@ -402,6 +361,12 @@
             this.toolStripRestartButton.Text = "Restart";
             this.toolStripRestartButton.ToolTipText = "Stop, wait, then start";
             this.toolStripRestartButton.Click += new System.EventHandler(this.RestartClicked);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.AutoSize = false;
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 29);
             // 
             // toolStripDeleteButton
             // 
@@ -472,6 +437,12 @@
             this.toolStripInfoButton.Text = "Info";
             this.toolStripInfoButton.Click += new System.EventHandler(this.AssemblyInfoClick);
             // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.AutoSize = false;
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 29);
+            // 
             // toolStripRefreshButton
             // 
             this.toolStripRefreshButton.Image = global::ServiceBouncer.Properties.Resources.Refresh;
@@ -487,6 +458,102 @@
             this.toolStripFilterIcon.Image = global::ServiceBouncer.Properties.Resources.Filter;
             this.toolStripFilterIcon.Name = "toolStripFilterIcon";
             this.toolStripFilterIcon.Size = new System.Drawing.Size(25, 25);
+            // 
+            // toolStripFilterBox
+            // 
+            this.toolStripFilterBox.Margin = new System.Windows.Forms.Padding(1, 3, 10, 0);
+            this.toolStripFilterBox.Name = "toolStripFilterBox";
+            this.toolStripFilterBox.Size = new System.Drawing.Size(150, 23);
+            this.toolStripFilterBox.ToolTipText = "Type a name here to filter";
+            this.toolStripFilterBox.TextChanged += new System.EventHandler(this.FilterBoxTextChanged);
+            // 
+            // toolStrip1
+            // 
+            this.toolStrip1.Dock = System.Windows.Forms.DockStyle.None;
+            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripConnectToLabel,
+            this.toolStripConnectToTextBox,
+            this.toolStripConnectButton});
+            this.toolStrip1.Location = new System.Drawing.Point(3, 32);
+            this.toolStrip1.Name = "toolStrip1";
+            this.toolStrip1.Size = new System.Drawing.Size(223, 25);
+            this.toolStrip1.TabIndex = 1;
+            // 
+            // toolStripConnectToLabel
+            // 
+            this.toolStripConnectToLabel.Name = "toolStripConnectToLabel";
+            this.toolStripConnectToLabel.Size = new System.Drawing.Size(55, 22);
+            this.toolStripConnectToLabel.Text = "Connect:";
+            // 
+            // toolStripConnectToTextBox
+            // 
+            this.toolStripConnectToTextBox.MaxLength = 120;
+            this.toolStripConnectToTextBox.Name = "toolStripConnectToTextBox";
+            this.toolStripConnectToTextBox.Size = new System.Drawing.Size(100, 25);
+            this.toolStripConnectToTextBox.Text = "localhost";
+            this.toolStripConnectToTextBox.TextBoxTextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.toolStripConnectToTextBox.ToolTipText = "Hostname of the machine to connect to";
+            this.toolStripConnectToTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.toolStripConnectToTextBox_KeyDown);
+            this.toolStripConnectToTextBox.TextChanged += new System.EventHandler(this.toolStripConnectToTextBox_TextChanged);
+            // 
+            // toolStripConnectButton
+            // 
+            this.toolStripConnectButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripConnectButton.Image = global::ServiceBouncer.Properties.Resources.Disconnected;
+            this.toolStripConnectButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripConnectButton.Name = "toolStripConnectButton";
+            this.toolStripConnectButton.Size = new System.Drawing.Size(23, 22);
+            this.toolStripConnectButton.Tag = "Disconnected";
+            this.toolStripConnectButton.Text = "Connect";
+            this.toolStripConnectButton.ToolTipText = "Connect";
+            this.toolStripConnectButton.Click += new System.EventHandler(this.toolStripConnectButton_Click);
+            // 
+            // refreshTimer
+            // 
+            this.refreshTimer.Enabled = true;
+            this.refreshTimer.Interval = 750;
+            this.refreshTimer.Tick += new System.EventHandler(this.RefreshTimerTicked);
+            // 
+            // statusStrip1
+            // 
+            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripStatusLabel});
+            this.statusStrip1.Location = new System.Drawing.Point(0, 282);
+            this.statusStrip1.Name = "statusStrip1";
+            this.statusStrip1.Size = new System.Drawing.Size(904, 22);
+            this.statusStrip1.TabIndex = 1;
+            this.statusStrip1.Text = "statusStrip1";
+            // 
+            // toolStripStatusLabel
+            // 
+            this.toolStripStatusLabel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripStatusLabel.Name = "toolStripStatusLabel";
+            this.toolStripStatusLabel.Size = new System.Drawing.Size(0, 17);
+            // 
+            // nameDataGridViewTextBoxColumn
+            // 
+            this.nameDataGridViewTextBoxColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.nameDataGridViewTextBoxColumn.DataPropertyName = "Name";
+            dataGridViewCellStyle1.Padding = new System.Windows.Forms.Padding(10, 0, 0, 0);
+            this.nameDataGridViewTextBoxColumn.DefaultCellStyle = dataGridViewCellStyle1;
+            this.nameDataGridViewTextBoxColumn.FillWeight = 341.7259F;
+            this.nameDataGridViewTextBoxColumn.HeaderText = "Display name";
+            this.nameDataGridViewTextBoxColumn.Name = "nameDataGridViewTextBoxColumn";
+            this.nameDataGridViewTextBoxColumn.ReadOnly = true;
+            // 
+            // statusDataGridViewTextBoxColumn
+            // 
+            this.statusDataGridViewTextBoxColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.statusDataGridViewTextBoxColumn.DataPropertyName = "Status";
+            this.statusDataGridViewTextBoxColumn.FillWeight = 113.9086F;
+            this.statusDataGridViewTextBoxColumn.HeaderText = "Status";
+            this.statusDataGridViewTextBoxColumn.Name = "statusDataGridViewTextBoxColumn";
+            this.statusDataGridViewTextBoxColumn.ReadOnly = true;
+            this.statusDataGridViewTextBoxColumn.Width = 68;
+            // 
+            // serviceViewModelBindingSource
+            // 
+            this.serviceViewModelBindingSource.DataSource = typeof(ServiceBouncer.ServiceViewModel);
             // 
             // MainForm
             // 
@@ -504,6 +571,7 @@
             this.Deactivate += new System.EventHandler(this.FormDeactivated);
             this.Load += new System.EventHandler(this.FormLoaded);
             this.toolStripContainer.ContentPanel.ResumeLayout(false);
+            this.toolStripContainer.ContentPanel.PerformLayout();
             this.toolStripContainer.TopToolStripPanel.ResumeLayout(false);
             this.toolStripContainer.TopToolStripPanel.PerformLayout();
             this.toolStripContainer.ResumeLayout(false);
@@ -512,6 +580,10 @@
             this.contextMenu.ResumeLayout(false);
             this.toolStrip.ResumeLayout(false);
             this.toolStrip.PerformLayout();
+            this.toolStrip1.ResumeLayout(false);
+            this.toolStrip1.PerformLayout();
+            this.statusStrip1.ResumeLayout(false);
+            this.statusStrip1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.serviceViewModelBindingSource)).EndInit();
             this.ResumeLayout(false);
 
@@ -550,8 +622,6 @@
         private System.Windows.Forms.ToolStripMenuItem contextStartupTypeManual;
         private System.Windows.Forms.ToolStripMenuItem contextStartupTypeDisabled;
         private System.Windows.Forms.DataGridViewImageColumn StatusIcon;
-        private System.Windows.Forms.DataGridViewTextBoxColumn nameDataGridViewTextBoxColumn;
-        private System.Windows.Forms.DataGridViewTextBoxColumn statusDataGridViewTextBoxColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn StartupType;
         private System.Windows.Forms.ToolStrip toolStrip;
         private System.Windows.Forms.ToolStripSeparator contextMenuSpacer3;
@@ -560,6 +630,14 @@
         private System.Windows.Forms.ToolStripButton toolStripExplorerButton;
         private System.Windows.Forms.ToolStripButton toolStripInfoButton;
         private System.Windows.Forms.ToolStripButton toolStripInstallButton;
+        private System.Windows.Forms.ToolStrip toolStrip1;
+        private System.Windows.Forms.ToolStripLabel toolStripConnectToLabel;
+        private System.Windows.Forms.ToolStripTextBox toolStripConnectToTextBox;
+        private System.Windows.Forms.ToolStripButton toolStripConnectButton;
+        private System.Windows.Forms.DataGridViewTextBoxColumn nameDataGridViewTextBoxColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn statusDataGridViewTextBoxColumn;
+        private System.Windows.Forms.StatusStrip statusStrip1;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel;
     }
 }
 
