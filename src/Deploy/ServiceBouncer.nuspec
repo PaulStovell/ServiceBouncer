@@ -1,15 +1,16 @@
 <?xml version="1.0"?>
 <package>
-	<metadata>
-		<id>ServiceBouncer</id>
-		<version>1.2.0</version>
-		<title>ServiceBouncer</title>
+  <metadata>
+    <id>ServiceBouncer</id>
+    <version>1.2.1</version>
+    <title>ServiceBouncer</title>
     <authors>ServiceBouncer</authors>
-		<requireLicenseAcceptance>false</requireLicenseAcceptance>
-		<description>ServiceBouncer Service Management Application</description>
-	</metadata>
-	<files>
-		<file src="ServiceBouncer\bin\Release\*.exe" target="Content" />
-		<file src="Deploy\deploy.ps1" target="deploy.ps1" />
-	</files>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>ServiceBouncer Service Management Application</description>
+  </metadata>
+  <files>
+    <file src="ServiceBouncer\bin\Release\NET45\**" target="Content\NET45" />
+    <file src="ServiceBouncer\bin\Release\NET461\**" target="Content\NET461" />
+    <file src="Deploy\deploy.ps1" target="deploy.ps1" />
+  </files>
 </package>

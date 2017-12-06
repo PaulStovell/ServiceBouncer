@@ -1,5 +1,10 @@
 $scriptDir = Split-Path ((Get-Variable MyInvocation -Scope 0).Value.MyCommand.Path)
 
+if($FramworkNeeded -eq $null)
+{
+    $FramworkNeeded = "NET461"
+}
+
 $ServiceBouncer = Get-Process ServiceBouncer -ErrorAction SilentlyContinue
 if ($ServiceBouncer) {
     Write-Host "Application Running, Attempting to Stop"
@@ -21,4 +26,4 @@ Write-Host "Creating Directory at $DeployPath"
 New-Item $DeployPath -Type container
 
 Write-Host "Deploying to $DeployPath"
-Copy-Item "$scriptDir\Content\*" $DeployPath -Force -Recurse
+Copy-Item "$scriptDir\Content\$FramworkNeeded\*" $DeployPath -Force -Recurse

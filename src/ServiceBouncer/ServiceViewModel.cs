@@ -28,7 +28,7 @@ namespace ServiceBouncer
             ServiceName = controller.ServiceName;
             Status = controller.Status.ToString();
             StatusIcon = GetIcon(Status);
-            StartupType = controller.StartType.ToString();
+            StartupType = controller.GetStartupType();
         }
 
         public async Task Start()
@@ -36,12 +36,12 @@ namespace ServiceBouncer
             if (controller.Status == ServiceControllerStatus.Stopped)
             {
                 await Task.Run(() => controller.Start());
-                await Refresh();
+                await Refresh(false);
             }
             else if (controller.Status == ServiceControllerStatus.Paused)
             {
                 await Task.Run(() => controller.Continue());
-                await Refresh();
+                await Refresh(false);
             }
         }
 
@@ -62,7 +62,7 @@ namespace ServiceBouncer
                     controller.Start();
                 });
 
-                await Refresh();
+                await Refresh(false);
             }
         }
 
@@ -71,7 +71,7 @@ namespace ServiceBouncer
             if (controller.Status == ServiceControllerStatus.Running || controller.Status == ServiceControllerStatus.Paused)
             {
                 await Task.Run(() => controller.Stop());
-                await Refresh();
+                await Refresh(false);
             }
         }
 
@@ -82,7 +82,7 @@ namespace ServiceBouncer
                 if (controller.CanPauseAndContinue)
                 {
                     await Task.Run(() => controller.Pause());
-                    await Refresh();
+                    await Refresh(false);
                 }
                 else
                 {
@@ -103,7 +103,7 @@ namespace ServiceBouncer
         public async Task SetStartupType(ServiceStartMode newType)
         {
             await Task.Run(() => controller.SetStartupType(newType));
-            await Refresh();
+            await Refresh(false);
         }
 
         public async Task OpenServiceInExplorer()
@@ -174,7 +174,7 @@ namespace ServiceBouncer
             return output.ToString();
         }
 
-        public async Task Refresh()
+        public async Task Refresh(bool background)
         {
             try
             {
@@ -206,13 +206,24 @@ namespace ServiceBouncer
                             changedEvents.Add("Status");
                             changedEvents.Add("StatusIcon");
                         }
-
-                        var startup = controller.StartType.ToString();
+#if NET45
+                        if (!background)
+                        {
+                            var startup = controller.GetStartupType();
+                            if (StartupType != startup)
+                            {
+                                StartupType = startup;
+                                changedEvents.Add("StartupType");
+                            }
+                        }
+#elif NET461
+                        var startup = controller.GetStartupType();
                         if (StartupType != startup)
                         {
                             StartupType = startup;
                             changedEvents.Add("StartupType");
                         }
+#endif
                     }
                     catch (Exception)
                     {

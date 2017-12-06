@@ -24,13 +24,17 @@ namespace ServiceBouncer
             InitializeComponent();
             serviceViewModelBindingSource.DataSource = services;
             toolStripConnectToTextBox.Text = machineHostname;
+
+#if NET45
+            dataGridStatupType.HeaderText = $"{dataGridStatupType.HeaderText} (No Auto Refresh)";
+#endif
         }
 
         private void RefreshTimerTicked(object sender, EventArgs e)
         {
             if (isActive)
             {
-                PerformOperation(x => x.Refresh(), services.ToList());
+                PerformOperation(x => x.Refresh(true), services.ToList());
                 SetTitle();
             }
         }
