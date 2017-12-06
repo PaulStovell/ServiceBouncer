@@ -191,8 +191,7 @@ namespace ServiceBouncer
         {
             try
             {
-                var connectMachine = machineHostname == Environment.MachineName ? "." : machineHostname;
-                var systemServices = await Task.Run(() => ServiceController.GetServices(connectMachine).Where(service => service.DisplayName.IndexOf(toolStripFilterBox.Text, StringComparison.OrdinalIgnoreCase) >= 0));
+                var systemServices = await Task.Run(() => ServiceController.GetServices(machineHostname).Where(service => service.DisplayName.IndexOf(toolStripFilterBox.Text, StringComparison.OrdinalIgnoreCase) >= 0));
                 Connect();
                 services.Clear();
 
