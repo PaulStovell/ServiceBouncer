@@ -16,13 +16,12 @@ namespace ServiceBouncer
     {
         private readonly BindingList<ServiceViewModel> services = new SortableBindingList<ServiceViewModel>();
         private bool isActive;
-        private string _machineHostname = "localhost";
-
-        private string MachineHostname { get => _machineHostname; set => _machineHostname = value; }
+        private string _machineHostname;
 
         public MainForm()
         {
             isActive = true;
+            _machineHostname = "localhost";
             InitializeComponent();
             serviceViewModelBindingSource.DataSource = services;
         }
@@ -143,7 +142,7 @@ namespace ServiceBouncer
         {
             try
             {
-                var systemServices = await Task.Run(() => ServiceController.GetServices(MachineHostname).Where(service => service.DisplayName.IndexOf(toolStripFilterBox.Text, StringComparison.OrdinalIgnoreCase) >= 0));
+                var systemServices = await Task.Run(() => ServiceController.GetServices(_machineHostname).Where(service => service.DisplayName.IndexOf(toolStripFilterBox.Text, StringComparison.OrdinalIgnoreCase) >= 0));
                 Connect();
                 services.Clear();
 
@@ -167,10 +166,10 @@ namespace ServiceBouncer
             toolStripConnectButton.ToolTipText = "Disconnect";
             toolStripConnectButton.Tag = "Connected";
             toolStripConnectButton.Enabled = true;
+            toolStripConnectButton.Image = Properties.Resources.Connected;
             servicesDataGridView.Enabled = true;
             toolStripConnectToTextBox.Enabled = true;
-            toolStripConnectButton.Image = Properties.Resources.Connected;
-            toolStripStatusLabel.Text = $"Connected to {MachineHostname}.";
+            toolStripStatusLabel.Text = $"Connected to {_machineHostname}.";
         }
 
         private void Disconnect()
@@ -191,7 +190,7 @@ namespace ServiceBouncer
             if (services.Any())
             {
                 var titles = services.GroupBy(s => s.Status).Select(s => (string.IsNullOrWhiteSpace(s.Key) ? "Unknown" : s.Key) + ": " + s.Count());
-                Text = "Total: " + services.Count + titles.Aggregate((sentance, next) => sentance + ", " + next );
+                Text = "Total: " + services.Count + ", " + string.Join(", ", titles);
             }
             else
             {
@@ -220,7 +219,7 @@ namespace ServiceBouncer
             }
         }
 
-        private void toolStripConnectButton_Click(object sender, EventArgs e)
+        private void toolStripConnectButton_Click_1(object sender, EventArgs e)
         {
             if ((string)toolStripConnectButton.Tag == "Connected") // If the machine name hasn't changed and the disconnect button is pressed disconnect
             {
@@ -232,24 +231,14 @@ namespace ServiceBouncer
                 toolStripConnectToTextBox.Enabled = false;
                 toolStripConnectButton.Enabled = false;
                 servicesDataGridView.Enabled = false;
-                toolStripStatusLabel.Text = $"Connecting to: {MachineHostname}";
+                toolStripStatusLabel.Text = $"Connecting to: {_machineHostname}";
 
-                MachineHostname = toolStripConnectToTextBox.Text;
+                _machineHostname = toolStripConnectToTextBox.Text;
                 Reload();
             }
-
         }
 
-        private void toolStripConnectToTextBox_TextChanged(object sender, EventArgs e)
-        {
-            if ((string)toolStripConnectButton.Tag == "Connected")
-            {
-                toolStripConnectButton.Image = Properties.Resources.Reconnect;
-                toolStripConnectButton.Tag = "NewConnection";
-            }
-        }
-
-        private void toolStripConnectToTextBox_KeyDown(object sender, KeyEventArgs e)
+        private void toolStripConnectToTextBox_KeyDown_1(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
             {
@@ -259,11 +248,20 @@ namespace ServiceBouncer
                 servicesDataGridView.Enabled = false;
                 toolStripStatusLabel.Text = $"Connecting to {toolStripConnectToTextBox.Text}.";
 
-                MachineHostname = toolStripConnectToTextBox.Text;
+                _machineHostname = toolStripConnectToTextBox.Text;
                 Reload();
 
                 e.Handled = true;
                 e.SuppressKeyPress = true;
+            }
+        }
+
+        private void toolStripConnectToTextBox_TextChanged_1(object sender, EventArgs e)
+        {
+            if ((string)toolStripConnectButton.Tag == "Connected")
+            {
+                toolStripConnectButton.Image = Properties.Resources.Reconnect;
+                toolStripConnectButton.Tag = "NewConnection";
             }
         }
     }
