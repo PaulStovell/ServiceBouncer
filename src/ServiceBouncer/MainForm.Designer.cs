@@ -521,7 +521,7 @@
             this.toolStripConnectButton.Tag = "Disconnected";
             this.toolStripConnectButton.Text = "Connect";
             this.toolStripConnectButton.ToolTipText = "Connect";
-            this.toolStripConnectButton.Click += new System.EventHandler(this.toolStripConnectButton_Click_1);
+            this.toolStripConnectButton.Click += new System.EventHandler(this.ConnectButtonClick);
             // 
             // toolStripConnectToTextBox
             // 
@@ -531,8 +531,8 @@
             this.toolStripConnectToTextBox.Size = new System.Drawing.Size(100, 23);
             this.toolStripConnectToTextBox.Text = "localhost";
             this.toolStripConnectToTextBox.ToolTipText = "Hostname of the machine to connect to";
-            this.toolStripConnectToTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.toolStripConnectToTextBox_KeyDown_1);
-            this.toolStripConnectToTextBox.TextChanged += new System.EventHandler(this.toolStripConnectToTextBox_TextChanged_1);
+            this.toolStripConnectToTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.ConnectTextBoxKeyDown);
+            this.toolStripConnectToTextBox.TextChanged += new System.EventHandler(this.ConnectTextBoxChanged);
             // 
             // nameDataGridViewTextBoxColumn
             // 
