@@ -20,9 +20,10 @@ namespace ServiceBouncer
         public MainForm()
         {
             isActive = true;
-            machineHostname = "localhost";
+            machineHostname = Environment.MachineName;
             InitializeComponent();
             serviceViewModelBindingSource.DataSource = services;
+            toolStripConnectToTextBox.Text = machineHostname;
         }
 
         private void RefreshTimerTicked(object sender, EventArgs e)
@@ -179,6 +180,8 @@ namespace ServiceBouncer
         {
             if ((string)toolStripConnectButton.Tag == "Connected")
             {
+                toolStripConnectButton.Text = "Reconnect";
+                toolStripConnectButton.ToolTipText = "Reconnect";
                 toolStripConnectButton.Image = Properties.Resources.Reconnect;
                 toolStripConnectButton.Tag = "NewConnection";
             }
@@ -188,7 +191,8 @@ namespace ServiceBouncer
         {
             try
             {
-                var systemServices = await Task.Run(() => ServiceController.GetServices(machineHostname).Where(service => service.DisplayName.IndexOf(toolStripFilterBox.Text, StringComparison.OrdinalIgnoreCase) >= 0));
+                var connectMachine = machineHostname == Environment.MachineName ? "." : machineHostname;
+                var systemServices = await Task.Run(() => ServiceController.GetServices(connectMachine).Where(service => service.DisplayName.IndexOf(toolStripFilterBox.Text, StringComparison.OrdinalIgnoreCase) >= 0));
                 Connect();
                 services.Clear();
 
@@ -202,7 +206,7 @@ namespace ServiceBouncer
             catch (Exception e)
             {
                 Disconnect();
-                MessageBox.Show($"Unable to retrieve the services from {toolStripConnectToTextBox.Text}. Message: {e.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Unable to retrieve the services from {toolStripConnectToTextBox.Text}.\nMessage: {e.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -220,9 +224,9 @@ namespace ServiceBouncer
 
         private void Disconnect()
         {
-            toolStripConnectButton.Text = "Connected";
-            toolStripConnectButton.ToolTipText = "Connected";
-            toolStripConnectButton.Tag = "Disconnect";
+            toolStripConnectButton.Text = "Connect";
+            toolStripConnectButton.ToolTipText = "Connect";
+            toolStripConnectButton.Tag = "Disconnected";
             toolStripConnectButton.Image = Properties.Resources.Disconnected;
             toolStripConnectButton.Enabled = true;
             servicesDataGridView.Enabled = true;
