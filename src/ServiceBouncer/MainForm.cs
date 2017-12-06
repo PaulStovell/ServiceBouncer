@@ -41,17 +41,49 @@ namespace ServiceBouncer
 
         private void FormLoaded(object sender, EventArgs e)
         {
-            Reload();
-
+            var validFramework = true;
+#if NET45
+            var requiredFramework = "4.5";
             using (var ndpKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32).OpenSubKey("SOFTWARE\\Microsoft\\NET Framework Setup\\NDP\\v4\\Full\\"))
             {
-                var releaseKey = Convert.ToInt32(ndpKey.GetValue("Release"));
-                if (releaseKey < 394254)
+                if (ndpKey == null)
                 {
-                    MessageBox.Show("ServiceBouncer required .net 4.6.1 or higher to be installed", "Framework Upgrade Required", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    Application.Exit();
+                    validFramework = false;
+                }
+                else
+                {
+                    var releaseKey = Convert.ToInt32(ndpKey.GetValue("Release"));
+                    if (releaseKey < 378389)
+                    {
+                        validFramework = false;
+                    }
                 }
             }
+#elif NET461
+            var requiredFramework = "4.6.1";
+            using (var ndpKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32).OpenSubKey("SOFTWARE\\Microsoft\\NET Framework Setup\\NDP\\v4\\Full\\"))
+            {
+                if (ndpKey == null)
+                {
+                    validFramework = false;
+                }
+                else
+                {
+                    var releaseKey = Convert.ToInt32(ndpKey.GetValue("Release"));
+                    if (releaseKey < 394254)
+                    {
+                        validFramework = false;
+                    }
+                }
+            }
+#endif
+            if (!validFramework)
+            {
+                MessageBox.Show($"ServiceBouncer required .net {requiredFramework} or higher to be installed", "Framework Upgrade Required", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Application.Exit();
+            }
+
+            Reload();
         }
 
         private void FormActivated(object sender, EventArgs e)
