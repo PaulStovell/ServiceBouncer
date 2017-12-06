@@ -15,12 +15,15 @@ namespace ServiceBouncer
     {
         private readonly BindingList<ServiceViewModel> services = new SortableBindingList<ServiceViewModel>();
         private bool isActive;
+        private string machineHostname;
 
         public MainForm()
         {
             isActive = true;
+            machineHostname = Environment.MachineName;
             InitializeComponent();
             serviceViewModelBindingSource.DataSource = services;
+            toolStripConnectToTextBox.Text = machineHostname;
         }
 
         private void RefreshTimerTicked(object sender, EventArgs e)
@@ -135,22 +138,114 @@ namespace ServiceBouncer
             Reload();
         }
 
+        private void ConnectButtonClick(object sender, EventArgs e)
+        {
+            if ((string)toolStripConnectButton.Tag == "Connected") // If the machine name hasn't changed and the disconnect button is pressed disconnect
+            {
+                Disconnect();
+            }
+            else // If the button tag is not set as "Connected" then connect.
+            {
+                // Disable the button and the textbox so that you cannot create multiple requests at the time.
+                toolStripConnectToTextBox.Enabled = false;
+                toolStripConnectButton.Enabled = false;
+                servicesDataGridView.Enabled = false;
+                toolStripStatusLabel.Text = $"Connecting to: {machineHostname}";
+
+                machineHostname = toolStripConnectToTextBox.Text;
+                Reload();
+            }
+        }
+
+        private void ConnectTextBoxKeyDown(object sender, KeyEventArgs e)
+        {
+            //Only listen for the Enter key
+            if (e.KeyCode == Keys.Enter)
+            {
+                // Disable the button and the textbox so that you cannot create multiple requests at the time.
+                toolStripConnectToTextBox.Enabled = false;
+                toolStripConnectButton.Enabled = false;
+                servicesDataGridView.Enabled = false;
+                toolStripStatusLabel.Text = $"Connecting to {toolStripConnectToTextBox.Text}.";
+
+                machineHostname = toolStripConnectToTextBox.Text;
+                Reload();
+
+                e.Handled = true;
+                e.SuppressKeyPress = true;
+            }
+        }
+
+        private void ConnectTextBoxChanged(object sender, EventArgs e)
+        {
+            if ((string)toolStripConnectButton.Tag == "Connected")
+            {
+                toolStripConnectButton.Text = "Reconnect";
+                toolStripConnectButton.ToolTipText = "Reconnect";
+                toolStripConnectButton.Image = Properties.Resources.Reconnect;
+                toolStripConnectButton.Tag = "NewConnection";
+            }
+        }
+
         private async void Reload()
         {
-            var systemServices = await Task.Run(() => ServiceController.GetServices().Where(service => service.DisplayName.IndexOf(toolStripFilterBox.Text, StringComparison.OrdinalIgnoreCase) >= 0));
-            services.Clear();
-            foreach (var model in systemServices.Select(service => new ServiceViewModel(service)).OrderBy(x => x.Name))
+            try
             {
-                services.Add(model);
-            }
+                var connectMachine = machineHostname == Environment.MachineName ? "." : machineHostname;
+                var systemServices = await Task.Run(() => ServiceController.GetServices(connectMachine).Where(service => service.DisplayName.IndexOf(toolStripFilterBox.Text, StringComparison.OrdinalIgnoreCase) >= 0));
+                Connect();
+                services.Clear();
 
-            SetTitle();
+                foreach (var model in systemServices.Select(service => new ServiceViewModel(service)).OrderBy(x => x.Name))
+                {
+                    services.Add(model);
+                }
+
+                SetTitle();
+            }
+            catch (Exception e)
+            {
+                Disconnect();
+                MessageBox.Show($"Unable to retrieve the services from {toolStripConnectToTextBox.Text}.\nMessage: {e.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void Connect()
+        {
+            toolStripConnectButton.Text = "Disconnect";
+            toolStripConnectButton.ToolTipText = "Disconnect";
+            toolStripConnectButton.Tag = "Connected";
+            toolStripConnectButton.Enabled = true;
+            toolStripConnectButton.Image = Properties.Resources.Connected;
+            servicesDataGridView.Enabled = true;
+            toolStripConnectToTextBox.Enabled = true;
+            toolStripStatusLabel.Text = $"Connected to {machineHostname}.";
+        }
+
+        private void Disconnect()
+        {
+            toolStripConnectButton.Text = "Connect";
+            toolStripConnectButton.ToolTipText = "Connect";
+            toolStripConnectButton.Tag = "Disconnected";
+            toolStripConnectButton.Image = Properties.Resources.Disconnected;
+            toolStripConnectButton.Enabled = true;
+            servicesDataGridView.Enabled = true;
+            toolStripConnectToTextBox.Enabled = true;
+            toolStripStatusLabel.Text = "Disconnected";
+            services.Clear();
         }
 
         private void SetTitle()
         {
-            var titles = services.GroupBy(s => s.Status).Select(s => (string.IsNullOrWhiteSpace(s.Key) ? "Unknown" : s.Key) + ": " + s.Count());
-            Text = "Total: " + services.Count + ", " + string.Join(", ", titles);
+            if (services.Any())
+            {
+                var titles = services.GroupBy(s => s.Status).Select(s => (string.IsNullOrWhiteSpace(s.Key) ? "Unknown" : s.Key) + ": " + s.Count());
+                Text = "Total: " + services.Count + ", " + string.Join(", ", titles);
+            }
+            else
+            {
+                Text = "Total: 0";
+            }
         }
 
         private void PerformOperation(Func<ServiceViewModel, Task> actionToPerform)

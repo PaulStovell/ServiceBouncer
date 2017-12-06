@@ -139,6 +139,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="AppIcon.ico" />
+    <Content Include="Icons\Connected.png" />
+    <Content Include="Icons\Disconnected.png" />
+    <Content Include="Icons\Reconnect.png" />
     <None Include="Icons\Install.png" />
     <None Include="Icons\Info.png" />
     <None Include="Icons\Browse.png" />
