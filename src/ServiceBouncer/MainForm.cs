@@ -65,9 +65,32 @@ namespace ServiceBouncer
             Reload();
         }
 
+        public void FilterDataGridView()
+        {
+            if(toolStripFilterBox.Text != "")
+            {
+                servicesDataGridView.DataSource = services.Where(service =>
+                            service.Name.IndexOf(toolStripFilterBox.Text, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                            service.Description.IndexOf(toolStripFilterBox.Text, StringComparison.OrdinalIgnoreCase) >= 0)
+                        .OrderBy(x => x.Name)
+                        .ToList();
+            }
+            else
+            {
+                servicesDataGridView.DataSource = services;
+            }
+        }
+
         private void FilterBoxTextChanged(object sender, EventArgs e)
         {
-            Reload();
+            try
+            {
+                FilterDataGridView();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
         }
 
         private void StartClicked(object sender, EventArgs e)
@@ -192,15 +215,16 @@ namespace ServiceBouncer
             try
             {
                 var connectMachine = machineHostname == Environment.MachineName ? "." : machineHostname;
-                var systemServices = await Task.Run(() => ServiceController.GetServices(connectMachine).Where(service => service.DisplayName.IndexOf(toolStripFilterBox.Text, StringComparison.OrdinalIgnoreCase) >= 0));
+                var systemServices = await Task.Run(() => ServiceController.GetServices(connectMachine));
                 Connect();
                 services.Clear();
 
-                foreach (var model in systemServices.Select(service => new ServiceViewModel(service)).OrderBy(x => x.Name))
+                foreach (var model in systemServices.Select(service => new ServiceViewModel(service)))
                 {
                     services.Add(model);
                 }
 
+                FilterDataGridView();
                 SetTitle();
             }
             catch (Exception e)
