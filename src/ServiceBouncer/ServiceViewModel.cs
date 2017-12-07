@@ -17,7 +17,6 @@ namespace ServiceBouncer
         public event PropertyChangedEventHandler PropertyChanged;
         public string Name { get; private set; }
         public string ServiceName { get; private set; }
-        public string Description { get; private set; } 
         public string Status { get; private set; }
         public string StartupType { get; private set; }
         public Image StatusIcon { get; private set; }
@@ -30,14 +29,6 @@ namespace ServiceBouncer
             Status = controller.Status.ToString();
             StatusIcon = GetIcon(Status);
             StartupType = controller.StartType.ToString();
-            Description = "";
-
-            GetDescription();
-        }
-
-        public async Task GetDescription()
-        {
-            await Task.Run(() => Description = controller.GetServiceDescription());
         }
 
         public async Task Start()
