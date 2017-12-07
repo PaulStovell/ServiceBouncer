@@ -2,7 +2,6 @@
 using ServiceBouncer.ComponentModel;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.ServiceProcess;
 using System.Threading;
@@ -13,19 +12,20 @@ namespace ServiceBouncer
 {
     public partial class MainForm : Form
     {
-        private readonly BindingList<ServiceViewModel> services = new SortableBindingList<ServiceViewModel>();
+        private readonly SortableBindingList<ServiceViewModel> services;
         private bool isActive;
         private string machineHostname;
 
         public MainForm()
         {
+            InitializeComponent();
             isActive = true;
             machineHostname = Environment.MachineName;
-            InitializeComponent();
-            serviceViewModelBindingSource.DataSource = services;
             toolStripConnectToTextBox.Text = machineHostname;
+            services = new SortableBindingList<ServiceViewModel>();
 
 #if NET45
+            //In NET45 startup type requires WMI, so it doesn't auto refresh
             dataGridStatupType.HeaderText = $"{dataGridStatupType.HeaderText} (No Auto Refresh)";
 #endif
         }
@@ -34,76 +34,45 @@ namespace ServiceBouncer
         {
             if (isActive)
             {
-                PerformOperation(x => x.Refresh(true), services.ToList());
+                //Only refresh things which do not use WMI
+#if NET45
+                PerformBackgroundOperation(x => x.Refresh(ServiceViewModel.RefreshData.DisplayName, ServiceViewModel.RefreshData.ServiceName, ServiceViewModel.RefreshData.Status), services.ToList());
+#elif NET461
+                PerformBackgroundOperation(x => x.Refresh(ServiceViewModel.RefreshData.DisplayName, ServiceViewModel.RefreshData.ServiceName, ServiceViewModel.RefreshData.Status, ServiceViewModel.RefreshData.Startup), services.ToList());
+#endif
                 SetTitle();
             }
         }
 
         private void FormLoaded(object sender, EventArgs e)
         {
-            var validFramework = true;
-#if NET45
-            var requiredFramework = "4.5";
-            using (var ndpKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32).OpenSubKey("SOFTWARE\\Microsoft\\NET Framework Setup\\NDP\\v4\\Full\\"))
+            PerformAction(async () =>
             {
-                if (ndpKey == null)
-                {
-                    validFramework = false;
-                }
-                else
-                {
-                    var releaseKey = Convert.ToInt32(ndpKey.GetValue("Release"));
-                    if (releaseKey < 378389)
-                    {
-                        validFramework = false;
-                    }
-                }
-            }
-#elif NET461
-            var requiredFramework = "4.6.1";
-            using (var ndpKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32).OpenSubKey("SOFTWARE\\Microsoft\\NET Framework Setup\\NDP\\v4\\Full\\"))
-            {
-                if (ndpKey == null)
-                {
-                    validFramework = false;
-                }
-                else
-                {
-                    var releaseKey = Convert.ToInt32(ndpKey.GetValue("Release"));
-                    if (releaseKey < 394254)
-                    {
-                        validFramework = false;
-                    }
-                }
-            }
-#endif
-            if (!validFramework)
-            {
-                MessageBox.Show($"ServiceBouncer required .net {requiredFramework} or higher to be installed", "Framework Upgrade Required", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Application.Exit();
-            }
-
-            Reload();
+                CheckFrameworkValid();
+                await Reload();
+            });
         }
 
         private void FormActivated(object sender, EventArgs e)
         {
             isActive = true;
+            SetTitle();
         }
 
         private void FormDeactivated(object sender, EventArgs e)
         {
             isActive = false;
+            SetTitle();
         }
 
         private void RefreshClicked(object sender, EventArgs e)
         {
-            Reload();
+            PerformAction(async () => await Reload());
         }
 
         private void FilterBoxTextChanged(object sender, EventArgs e)
         {
-            Reload();
+            PopulateFilteredDataview();
         }
 
         private void StartClicked(object sender, EventArgs e)
@@ -170,27 +139,29 @@ namespace ServiceBouncer
 
         private void InstallClicked(object sender, EventArgs e)
         {
-            new InstallationForm().ShowDialog();
-            Reload();
+            PerformAction(async () =>
+            {
+                new InstallationForm().ShowDialog();
+                await Reload();
+            });
         }
 
         private void ConnectButtonClick(object sender, EventArgs e)
         {
-            if ((string)toolStripConnectButton.Tag == "Connected") // If the machine name hasn't changed and the disconnect button is pressed disconnect
+            PerformAction(async () =>
             {
-                Disconnect();
-            }
-            else // If the button tag is not set as "Connected" then connect.
-            {
-                // Disable the button and the textbox so that you cannot create multiple requests at the time.
-                toolStripConnectToTextBox.Enabled = false;
-                toolStripConnectButton.Enabled = false;
-                servicesDataGridView.Enabled = false;
-                toolStripStatusLabel.Text = $"Connecting to: {machineHostname}";
-
-                machineHostname = toolStripConnectToTextBox.Text;
-                Reload();
-            }
+                if ((string)toolStripConnectButton.Tag == "Connected") // If the machine name hasn't changed and the disconnect button is pressed disconnect
+                {
+                    Disconnect();
+                }
+                else // If the button tag is not set as "Connected" then connect.
+                {
+                    toolStripStatusLabel.Text = $"Connecting to: {machineHostname}";
+                    machineHostname = toolStripConnectToTextBox.Text;
+                    await Reload();
+                    Connect();
+                }
+            });
         }
 
         private void ConnectTextBoxKeyDown(object sender, KeyEventArgs e)
@@ -198,14 +169,12 @@ namespace ServiceBouncer
             //Only listen for the Enter key
             if (e.KeyCode == Keys.Enter)
             {
-                // Disable the button and the textbox so that you cannot create multiple requests at the time.
-                toolStripConnectToTextBox.Enabled = false;
-                toolStripConnectButton.Enabled = false;
-                servicesDataGridView.Enabled = false;
-                toolStripStatusLabel.Text = $"Connecting to {toolStripConnectToTextBox.Text}.";
-
-                machineHostname = toolStripConnectToTextBox.Text;
-                Reload();
+                PerformAction(async () =>
+                {
+                    toolStripStatusLabel.Text = $"Connecting to {toolStripConnectToTextBox.Text}.";
+                    machineHostname = toolStripConnectToTextBox.Text;
+                    await Reload();
+                });
 
                 e.Handled = true;
                 e.SuppressKeyPress = true;
@@ -223,19 +192,73 @@ namespace ServiceBouncer
             }
         }
 
-        private async void Reload()
+#if NET45
+        private void CheckFrameworkValid()
+        {
+            var validFramework = true;
+            using (var ndpKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32).OpenSubKey("SOFTWARE\\Microsoft\\NET Framework Setup\\NDP\\v4\\Full\\"))
+            {
+                if (ndpKey == null)
+                {
+                    validFramework = false;
+                }
+                else
+                {
+                    var releaseKey = Convert.ToInt32(ndpKey.GetValue("Release"));
+                    if (releaseKey < 378389)
+                    {
+                        validFramework = false;
+                    }
+                }
+            }
+
+            if (!validFramework)
+            {
+                MessageBox.Show("ServiceBouncer required .net 4.5 or higher to be installed", "Framework Upgrade Required", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Application.Exit();
+            }
+        }
+#elif NET461
+        private void CheckFrameworkValid()
+        {
+            var validFramework = true;
+            using (var ndpKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32).OpenSubKey("SOFTWARE\\Microsoft\\NET Framework Setup\\NDP\\v4\\Full\\"))
+            {
+                if (ndpKey == null)
+                {
+                    validFramework = false;
+                }
+                else
+                {
+                    var releaseKey = Convert.ToInt32(ndpKey.GetValue("Release"));
+                    if (releaseKey < 394254)
+                    {
+                        validFramework = false;
+                    }
+                }
+            }
+
+            if (!validFramework)
+            {
+                MessageBox.Show("ServiceBouncer required .net 4.6.1 or higher to be installed", "Framework Upgrade Required", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Application.Exit();
+            }
+        }
+#endif
+        private async Task Reload()
         {
             try
             {
-                var systemServices = await Task.Run(() => ServiceController.GetServices(machineHostname).Where(service => service.DisplayName.IndexOf(toolStripFilterBox.Text, StringComparison.OrdinalIgnoreCase) >= 0));
-                Connect();
+                var systemServices = await Task.Run(() => ServiceController.GetServices(machineHostname));
                 services.Clear();
 
-                foreach (var model in systemServices.Select(service => new ServiceViewModel(service)).OrderBy(x => x.Name))
+                foreach (var model in systemServices.Select(service => new ServiceViewModel(service)))
                 {
+                    await model.Refresh(ServiceViewModel.RefreshData.DisplayName, ServiceViewModel.RefreshData.ServiceName, ServiceViewModel.RefreshData.Status, ServiceViewModel.RefreshData.Startup);
                     services.Add(model);
                 }
 
+                PopulateFilteredDataview();
                 SetTitle();
             }
             catch (Exception e)
@@ -245,15 +268,26 @@ namespace ServiceBouncer
             }
         }
 
+        private void PopulateFilteredDataview()
+        {
+            if (!string.IsNullOrWhiteSpace(toolStripFilterBox.Text))
+            {
+                servicesDataGridView.DataSource = services.Where(service => service.Name.IndexOf(toolStripFilterBox.Text, StringComparison.OrdinalIgnoreCase) >= 0).OrderBy(x => x.Name).ToList();
+            }
+            else
+            {
+                servicesDataGridView.DataSource = services;
+            }
+
+            servicesDataGridView.Refresh();
+        }
+
         private void Connect()
         {
             toolStripConnectButton.Text = "Disconnect";
             toolStripConnectButton.ToolTipText = "Disconnect";
             toolStripConnectButton.Tag = "Connected";
-            toolStripConnectButton.Enabled = true;
             toolStripConnectButton.Image = Properties.Resources.Connected;
-            servicesDataGridView.Enabled = true;
-            toolStripConnectToTextBox.Enabled = true;
             toolStripStatusLabel.Text = $"Connected to {machineHostname}.";
         }
 
@@ -263,23 +297,28 @@ namespace ServiceBouncer
             toolStripConnectButton.ToolTipText = "Connect";
             toolStripConnectButton.Tag = "Disconnected";
             toolStripConnectButton.Image = Properties.Resources.Disconnected;
-            toolStripConnectButton.Enabled = true;
-            servicesDataGridView.Enabled = true;
-            toolStripConnectToTextBox.Enabled = true;
             toolStripStatusLabel.Text = "Disconnected";
             services.Clear();
+            PopulateFilteredDataview();
         }
 
         private void SetTitle()
         {
-            if (services.Any())
+            if (isActive)
             {
-                var titles = services.GroupBy(s => s.Status).Select(s => (string.IsNullOrWhiteSpace(s.Key) ? "Unknown" : s.Key) + ": " + s.Count());
-                Text = "Total: " + services.Count + ", " + string.Join(", ", titles);
+                if (services.Any())
+                {
+                    var titles = services.GroupBy(s => s.Status).Select(s => (string.IsNullOrWhiteSpace(s.Key) ? "Unknown" : s.Key) + ": " + s.Count());
+                    Text = "Service Bouncer - Total: " + services.Count + ", " + string.Join(", ", titles);
+                }
+                else
+                {
+                    Text = "Service Bouncer - Total: 0";
+                }
             }
             else
             {
-                Text = "Total: 0";
+                Text = "Service Bouncer";
             }
         }
 
@@ -289,17 +328,60 @@ namespace ServiceBouncer
             PerformOperation(actionToPerform, selectedServices);
         }
 
-        private async void PerformOperation(Func<ServiceViewModel, Task> actionToPerform, List<ServiceViewModel> servicesToAction)
+        private void PerformOperation(Func<ServiceViewModel, Task> actionToPerform, List<ServiceViewModel> servicesToAction)
         {
-            foreach (var model in servicesToAction)
+            PerformAction(async () =>
             {
-                try
+                foreach (var model in servicesToAction)
                 {
-                    await actionToPerform(model);
+                    try
+                    {
+                        await actionToPerform(model);
+                    }
+                    catch (Exception e)
+                    {
+                        MessageBox.Show($"An error occured interacting with service '{model.Name}'\nMessage: {e.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
                 }
-                catch (Exception e)
+            });
+        }
+
+        private void PerformBackgroundOperation(Func<ServiceViewModel, Task> actionToPerform, List<ServiceViewModel> servicesToAction)
+        {
+
+            PerformAction(async () =>
+            {
+                foreach (var model in servicesToAction)
                 {
-                    MessageBox.Show($"An error occured interacting with service '{model.Name}'\nMessage: {e.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    try
+                    {
+                        await actionToPerform(model);
+                    }
+                    catch (Exception e)
+                    {
+                        MessageBox.Show($"An error occured interacting with service '{model.Name}'\nMessage: {e.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }, false);
+        }
+
+        private async void PerformAction(Func<Task> actionToPerform, bool disableToolstrip = true)
+        {
+            if (disableToolstrip)
+            {
+                foreach (ToolStripItem toolStripItem in toolStrip.Items)
+                {
+                    toolStripItem.Enabled = false;
+                }
+            }
+
+            await actionToPerform();
+
+            if (disableToolstrip)
+            {
+                foreach (ToolStripItem toolStripItem in toolStrip.Items)
+                {
+                    toolStripItem.Enabled = true;
                 }
             }
         }

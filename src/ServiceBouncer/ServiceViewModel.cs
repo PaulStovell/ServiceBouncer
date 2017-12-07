@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
+using System.Linq;
 using System.Reflection;
 using System.ServiceProcess;
 using System.Text;
@@ -24,11 +25,6 @@ namespace ServiceBouncer
         public ServiceViewModel(ServiceController controller)
         {
             this.controller = controller;
-            Name = controller.DisplayName;
-            ServiceName = controller.ServiceName;
-            Status = controller.Status.ToString();
-            StatusIcon = GetIcon(Status);
-            StartupType = controller.GetStartupType();
         }
 
         public async Task Start()
@@ -36,12 +32,12 @@ namespace ServiceBouncer
             if (controller.Status == ServiceControllerStatus.Stopped)
             {
                 await Task.Run(() => controller.Start());
-                await Refresh(false);
+                await Refresh(RefreshData.Status);
             }
             else if (controller.Status == ServiceControllerStatus.Paused)
             {
                 await Task.Run(() => controller.Continue());
-                await Refresh(false);
+                await Refresh(RefreshData.Status);
             }
         }
 
@@ -62,7 +58,7 @@ namespace ServiceBouncer
                     controller.Start();
                 });
 
-                await Refresh(false);
+                await Refresh(RefreshData.Status);
             }
         }
 
@@ -71,7 +67,7 @@ namespace ServiceBouncer
             if (controller.Status == ServiceControllerStatus.Running || controller.Status == ServiceControllerStatus.Paused)
             {
                 await Task.Run(() => controller.Stop());
-                await Refresh(false);
+                await Refresh(RefreshData.Status);
             }
         }
 
@@ -82,7 +78,7 @@ namespace ServiceBouncer
                 if (controller.CanPauseAndContinue)
                 {
                     await Task.Run(() => controller.Pause());
-                    await Refresh(false);
+                    await Refresh(RefreshData.Status);
                 }
                 else
                 {
@@ -103,7 +99,7 @@ namespace ServiceBouncer
         public async Task SetStartupType(ServiceStartMode newType)
         {
             await Task.Run(() => controller.SetStartupType(newType));
-            await Refresh(false);
+            await Refresh(RefreshData.Startup);
         }
 
         public async Task OpenServiceInExplorer()
@@ -174,7 +170,15 @@ namespace ServiceBouncer
             return output.ToString();
         }
 
-        public async Task Refresh(bool background)
+        public enum RefreshData
+        {
+            DisplayName,
+            ServiceName,
+            Status,
+            Startup
+        }
+
+        public async Task Refresh(params RefreshData[] refreshData)
         {
             try
             {
@@ -186,28 +190,37 @@ namespace ServiceBouncer
                     {
                         controller.Refresh();
 
-                        if (Name != controller.DisplayName)
+                        if (refreshData.Contains(RefreshData.DisplayName))
                         {
-                            Name = controller.DisplayName;
-                            changedEvents.Add("Name");
+                            if (Name != controller.DisplayName)
+                            {
+                                Name = controller.DisplayName;
+                                changedEvents.Add("Name");
+                            }
                         }
 
-                        if (ServiceName != controller.ServiceName)
+                        if (refreshData.Contains(RefreshData.ServiceName))
                         {
-                            ServiceName = controller.ServiceName;
-                            changedEvents.Add("ServiceName");
+                            if (ServiceName != controller.ServiceName)
+                            {
+                                ServiceName = controller.ServiceName;
+                                changedEvents.Add("ServiceName");
+                            }
                         }
 
-                        var statusText = controller.Status.ToString();
-                        if (Status != statusText)
+                        if (refreshData.Contains(RefreshData.Status))
                         {
-                            Status = controller.Status.ToString();
-                            StatusIcon = GetIcon(Status);
-                            changedEvents.Add("Status");
-                            changedEvents.Add("StatusIcon");
+                            var statusText = controller.Status.ToString();
+                            if (Status != statusText)
+                            {
+                                Status = controller.Status.ToString();
+                                StatusIcon = GetIcon(Status);
+                                changedEvents.Add("Status");
+                                changedEvents.Add("StatusIcon");
+                            }
                         }
-#if NET45
-                        if (!background)
+
+                        if (refreshData.Contains(RefreshData.Startup))
                         {
                             var startup = controller.GetStartupType();
                             if (StartupType != startup)
@@ -216,17 +229,10 @@ namespace ServiceBouncer
                                 changedEvents.Add("StartupType");
                             }
                         }
-#elif NET461
-                        var startup = controller.GetStartupType();
-                        if (StartupType != startup)
-                        {
-                            StartupType = startup;
-                            changedEvents.Add("StartupType");
-                        }
-#endif
                     }
                     catch (Exception)
                     {
+
                         //Ignored
                     }
 

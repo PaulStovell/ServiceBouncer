@@ -46,16 +46,20 @@ namespace ServiceBouncer.Extensions
             }
         }
 
+#if NET45
+        //NET45 PolyFil as controller doesn't have StartType
         public static string GetStartupType(this ServiceController controller)
         {
-#if NET45
             using (var wmiManagementObject = controller.GetNewWmiManagementObject())
             {
                 return wmiManagementObject["StartMode"].ToString();
             }
-#elif NET461
-            return controller.StartType.ToString();
-#endif
         }
+#elif NET461
+        public static string GetStartupType(this ServiceController controller)
+        {
+            return controller.StartType.ToString();
+        }
+#endif
     }
 }
