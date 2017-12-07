@@ -83,9 +83,9 @@ namespace ServiceBouncer.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap Connected {
+        internal static System.Drawing.Bitmap Connect {
             get {
-                object obj = ResourceManager.GetObject("Connected", resourceCulture);
+                object obj = ResourceManager.GetObject("Connect", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -103,9 +103,9 @@ namespace ServiceBouncer.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap Disconnected {
+        internal static System.Drawing.Bitmap Disconnect {
             get {
-                object obj = ResourceManager.GetObject("Disconnected", resourceCulture);
+                object obj = ResourceManager.GetObject("Disconnect", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

@@ -2,6 +2,7 @@
 using ServiceBouncer.ComponentModel;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.ServiceProcess;
 using System.Threading;
@@ -12,7 +13,7 @@ namespace ServiceBouncer
 {
     public partial class MainForm : Form
     {
-        private readonly SortableBindingList<ServiceViewModel> services;
+        private readonly List<ServiceViewModel> services;
         private bool isActive;
         private string machineHostname;
 
@@ -22,8 +23,7 @@ namespace ServiceBouncer
             isActive = true;
             machineHostname = Environment.MachineName;
             toolStripConnectToTextBox.Text = machineHostname;
-            services = new SortableBindingList<ServiceViewModel>();
-
+            services = new List<ServiceViewModel>();
 #if NET45
             //In NET45 startup type requires WMI, so it doesn't auto refresh
             dataGridStatupType.HeaderText = $"{dataGridStatupType.HeaderText} (No Auto Refresh)";
@@ -49,7 +49,9 @@ namespace ServiceBouncer
             PerformAction(async () =>
             {
                 CheckFrameworkValid();
+                Connect();
                 await Reload();
+                dataGridView.Sort(dataGridName, ListSortDirection.Ascending);
             });
         }
 
@@ -270,16 +272,24 @@ namespace ServiceBouncer
 
         private void PopulateFilteredDataview()
         {
+            var sortColumn = dataGridView.SortedColumn;
+            var sortOrder = ListSortDirection.Ascending;
+            if (dataGridView.SortOrder == SortOrder.Descending) sortOrder = ListSortDirection.Descending;
+
             if (!string.IsNullOrWhiteSpace(toolStripFilterBox.Text))
             {
-                servicesDataGridView.DataSource = services.Where(service => service.Name.IndexOf(toolStripFilterBox.Text, StringComparison.OrdinalIgnoreCase) >= 0).OrderBy(x => x.Name).ToList();
+                dataGridView.DataSource = new SortableBindingList<ServiceViewModel>(services.Where(service => service.Name.IndexOf(toolStripFilterBox.Text, StringComparison.OrdinalIgnoreCase) >= 0).ToList());
             }
             else
             {
-                servicesDataGridView.DataSource = services;
+                dataGridView.DataSource = new SortableBindingList<ServiceViewModel>(services);
             }
 
-            servicesDataGridView.Refresh();
+            dataGridView.Refresh();
+            if (sortColumn != null)
+            {
+                dataGridView.Sort(sortColumn, sortOrder);
+            }
         }
 
         private void Connect()
@@ -287,7 +297,7 @@ namespace ServiceBouncer
             toolStripConnectButton.Text = "Disconnect";
             toolStripConnectButton.ToolTipText = "Disconnect";
             toolStripConnectButton.Tag = "Connected";
-            toolStripConnectButton.Image = Properties.Resources.Connected;
+            toolStripConnectButton.Image = Properties.Resources.Disconnect;
             toolStripStatusLabel.Text = $"Connected to {machineHostname}.";
         }
 
@@ -296,7 +306,7 @@ namespace ServiceBouncer
             toolStripConnectButton.Text = "Connect";
             toolStripConnectButton.ToolTipText = "Connect";
             toolStripConnectButton.Tag = "Disconnected";
-            toolStripConnectButton.Image = Properties.Resources.Disconnected;
+            toolStripConnectButton.Image = Properties.Resources.Connect;
             toolStripStatusLabel.Text = "Disconnected";
             services.Clear();
             PopulateFilteredDataview();
@@ -324,7 +334,7 @@ namespace ServiceBouncer
 
         private void PerformOperation(Func<ServiceViewModel, Task> actionToPerform)
         {
-            var selectedServices = servicesDataGridView.SelectedRows.OfType<DataGridViewRow>().Select(g => g.DataBoundItem).OfType<ServiceViewModel>().ToList();
+            var selectedServices = dataGridView.SelectedRows.OfType<DataGridViewRow>().Select(g => g.DataBoundItem).OfType<ServiceViewModel>().ToList();
             PerformOperation(actionToPerform, selectedServices);
         }
 
