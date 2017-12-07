@@ -31,6 +31,15 @@ namespace ServiceBouncer.Extensions
             }
         }
 
+        public static string GetServiceDescription(this ServiceController controller)
+        {
+            using (var wmiManagementObject = new ManagementObject(new ManagementPath(string.Format("\\\\{0}\\root\\cimv2:Win32_Service.Name='{1}'", controller.MachineName, controller.ServiceName))))
+            {
+                var description = wmiManagementObject["Description"].ToString();
+                return description;
+            }
+        }
+
         public static void SetStartupType(this ServiceController controller, ServiceStartMode newType)
         {
             using (var wmiManagementObject = new ManagementObject(new ManagementPath(string.Format("\\\\{0}\\root\\cimv2:Win32_Service.Name='{1}'", controller.MachineName, controller.ServiceName))))
