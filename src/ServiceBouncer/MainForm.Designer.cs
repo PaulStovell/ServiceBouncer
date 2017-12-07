@@ -79,7 +79,6 @@
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.startupTypeDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.descriptionDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.toolStripContainer.ContentPanel.SuspendLayout();
             this.toolStripContainer.TopToolStripPanel.SuspendLayout();
             this.toolStripContainer.SuspendLayout();
@@ -143,8 +142,7 @@
             this.dataGridViewImageColumn1,
             this.dataGridViewTextBoxColumn1,
             this.dataGridViewTextBoxColumn2,
-            this.startupTypeDataGridViewTextBoxColumn,
-            this.descriptionDataGridViewTextBoxColumn});
+            this.startupTypeDataGridViewTextBoxColumn});
             this.servicesDataGridView.ContextMenuStrip = this.contextMenu;
             this.servicesDataGridView.DataSource = this.serviceViewModelBindingSource;
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
@@ -532,13 +530,15 @@
             // dataGridViewTextBoxColumn1
             // 
             this.dataGridViewTextBoxColumn1.DataPropertyName = "Name";
-            this.dataGridViewTextBoxColumn1.HeaderText = "Name";
+            this.dataGridViewTextBoxColumn1.FillWeight = 116.4129F;
+            this.dataGridViewTextBoxColumn1.HeaderText = "Display Name";
             this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
             this.dataGridViewTextBoxColumn1.ReadOnly = true;
             // 
             // dataGridViewTextBoxColumn2
             // 
             this.dataGridViewTextBoxColumn2.DataPropertyName = "Status";
+            this.dataGridViewTextBoxColumn2.FillWeight = 116.4129F;
             this.dataGridViewTextBoxColumn2.HeaderText = "Status";
             this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
             this.dataGridViewTextBoxColumn2.ReadOnly = true;
@@ -546,16 +546,10 @@
             // startupTypeDataGridViewTextBoxColumn
             // 
             this.startupTypeDataGridViewTextBoxColumn.DataPropertyName = "StartupType";
-            this.startupTypeDataGridViewTextBoxColumn.HeaderText = "StartupType";
+            this.startupTypeDataGridViewTextBoxColumn.FillWeight = 116.4129F;
+            this.startupTypeDataGridViewTextBoxColumn.HeaderText = "Startup Type";
             this.startupTypeDataGridViewTextBoxColumn.Name = "startupTypeDataGridViewTextBoxColumn";
             this.startupTypeDataGridViewTextBoxColumn.ReadOnly = true;
-            // 
-            // descriptionDataGridViewTextBoxColumn
-            // 
-            this.descriptionDataGridViewTextBoxColumn.DataPropertyName = "Description";
-            this.descriptionDataGridViewTextBoxColumn.HeaderText = "Description";
-            this.descriptionDataGridViewTextBoxColumn.Name = "descriptionDataGridViewTextBoxColumn";
-            this.descriptionDataGridViewTextBoxColumn.ReadOnly = true;
             // 
             // MainForm
             // 
@@ -640,7 +634,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
         private System.Windows.Forms.DataGridViewTextBoxColumn startupTypeDataGridViewTextBoxColumn;
-        private System.Windows.Forms.DataGridViewTextBoxColumn descriptionDataGridViewTextBoxColumn;
     }
 }
 
