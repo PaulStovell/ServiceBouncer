@@ -51,6 +51,7 @@
             this.contextMenuSpacer3 = new System.Windows.Forms.ToolStripSeparator();
             this.contextMenuOpenLocation = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuAssemblyInfo = new System.Windows.Forms.ToolStripMenuItem();
+            this.serviceViewModelBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.toolStrip = new System.Windows.Forms.ToolStrip();
             this.toolStripConnectButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripConnectToTextBox = new System.Windows.Forms.ToolStripTextBox();
@@ -74,19 +75,19 @@
             this.toolStripFilterBox = new System.Windows.Forms.ToolStripTextBox();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.refreshTimer = new System.Windows.Forms.Timer(this.components);
-            this.serviceViewModelBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.dataGridViewImageColumn1 = new System.Windows.Forms.DataGridViewImageColumn();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.startupTypeDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Description = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.toolStripContainer.ContentPanel.SuspendLayout();
             this.toolStripContainer.TopToolStripPanel.SuspendLayout();
             this.toolStripContainer.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.servicesDataGridView)).BeginInit();
             this.contextMenu.SuspendLayout();
-            this.toolStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.serviceViewModelBindingSource)).BeginInit();
+            this.toolStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // toolStripContainer
@@ -142,7 +143,8 @@
             this.dataGridViewImageColumn1,
             this.dataGridViewTextBoxColumn1,
             this.dataGridViewTextBoxColumn2,
-            this.startupTypeDataGridViewTextBoxColumn});
+            this.startupTypeDataGridViewTextBoxColumn,
+            this.Description});
             this.servicesDataGridView.ContextMenuStrip = this.contextMenu;
             this.servicesDataGridView.DataSource = this.serviceViewModelBindingSource;
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
@@ -286,6 +288,10 @@
             this.contextMenuAssemblyInfo.Size = new System.Drawing.Size(179, 22);
             this.contextMenuAssemblyInfo.Text = "Assembly Info";
             this.contextMenuAssemblyInfo.Click += new System.EventHandler(this.AssemblyInfoClick);
+            // 
+            // serviceViewModelBindingSource
+            // 
+            this.serviceViewModelBindingSource.DataSource = typeof(ServiceBouncer.ServiceViewModel);
             // 
             // toolStrip
             // 
@@ -511,10 +517,6 @@
             this.refreshTimer.Interval = 750;
             this.refreshTimer.Tick += new System.EventHandler(this.RefreshTimerTicked);
             // 
-            // serviceViewModelBindingSource
-            // 
-            this.serviceViewModelBindingSource.DataSource = typeof(ServiceBouncer.ServiceViewModel);
-            // 
             // dataGridViewImageColumn1
             // 
             this.dataGridViewImageColumn1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
@@ -551,6 +553,13 @@
             this.startupTypeDataGridViewTextBoxColumn.Name = "startupTypeDataGridViewTextBoxColumn";
             this.startupTypeDataGridViewTextBoxColumn.ReadOnly = true;
             // 
+            // Description
+            // 
+            this.Description.DataPropertyName = "Description";
+            this.Description.HeaderText = "Description";
+            this.Description.Name = "Description";
+            this.Description.ReadOnly = true;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -576,9 +585,9 @@
             this.statusStrip1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.servicesDataGridView)).EndInit();
             this.contextMenu.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.serviceViewModelBindingSource)).EndInit();
             this.toolStrip.ResumeLayout(false);
             this.toolStrip.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.serviceViewModelBindingSource)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -634,6 +643,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
         private System.Windows.Forms.DataGridViewTextBoxColumn startupTypeDataGridViewTextBoxColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Description;
     }
 }
 
