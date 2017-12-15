@@ -183,17 +183,6 @@ namespace ServiceBouncer
             }
         }
 
-        private void ConnectTextBoxChanged(object sender, EventArgs e)
-        {
-            if ((string)toolStripConnectButton.Tag == "Connected")
-            {
-                toolStripConnectButton.Text = "Reconnect";
-                toolStripConnectButton.ToolTipText = "Reconnect";
-                toolStripConnectButton.Image = Properties.Resources.Reconnect;
-                toolStripConnectButton.Tag = "NewConnection";
-            }
-        }
-
 #if NET45
         private void CheckFrameworkValid()
         {
@@ -299,6 +288,14 @@ namespace ServiceBouncer
             toolStripConnectButton.Tag = "Connected";
             toolStripConnectButton.Image = Properties.Resources.Disconnect;
             toolStripStatusLabel.Text = $"Connected to {machineHostname}.";
+
+            foreach (ToolStripItem toolStripItem in toolStrip.Items)
+            {
+                toolStripItem.Visible = true;
+            }
+
+            toolStripConnectToTextBox.Visible = false;
+
         }
 
         private void Disconnect()
@@ -310,21 +307,22 @@ namespace ServiceBouncer
             toolStripStatusLabel.Text = "Disconnected";
             services.Clear();
             PopulateFilteredDataview();
+
+            foreach (ToolStripItem toolStripItem in toolStrip.Items)
+            {
+                toolStripItem.Visible = false;
+            }
+
+            toolStripConnectToTextBox.Visible = true;
+            toolStripConnectButton.Visible = true;
         }
 
         private void SetTitle()
         {
-            if (isActive)
+            if (isActive && services.Any())
             {
-                if (services.Any())
-                {
-                    var titles = services.GroupBy(s => s.Status).Select(s => (string.IsNullOrWhiteSpace(s.Key) ? "Unknown" : s.Key) + ": " + s.Count());
-                    Text = "Service Bouncer - Total: " + services.Count + ", " + string.Join(", ", titles);
-                }
-                else
-                {
-                    Text = "Service Bouncer - Total: 0";
-                }
+                var titles = services.GroupBy(s => s.Status).Select(s => (string.IsNullOrWhiteSpace(s.Key) ? "Unknown" : s.Key) + ": " + s.Count());
+                Text = "Service Bouncer - Total: " + services.Count + ", " + string.Join(", ", titles);
             }
             else
             {
