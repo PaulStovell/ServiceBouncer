@@ -133,7 +133,7 @@ namespace ServiceBouncer
             await PerformOperation(async x =>
             {
                 var value = await x.GetAssemblyInfo();
-                MessageBox.Show($@"Service '{x.Name}' assembly info:\n{value}", @"Assembly Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show($@"Service '{x.Name}' assembly info:{Environment.NewLine}{value}", @"Assembly Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
             });
         }
 
@@ -191,7 +191,7 @@ namespace ServiceBouncer
             catch (Exception e)
             {
                 Disconnect();
-                MessageBox.Show($@"Unable to retrieve the services from {toolStripConnectToTextBox.Text}.\nMessage: {e.Message}", @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($@"Unable to retrieve the services from {toolStripConnectToTextBox.Text}.{Environment.NewLine}Message: {e.Message}", @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
         }
@@ -234,7 +234,7 @@ namespace ServiceBouncer
                 var backgroundRefreshTimeText = backgroundRefreshSeconds == 1 ? "1 second" : $"{backgroundRefreshSeconds} seconds";
                 refreshTimer.Enabled = true;
                 refreshTimer.Interval = backgroundRefreshSeconds * 1000;
-                toolStripStatusLabel.Text = $@"Connected to {machineHostname}. - Background refresh every {backgroundRefreshTimeText}";
+                toolStripStatusLabel.Text = $@"Connected to {machineHostname}. - Background refresh every {backgroundRefreshTimeText}.";
 
                 foreach (ToolStripItem toolStripItem in toolStrip.Items)
                 {
@@ -301,7 +301,7 @@ namespace ServiceBouncer
                     }
                     catch (Exception e)
                     {
-                        MessageBox.Show($@"An error occured interacting with service '{model.Name}'\nMessage: {e.Message}", @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show($@"An error occured interacting with service '{model.Name}'{Environment.NewLine}Message: {e.Message}", @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
 
