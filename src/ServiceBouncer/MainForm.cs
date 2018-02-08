@@ -99,7 +99,7 @@ namespace ServiceBouncer
         {
             await PerformOperation(async x =>
             {
-                if (MessageBox.Show($"Are you sure you want to delete the '{x.Name}'", "Confirm delete", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
+                if (MessageBox.Show($@"Are you sure you want to delete the '{x.Name}'", @"Confirm delete", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
                 {
                     await x.Delete();
                     Thread.Sleep(500);
@@ -133,7 +133,7 @@ namespace ServiceBouncer
             await PerformOperation(async x =>
             {
                 var value = await x.GetAssemblyInfo();
-                MessageBox.Show($"Service '{x.Name}' assembly info:\n{value}", "Assembly Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show($@"Service '{x.Name}' assembly info:\n{value}", @"Assembly Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
             });
         }
 
@@ -150,7 +150,7 @@ namespace ServiceBouncer
         {
             await PerformAction(async () =>
             {
-                if ((string)toolStripConnectButton.Tag == "Connected")
+                if ((string)toolStripConnectButton.Tag == @"Connected")
                 {
                     Disconnect();
                 }
@@ -191,7 +191,7 @@ namespace ServiceBouncer
             catch (Exception e)
             {
                 Disconnect();
-                MessageBox.Show($"Unable to retrieve the services from {toolStripConnectToTextBox.Text}.\nMessage: {e.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($@"Unable to retrieve the services from {toolStripConnectToTextBox.Text}.\nMessage: {e.Message}", @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
         }
@@ -221,20 +221,20 @@ namespace ServiceBouncer
         private async Task Connect()
         {
             machineHostname = toolStripConnectToTextBox.Text;
-            toolStripStatusLabel.Text = $"Connecting to {machineHostname}.";
+            toolStripStatusLabel.Text = $@"Connecting to {machineHostname}.";
 
             if (await Reload())
             {
-                toolStripConnectButton.Text = "Disconnect";
-                toolStripConnectButton.ToolTipText = "Disconnect";
-                toolStripConnectButton.Tag = "Connected";
+                toolStripConnectButton.Text = @"Disconnect";
+                toolStripConnectButton.ToolTipText = @"Disconnect";
+                toolStripConnectButton.Tag = @"Connected";
                 toolStripConnectButton.Image = Properties.Resources.Disconnect;
 
                 var backgroundRefreshSeconds = machineHostname == Environment.MachineName ? 1 : 30;
                 var backgroundRefreshTimeText = backgroundRefreshSeconds == 1 ? "1 second" : $"{backgroundRefreshSeconds} seconds";
                 refreshTimer.Enabled = true;
                 refreshTimer.Interval = backgroundRefreshSeconds * 1000;
-                toolStripStatusLabel.Text = $"Connected to {machineHostname}. - Background refresh every {backgroundRefreshTimeText}";
+                toolStripStatusLabel.Text = $@"Connected to {machineHostname}. - Background refresh every {backgroundRefreshTimeText}";
 
                 foreach (ToolStripItem toolStripItem in toolStrip.Items)
                 {
@@ -247,11 +247,11 @@ namespace ServiceBouncer
 
         private void Disconnect()
         {
-            toolStripConnectButton.Text = "Connect";
-            toolStripConnectButton.ToolTipText = "Connect";
-            toolStripConnectButton.Tag = "Disconnected";
+            toolStripConnectButton.Text = @"Connect";
+            toolStripConnectButton.ToolTipText = @"Connect";
+            toolStripConnectButton.Tag = @"Disconnected";
             toolStripConnectButton.Image = Properties.Resources.Connect;
-            toolStripStatusLabel.Text = "Disconnected";
+            toolStripStatusLabel.Text = @"Disconnected";
             services.Clear();
             PopulateFilteredDataview();
 
@@ -270,11 +270,11 @@ namespace ServiceBouncer
             if (isActive && services.Any())
             {
                 var titles = services.GroupBy(s => s.Status).Select(s => (string.IsNullOrWhiteSpace(s.Key) ? "Unknown" : s.Key) + ": " + s.Count());
-                Text = "Service Bouncer - Total: " + services.Count + ", " + string.Join(", ", titles);
+                Text = $@"Service Bouncer - Total: {services.Count}, {string.Join(", ", titles)}";
             }
             else
             {
-                Text = "Service Bouncer";
+                Text = @"Service Bouncer";
             }
         }
 
@@ -289,7 +289,7 @@ namespace ServiceBouncer
             await PerformOperation(actionToPerform, services.ToList(), false);
         }
 
-        private async Task PerformOperation(Func<ServiceViewModel, Task> actionToPerform, List<ServiceViewModel> servicesToAction, bool disableToolstrip)
+        private async Task PerformOperation(Func<ServiceViewModel, Task> actionToPerform, IReadOnlyCollection<ServiceViewModel> servicesToAction, bool disableToolstrip)
         {
             await PerformAction(async () =>
             {
@@ -301,7 +301,7 @@ namespace ServiceBouncer
                     }
                     catch (Exception e)
                     {
-                        MessageBox.Show($"An error occured interacting with service '{model.Name}'\nMessage: {e.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show($@"An error occured interacting with service '{model.Name}'\nMessage: {e.Message}", @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
 

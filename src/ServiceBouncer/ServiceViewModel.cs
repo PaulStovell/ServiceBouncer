@@ -147,12 +147,12 @@ namespace ServiceBouncer
 
             var output = new StringBuilder();
 
-            if (!string.IsNullOrWhiteSpace(title?.Title)) output.AppendLine($"* Title: {title.Title}");
-            if (!string.IsNullOrWhiteSpace(description?.Description)) output.AppendLine($"* Description: {description.Description}");
-            if (!string.IsNullOrWhiteSpace(company?.Company)) output.AppendLine($"* Company: {company.Company}");
-            if (!string.IsNullOrWhiteSpace(product?.Product)) output.AppendLine($"* Product: {product.Product}");
-            if (!string.IsNullOrWhiteSpace(copyright?.Copyright)) output.AppendLine($"* Copyright: {copyright.Copyright}");
-            if (!string.IsNullOrWhiteSpace(version?.Version)) output.AppendLine($"* Version: {version.Version}");
+            if (!string.IsNullOrWhiteSpace(title?.Title)) output.AppendLine($@"* Title: {title.Title}");
+            if (!string.IsNullOrWhiteSpace(description?.Description)) output.AppendLine($@"* Description: {description.Description}");
+            if (!string.IsNullOrWhiteSpace(company?.Company)) output.AppendLine($@"* Company: {company.Company}");
+            if (!string.IsNullOrWhiteSpace(product?.Product)) output.AppendLine($@"* Product: {product.Product}");
+            if (!string.IsNullOrWhiteSpace(copyright?.Copyright)) output.AppendLine($@"* Copyright: {copyright.Copyright}");
+            if (!string.IsNullOrWhiteSpace(version?.Version)) output.AppendLine($@"* Version: {version.Version}");
 
             return output.ToString();
         }
@@ -161,11 +161,11 @@ namespace ServiceBouncer
         {
             var output = new StringBuilder();
 
-            if (!string.IsNullOrWhiteSpace(fileVersion.FileDescription)) output.AppendLine($"* Description: {fileVersion.FileDescription}");
-            if (!string.IsNullOrWhiteSpace(fileVersion.CompanyName)) output.AppendLine($"* Company: {fileVersion.CompanyName}");
-            if (!string.IsNullOrWhiteSpace(fileVersion.ProductName)) output.AppendLine($"* Product: {fileVersion.ProductName}");
-            if (!string.IsNullOrWhiteSpace(fileVersion.LegalCopyright)) output.AppendLine($"* Copyright: {fileVersion.LegalCopyright}");
-            if (!string.IsNullOrWhiteSpace(fileVersion.FileVersion)) output.AppendLine($"* Version: {fileVersion.FileVersion}");
+            if (!string.IsNullOrWhiteSpace(fileVersion.FileDescription)) output.AppendLine($@"* Description: {fileVersion.FileDescription}");
+            if (!string.IsNullOrWhiteSpace(fileVersion.CompanyName)) output.AppendLine($@"* Company: {fileVersion.CompanyName}");
+            if (!string.IsNullOrWhiteSpace(fileVersion.ProductName)) output.AppendLine($@"* Product: {fileVersion.ProductName}");
+            if (!string.IsNullOrWhiteSpace(fileVersion.LegalCopyright)) output.AppendLine($@"* Copyright: {fileVersion.LegalCopyright}");
+            if (!string.IsNullOrWhiteSpace(fileVersion.FileVersion)) output.AppendLine($@"* Version: {fileVersion.FileVersion}");
 
             return output.ToString();
         }
