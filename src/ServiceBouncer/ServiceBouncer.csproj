@@ -85,6 +85,7 @@
   <ItemGroup>
     <Compile Include="Extensions\AssemblyExtensions.cs" />
     <Compile Include="ComponentModel\SortableBindingList`1.cs" />
+    <Compile Include="FrameworkChecker.cs" />
     <Compile Include="InstallationForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -132,9 +133,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Icons\AppIcon.ico" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Icons\AppIcon.png" />
   </ItemGroup>
   <ItemGroup>
@@ -164,10 +162,7 @@
   <ItemGroup>
     <Content Include="AppIcon.ico" />
     <None Include="Icons\Connect.png" />
-    <Content Include="Icons\Connected.png" />
     <None Include="Icons\Disconnect.png" />
-    <Content Include="Icons\Disconnected.png" />
-    <Content Include="Icons\Reconnect.png" />
     <None Include="Icons\Install.png" />
     <None Include="Icons\Info.png" />
     <None Include="Icons\Browse.png" />

@@ -1,5 +1,4 @@
-﻿using Microsoft.Win32;
-using ServiceBouncer.ComponentModel;
+﻿using ServiceBouncer.ComponentModel;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -30,27 +29,26 @@ namespace ServiceBouncer
 #endif
         }
 
-        private void RefreshTimerTicked(object sender, EventArgs e)
+        private async void RefreshTimerTicked(object sender, EventArgs e)
         {
             if (isActive)
             {
-                //Only refresh things which do not use WMI
 #if NET45
-                PerformBackgroundOperation(x => x.Refresh(ServiceViewModel.RefreshData.DisplayName, ServiceViewModel.RefreshData.ServiceName, ServiceViewModel.RefreshData.Status), services.ToList());
+                //Only refresh things which do not use WMI
+                await PerformBackgroundOperation(x => x.Refresh(ServiceViewModel.RefreshData.DisplayName, ServiceViewModel.RefreshData.ServiceName, ServiceViewModel.RefreshData.Status));
 #elif NET461
-                PerformBackgroundOperation(x => x.Refresh(ServiceViewModel.RefreshData.DisplayName, ServiceViewModel.RefreshData.ServiceName, ServiceViewModel.RefreshData.Status, ServiceViewModel.RefreshData.Startup), services.ToList());
+                await PerformBackgroundOperation(x => x.Refresh(ServiceViewModel.RefreshData.DisplayName, ServiceViewModel.RefreshData.ServiceName, ServiceViewModel.RefreshData.Status, ServiceViewModel.RefreshData.Startup));
 #endif
                 SetTitle();
             }
         }
 
-        private void FormLoaded(object sender, EventArgs e)
+        private async void FormLoaded(object sender, EventArgs e)
         {
-            PerformAction(async () =>
+            await PerformAction(async () =>
             {
-                CheckFrameworkValid();
-                Connect();
-                await Reload();
+                FrameworkChecker.CheckFrameworkValid();
+                await Connect();
                 dataGridView.Sort(dataGridName, ListSortDirection.Ascending);
             });
         }
@@ -67,9 +65,9 @@ namespace ServiceBouncer
             SetTitle();
         }
 
-        private void RefreshClicked(object sender, EventArgs e)
+        private async void RefreshClicked(object sender, EventArgs e)
         {
-            PerformAction(async () => await Reload());
+            await PerformAction(async () => await Reload());
         }
 
         private void FilterBoxTextChanged(object sender, EventArgs e)
@@ -77,166 +75,103 @@ namespace ServiceBouncer
             PopulateFilteredDataview();
         }
 
-        private void StartClicked(object sender, EventArgs e)
+        private async void StartClicked(object sender, EventArgs e)
         {
-            PerformOperation(async x => await x.Start());
+            await PerformOperation(async x => await x.Start());
         }
 
-        private void RestartClicked(object sender, EventArgs e)
+        private async void RestartClicked(object sender, EventArgs e)
         {
-            PerformOperation(async x => await x.Restart());
+            await PerformOperation(async x => await x.Restart());
         }
 
-        private void StopClicked(object sender, EventArgs e)
+        private async void StopClicked(object sender, EventArgs e)
         {
-            PerformOperation(async x => await x.Stop());
+            await PerformOperation(async x => await x.Stop());
         }
 
-        private void PauseClicked(object sender, EventArgs e)
+        private async void PauseClicked(object sender, EventArgs e)
         {
-            PerformOperation(async x => await x.Pause());
+            await PerformOperation(async x => await x.Pause());
         }
 
-        private void DeleteClicked(object sender, EventArgs e)
+        private async void DeleteClicked(object sender, EventArgs e)
         {
-            PerformOperation(async x =>
+            await PerformOperation(async x =>
             {
                 if (MessageBox.Show($"Are you sure you want to delete the '{x.Name}'", "Confirm delete", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
                 {
                     await x.Delete();
                     Thread.Sleep(500);
-                    Reload();
+                    await Reload();
                 }
             });
         }
 
-        private void StartupAutomaticClicked(object sender, EventArgs e)
+        private async void StartupAutomaticClicked(object sender, EventArgs e)
         {
-            PerformOperation(async x => await x.SetStartupType(ServiceStartMode.Automatic));
+            await PerformOperation(async x => await x.SetStartupType(ServiceStartMode.Automatic));
         }
 
-        private void StartupManualClicked(object sender, EventArgs e)
+        private async void StartupManualClicked(object sender, EventArgs e)
         {
-            PerformOperation(async x => await x.SetStartupType(ServiceStartMode.Manual));
+            await PerformOperation(async x => await x.SetStartupType(ServiceStartMode.Manual));
         }
 
-        private void StartupDisabledClick(object sender, EventArgs e)
+        private async void StartupDisabledClick(object sender, EventArgs e)
         {
-            PerformOperation(async x => await x.SetStartupType(ServiceStartMode.Disabled));
+            await PerformOperation(async x => await x.SetStartupType(ServiceStartMode.Disabled));
         }
 
-        private void OpenServiceLocationClick(object sender, EventArgs e)
+        private async void OpenServiceLocationClick(object sender, EventArgs e)
         {
-            PerformOperation(async x => await x.OpenServiceInExplorer());
+            await PerformOperation(async x => await x.OpenServiceInExplorer());
         }
 
-        private void AssemblyInfoClick(object sender, EventArgs e)
+        private async void AssemblyInfoClick(object sender, EventArgs e)
         {
-            PerformOperation(async x =>
+            await PerformOperation(async x =>
             {
                 var value = await x.GetAssemblyInfo();
                 MessageBox.Show($"Service '{x.Name}' assembly info:\n{value}", "Assembly Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
             });
         }
 
-        private void InstallClicked(object sender, EventArgs e)
+        private async void InstallClicked(object sender, EventArgs e)
         {
-            PerformAction(async () =>
+            await PerformAction(async () =>
             {
                 new InstallationForm().ShowDialog();
                 await Reload();
             });
         }
 
-        private void ConnectButtonClick(object sender, EventArgs e)
+        private async void ConnectButtonClick(object sender, EventArgs e)
         {
-            PerformAction(async () =>
+            await PerformAction(async () =>
             {
-                if ((string)toolStripConnectButton.Tag == "Connected") // If the machine name hasn't changed and the disconnect button is pressed disconnect
+                if ((string)toolStripConnectButton.Tag == "Connected")
                 {
                     Disconnect();
                 }
-                else // If the button tag is not set as "Connected" then connect.
+                else
                 {
-                    toolStripStatusLabel.Text = $"Connecting to: {machineHostname}";
-                    machineHostname = toolStripConnectToTextBox.Text;
-                    await Reload();
-                    Connect();
+                    await Connect();
                 }
             });
         }
 
-        private void ConnectTextBoxKeyDown(object sender, KeyEventArgs e)
+        private async void ConnectTextBoxKeyDown(object sender, KeyEventArgs e)
         {
-            //Only listen for the Enter key
             if (e.KeyCode == Keys.Enter)
             {
-                PerformAction(async () =>
-                {
-                    toolStripStatusLabel.Text = $"Connecting to {toolStripConnectToTextBox.Text}.";
-                    machineHostname = toolStripConnectToTextBox.Text;
-                    await Reload();
-                });
-
+                await PerformAction(async () => { await Connect(); });
                 e.Handled = true;
                 e.SuppressKeyPress = true;
             }
         }
 
-#if NET45
-        private void CheckFrameworkValid()
-        {
-            var validFramework = true;
-            using (var ndpKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32).OpenSubKey("SOFTWARE\\Microsoft\\NET Framework Setup\\NDP\\v4\\Full\\"))
-            {
-                if (ndpKey == null)
-                {
-                    validFramework = false;
-                }
-                else
-                {
-                    var releaseKey = Convert.ToInt32(ndpKey.GetValue("Release"));
-                    if (releaseKey < 378389)
-                    {
-                        validFramework = false;
-                    }
-                }
-            }
-
-            if (!validFramework)
-            {
-                MessageBox.Show("ServiceBouncer required .net 4.5 or higher to be installed", "Framework Upgrade Required", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Application.Exit();
-            }
-        }
-#elif NET461
-        private void CheckFrameworkValid()
-        {
-            var validFramework = true;
-            using (var ndpKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32).OpenSubKey("SOFTWARE\\Microsoft\\NET Framework Setup\\NDP\\v4\\Full\\"))
-            {
-                if (ndpKey == null)
-                {
-                    validFramework = false;
-                }
-                else
-                {
-                    var releaseKey = Convert.ToInt32(ndpKey.GetValue("Release"));
-                    if (releaseKey < 394254)
-                    {
-                        validFramework = false;
-                    }
-                }
-            }
-
-            if (!validFramework)
-            {
-                MessageBox.Show("ServiceBouncer required .net 4.6.1 or higher to be installed", "Framework Upgrade Required", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Application.Exit();
-            }
-        }
-#endif
-        private async Task Reload()
+        private async Task<bool> Reload()
         {
             try
             {
@@ -245,17 +180,19 @@ namespace ServiceBouncer
 
                 foreach (var model in systemServices.Select(service => new ServiceViewModel(service)))
                 {
-                    await model.Refresh(ServiceViewModel.RefreshData.DisplayName, ServiceViewModel.RefreshData.ServiceName, ServiceViewModel.RefreshData.Status, ServiceViewModel.RefreshData.Startup);
                     services.Add(model);
                 }
 
+                await PerformBackgroundOperation(x => x.Refresh(ServiceViewModel.RefreshData.DisplayName, ServiceViewModel.RefreshData.ServiceName, ServiceViewModel.RefreshData.Status, ServiceViewModel.RefreshData.Startup));
                 PopulateFilteredDataview();
                 SetTitle();
+                return true;
             }
             catch (Exception e)
             {
                 Disconnect();
                 MessageBox.Show($"Unable to retrieve the services from {toolStripConnectToTextBox.Text}.\nMessage: {e.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
             }
         }
 
@@ -281,21 +218,31 @@ namespace ServiceBouncer
             }
         }
 
-        private void Connect()
+        private async Task Connect()
         {
-            toolStripConnectButton.Text = "Disconnect";
-            toolStripConnectButton.ToolTipText = "Disconnect";
-            toolStripConnectButton.Tag = "Connected";
-            toolStripConnectButton.Image = Properties.Resources.Disconnect;
-            toolStripStatusLabel.Text = $"Connected to {machineHostname}.";
+            machineHostname = toolStripConnectToTextBox.Text;
+            toolStripStatusLabel.Text = $"Connecting to {machineHostname}.";
 
-            foreach (ToolStripItem toolStripItem in toolStrip.Items)
+            if (await Reload())
             {
-                toolStripItem.Visible = true;
+                toolStripConnectButton.Text = "Disconnect";
+                toolStripConnectButton.ToolTipText = "Disconnect";
+                toolStripConnectButton.Tag = "Connected";
+                toolStripConnectButton.Image = Properties.Resources.Disconnect;
+
+                var backgroundRefreshSeconds = machineHostname == Environment.MachineName ? 1 : 30;
+                var backgroundRefreshTimeText = backgroundRefreshSeconds == 1 ? "1 second" : $"{backgroundRefreshSeconds} seconds";
+                refreshTimer.Enabled = true;
+                refreshTimer.Interval = backgroundRefreshSeconds * 1000;
+                toolStripStatusLabel.Text = $"Connected to {machineHostname}. - Background refresh every {backgroundRefreshTimeText}";
+
+                foreach (ToolStripItem toolStripItem in toolStrip.Items)
+                {
+                    toolStripItem.Visible = true;
+                }
+
+                toolStripConnectToTextBox.Visible = false;
             }
-
-            toolStripConnectToTextBox.Visible = false;
-
         }
 
         private void Disconnect()
@@ -315,6 +262,7 @@ namespace ServiceBouncer
 
             toolStripConnectToTextBox.Visible = true;
             toolStripConnectButton.Visible = true;
+            refreshTimer.Enabled = false;
         }
 
         private void SetTitle()
@@ -330,17 +278,22 @@ namespace ServiceBouncer
             }
         }
 
-        private void PerformOperation(Func<ServiceViewModel, Task> actionToPerform)
+        private async Task PerformOperation(Func<ServiceViewModel, Task> actionToPerform)
         {
             var selectedServices = dataGridView.SelectedRows.OfType<DataGridViewRow>().Select(g => g.DataBoundItem).OfType<ServiceViewModel>().ToList();
-            PerformOperation(actionToPerform, selectedServices);
+            await PerformOperation(actionToPerform, selectedServices, true);
         }
 
-        private void PerformOperation(Func<ServiceViewModel, Task> actionToPerform, List<ServiceViewModel> servicesToAction)
+        private async Task PerformBackgroundOperation(Func<ServiceViewModel, Task> actionToPerform)
         {
-            PerformAction(async () =>
+            await PerformOperation(actionToPerform, services.ToList(), false);
+        }
+
+        private async Task PerformOperation(Func<ServiceViewModel, Task> actionToPerform, List<ServiceViewModel> servicesToAction, bool disableToolstrip)
+        {
+            await PerformAction(async () =>
             {
-                foreach (var model in servicesToAction)
+                async Task WrappedFunction(ServiceViewModel model)
                 {
                     try
                     {
@@ -351,29 +304,19 @@ namespace ServiceBouncer
                         MessageBox.Show($"An error occured interacting with service '{model.Name}'\nMessage: {e.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
-            });
-        }
 
-        private void PerformBackgroundOperation(Func<ServiceViewModel, Task> actionToPerform, List<ServiceViewModel> servicesToAction)
-        {
-
-            PerformAction(async () =>
-            {
+                var tasks = new List<Task>();
                 foreach (var model in servicesToAction)
                 {
-                    try
-                    {
-                        await actionToPerform(model);
-                    }
-                    catch (Exception e)
-                    {
-                        MessageBox.Show($"An error occured interacting with service '{model.Name}'\nMessage: {e.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
+                    tasks.Add(WrappedFunction(model));
                 }
-            }, false);
+
+                await Task.WhenAll(tasks);
+            }, disableToolstrip);
         }
 
-        private async void PerformAction(Func<Task> actionToPerform, bool disableToolstrip = true)
+
+        private async Task PerformAction(Func<Task> actionToPerform, bool disableToolstrip = true)
         {
             if (disableToolstrip)
             {
