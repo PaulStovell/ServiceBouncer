@@ -1,6 +1,26 @@
 $scriptDir = Split-Path ((Get-Variable MyInvocation -Scope 0).Value.MyCommand.Path)
 
-if($FrameworkNeeded -eq $null)
+$FrameworkKeyPath = "HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full\"
+
+if((Test-Path $FrameworkKeyPath) -eq $False)
+{
+	Write-Error "Unable to detect framework version"
+	Return
+}
+
+$FrameworkValue = Get-ItemProperty -Path $FrameworkKeyPath | select -ExpandProperty "Release"
+$FrameworkNeeded = ""
+
+if($FrameworkValue -lt 378389)
+{
+	Write-Error "You need at least .NET 4.5 to install Service Bouncer"
+	Return
+}
+elseif($FrameworkValue -lt 394254)
+{
+	$FrameworkNeeded = "NET45"
+}
+else
 {
 	$FrameworkNeeded = "NET461"
 }
