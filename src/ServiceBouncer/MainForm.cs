@@ -1,5 +1,4 @@
-﻿using ServiceBouncer.ComponentModel;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -7,6 +6,7 @@ using System.ServiceProcess;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using ServiceBouncer.ComponentModel;
 
 namespace ServiceBouncer
 {
@@ -97,17 +97,15 @@ namespace ServiceBouncer
 
         private async void DeleteClicked(object sender, EventArgs e)
         {
-            await PerformOperationWithCheck(
-                s =>
+            await PerformOperationWithCheck(s =>
                 {
-                    // if many ask if we want to delete them all!
-                    if (s.Count > 1) return MessageBox.Show($@"You have selected {s.Count} services(s) to delete, are you sure you want to delete them all?", @"Confirm delete", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.Yes;
+                    if (s.Count > 1)
+                        return MessageBox.Show($@"You have selected {s.Count} services(s) to delete, are you sure you want to delete them all?", @"Confirm delete", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.Yes;
 
                     var service = s.FirstOrDefault();
-                    // if only one ask if we want to delete that one. 
-                    if (service != null) return MessageBox.Show($@"Are you sure you want to delete the '{service.Name}'", @"Confirm delete", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.Yes;
+                    if (service != null)
+                        return MessageBox.Show($@"Are you sure you want to delete the '{service.Name}'", @"Confirm delete", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.Yes;
 
-                    // nothing to do if there are none. 
                     return false;
                 },
                 async x =>
@@ -136,12 +134,32 @@ namespace ServiceBouncer
 
         private async void OpenServiceLocationClick(object sender, EventArgs e)
         {
-            await PerformOperation(async x => await x.OpenServiceInExplorer());
+            await PerformOperationWithCheck(s =>
+                {
+                    if (s.Count > 1)
+                    {
+                        MessageBox.Show(@"Please only select 1 sevice to view in explorer", @"View In Explorer", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return false;
+                    }
+
+                    return true;
+                },
+                async x => { await x.OpenServiceInExplorer(); });
         }
 
         private async void AssemblyInfoClick(object sender, EventArgs e)
         {
-            await PerformOperation(async x =>
+            await PerformOperationWithCheck(s =>
+            {
+                if (s.Count > 1)
+                {
+                    MessageBox.Show(@"Please only select 1 sevice to view assembly info", @"Assembly Info", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return false;
+                }
+
+                return true;
+            },
+            async x =>
             {
                 var value = await x.GetAssemblyInfo();
                 MessageBox.Show($@"Service '{x.Name}' assembly info:{Environment.NewLine}{value}", @"Assembly Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
