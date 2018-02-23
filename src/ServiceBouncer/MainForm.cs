@@ -97,15 +97,26 @@ namespace ServiceBouncer
 
         private async void DeleteClicked(object sender, EventArgs e)
         {
-            await PerformOperation(async x =>
-            {
-                if (MessageBox.Show($@"Are you sure you want to delete the '{x.Name}'", @"Confirm delete", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
+            await PerformOperationWithCheck(
+                s =>
+                {
+                    // if many ask if we want to delete them all!
+                    if (s.Count > 1) return MessageBox.Show($@"You have selected {s.Count} services(s) to delete, are you sure you want to delete them all?", @"Confirm delete", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.Yes;
+
+                    var service = s.FirstOrDefault();
+                    // if only one ask if we want to delete that one. 
+                    if (service != null) return MessageBox.Show($@"Are you sure you want to delete the '{service.Name}'", @"Confirm delete", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.Yes;
+
+                    // nothing to do if there are none. 
+                    return false;
+                },
+                async x =>
                 {
                     await x.Delete();
                     Thread.Sleep(500);
                     await Reload();
-                }
-            });
+
+                });
         }
 
         private async void StartupAutomaticClicked(object sender, EventArgs e)
@@ -278,41 +289,64 @@ namespace ServiceBouncer
             }
         }
 
-        private async Task PerformOperation(Func<ServiceViewModel, Task> actionToPerform)
+        private async Task PerformOperationWithCheck(Func<bool> check, Func<ServiceViewModel, Task> actionToPerform)
+        {
+            await PerformOperationWithCheck(i => check(), actionToPerform);
+        }
+
+        private async Task PerformBackgroundOperationWithCheck(Func<bool> check, Func<ServiceViewModel, Task> actionToPerform)
+        {
+            await PerformBackgroundOperationWithCheck(i => check(), actionToPerform);
+        }
+
+        private async Task PerformOperationWithCheck(Func<IReadOnlyCollection<ServiceViewModel>, bool> check, Func<ServiceViewModel, Task> actionToPerform)
         {
             var selectedServices = dataGridView.SelectedRows.OfType<DataGridViewRow>().Select(g => g.DataBoundItem).OfType<ServiceViewModel>().ToList();
-            await PerformOperation(actionToPerform, selectedServices, true);
+            await PerformOperation(check, actionToPerform, selectedServices, true);
+        }
+
+        private async Task PerformBackgroundOperationWithCheck(Func<IReadOnlyCollection<ServiceViewModel>, bool> check, Func<ServiceViewModel, Task> actionToPerform)
+        {
+            await PerformOperation(check, actionToPerform, services.ToList(), false);
+        }
+
+        private async Task PerformOperation(Func<ServiceViewModel, Task> actionToPerform)
+        {
+            await PerformOperationWithCheck(i => true, actionToPerform);
         }
 
         private async Task PerformBackgroundOperation(Func<ServiceViewModel, Task> actionToPerform)
         {
-            await PerformOperation(actionToPerform, services.ToList(), false);
+            await PerformBackgroundOperationWithCheck(i => true, actionToPerform);
         }
 
-        private async Task PerformOperation(Func<ServiceViewModel, Task> actionToPerform, IReadOnlyCollection<ServiceViewModel> servicesToAction, bool disableToolstrip)
+        private async Task PerformOperation(Func<IReadOnlyCollection<ServiceViewModel>, bool> check, Func<ServiceViewModel, Task> actionToPerform, IReadOnlyCollection<ServiceViewModel> servicesToAction, bool disableToolstrip)
         {
-            await PerformAction(async () =>
+            if (check(servicesToAction))
             {
-                async Task WrappedFunction(ServiceViewModel model)
+                await PerformAction(async () =>
                 {
-                    try
+                    async Task WrappedFunction(ServiceViewModel model)
                     {
-                        await actionToPerform(model);
+                        try
+                        {
+                            await actionToPerform(model);
+                        }
+                        catch (Exception e)
+                        {
+                            MessageBox.Show($@"An error occured interacting with service '{model.Name}'{Environment.NewLine}Message: {e.Message}", @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
                     }
-                    catch (Exception e)
+
+                    var tasks = new List<Task>();
+                    foreach (var model in servicesToAction)
                     {
-                        MessageBox.Show($@"An error occured interacting with service '{model.Name}'{Environment.NewLine}Message: {e.Message}", @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        tasks.Add(WrappedFunction(model));
                     }
-                }
 
-                var tasks = new List<Task>();
-                foreach (var model in servicesToAction)
-                {
-                    tasks.Add(WrappedFunction(model));
-                }
-
-                await Task.WhenAll(tasks);
-            }, disableToolstrip);
+                    await Task.WhenAll(tasks);
+                }, disableToolstrip);
+            }
         }
 
 
