@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>ServiceBouncer</id>
-    <version>1.2.4</version>
+    <version>1.2.5</version>
     <title>ServiceBouncer</title>
     <authors>ServiceBouncer</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
