@@ -45,7 +45,7 @@ namespace ServiceBouncer
         }
 
         // PC Locked
-        private async void SessionSwitch(object sender, Microsoft.Win32.SessionSwitchEventArgs e)
+        private void SessionSwitch(object sender, Microsoft.Win32.SessionSwitchEventArgs e)
         {
             if (e.Reason == Microsoft.Win32.SessionSwitchReason.SessionLock || e.Reason == Microsoft.Win32.SessionSwitchReason.RemoteDisconnect)
             {
