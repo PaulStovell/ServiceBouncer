@@ -43,6 +43,19 @@ namespace ServiceBouncer
             }
         }
 
+        // PC Locked
+        private async void SessionSwitch(object sender, Microsoft.Win32.SessionSwitchEventArgs e)
+        {
+            if (e.Reason == Microsoft.Win32.SessionSwitchReason.SessionLock || e.Reason == Microsoft.Win32.SessionSwitchReason.RemoteDisconnect)
+            {
+                isActive = false;
+            }
+            else if (e.Reason == Microsoft.Win32.SessionSwitchReason.SessionUnlock || e.Reason == Microsoft.Win32.SessionSwitchReason.RemoteConnect)
+            {
+                isActive = true;
+            }
+        }
+
         private async void FormLoaded(object sender, EventArgs e)
         {
             await PerformAction(async () =>
