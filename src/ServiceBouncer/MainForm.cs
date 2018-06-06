@@ -23,6 +23,7 @@ namespace ServiceBouncer
             machineHostname = Environment.MachineName;
             toolStripConnectToTextBox.Text = machineHostname;
             services = new List<ServiceViewModel>();
+            Microsoft.Win32.SystemEvents.SessionSwitch += SessionSwitch;
 #if NET45
             //In NET45 startup type requires WMI, so it doesn't auto refresh
             dataGridStatupType.HeaderText = $"{dataGridStatupType.HeaderText} (No Auto Refresh)";
