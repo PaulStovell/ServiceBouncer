@@ -23,6 +23,7 @@ namespace ServiceBouncer
             machineHostname = Environment.MachineName;
             toolStripConnectToTextBox.Text = machineHostname;
             services = new List<ServiceViewModel>();
+            Microsoft.Win32.SystemEvents.SessionSwitch += SessionSwitch;
 #if NET45
             //In NET45 startup type requires WMI, so it doesn't auto refresh
             dataGridStatupType.HeaderText = $"{dataGridStatupType.HeaderText} (No Auto Refresh)";
@@ -40,6 +41,19 @@ namespace ServiceBouncer
                 await PerformBackgroundOperation(x => x.Refresh(ServiceViewModel.RefreshData.DisplayName, ServiceViewModel.RefreshData.ServiceName, ServiceViewModel.RefreshData.Status, ServiceViewModel.RefreshData.Startup));
 #endif
                 SetTitle();
+            }
+        }
+
+        // PC Locked
+        private async void SessionSwitch(object sender, Microsoft.Win32.SessionSwitchEventArgs e)
+        {
+            if (e.Reason == Microsoft.Win32.SessionSwitchReason.SessionLock || e.Reason == Microsoft.Win32.SessionSwitchReason.RemoteDisconnect)
+            {
+                isActive = false;
+            }
+            else if (e.Reason == Microsoft.Win32.SessionSwitchReason.SessionUnlock || e.Reason == Microsoft.Win32.SessionSwitchReason.RemoteConnect)
+            {
+                isActive = true;
             }
         }
 
