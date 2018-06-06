@@ -15,6 +15,7 @@ namespace ServiceBouncer
         private readonly List<ServiceViewModel> services;
         private bool isActive;
         private string machineHostname;
+        private int backgroundRefreshSeconds = 1;
 
         public MainForm()
         {
@@ -71,12 +72,14 @@ namespace ServiceBouncer
         {
             isActive = true;
             SetTitle();
+            SetConnectedStatusBar();
         }
 
         private void FormDeactivated(object sender, EventArgs e)
         {
             isActive = false;
             SetTitle();
+            SetConnectedStatusBar();
         }
 
         private async void RefreshClicked(object sender, EventArgs e)
@@ -273,11 +276,11 @@ namespace ServiceBouncer
                 toolStripConnectButton.Tag = @"Connected";
                 toolStripConnectButton.Image = Properties.Resources.Disconnect;
 
-                var backgroundRefreshSeconds = machineHostname == Environment.MachineName ? 1 : 30;
-                var backgroundRefreshTimeText = backgroundRefreshSeconds == 1 ? "1 second" : $"{backgroundRefreshSeconds} seconds";
+                backgroundRefreshSeconds = machineHostname == Environment.MachineName ? 1 : 30;
                 refreshTimer.Enabled = true;
                 refreshTimer.Interval = backgroundRefreshSeconds * 1000;
-                toolStripStatusLabel.Text = $@"Connected to {machineHostname}. - Background refresh every {backgroundRefreshTimeText}.";
+
+                SetConnectedStatusBar();
 
                 foreach (ToolStripItem toolStripItem in toolStrip.Items)
                 {
@@ -318,6 +321,19 @@ namespace ServiceBouncer
             else
             {
                 Text = @"Service Bouncer";
+            }
+        }
+
+        private void SetConnectedStatusBar()
+        {
+            if (isActive)
+            {
+                var backgroundRefreshTimeText = backgroundRefreshSeconds == 1 ? "1 second" : $"{backgroundRefreshSeconds} seconds";
+                toolStripStatusLabel.Text = $@"Connected to {machineHostname}. - Background refresh every {backgroundRefreshTimeText}.";
+            }
+            else
+            {
+                toolStripStatusLabel.Text = $@"Connected to {machineHostname}.";
             }
         }
 
