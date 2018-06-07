@@ -1,4 +1,19 @@
-ECHO OFF
+echo off
 cls
-.paket\paket.bootstrapper.exe --run restore
-packages\FAKE\tools\FAKE.exe build.fsx
+
+ECHO ----------------------------
+ECHO Get Build Tools
+ECHO ----------------------------
+.paket\paket.exe restore -g BuildTools
+@if %errorlevel% neq 0 exit /b %errorlevel%
+
+ECHO ----------------------------
+ECHO Restore
+ECHO ----------------------------
+dotnet restore
+@if %errorlevel% neq 0 exit /b %errorlevel%
+
+ECHO ----------------------------
+ECHO Build
+ECHO ----------------------------
+dotnet fake run build.fsx
