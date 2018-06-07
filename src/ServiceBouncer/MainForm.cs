@@ -333,7 +333,7 @@ namespace ServiceBouncer
             }
             else
             {
-                toolStripStatusLabel.Text = $@"Connected to {machineHostname}.";
+                toolStripStatusLabel.Text = $@"Connected to {machineHostname}. - Background refresh disabled";
             }
         }
 
