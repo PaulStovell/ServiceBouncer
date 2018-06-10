@@ -35,15 +35,6 @@ namespace ServiceBouncer
 #endif
         }
 
-        private void SetOptions(Options options)
-        {
-            if (!string.IsNullOrWhiteSpace(options.Machine))
-            {
-                machineHostname = options.Machine;
-                toolStripConnectToTextBox.Text = machineHostname;
-            }
-        }
-
         private async void RefreshTimerTicked(object sender, EventArgs e)
         {
             if (isActive)
