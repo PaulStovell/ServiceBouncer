@@ -6,7 +6,10 @@ using System.ServiceProcess;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using CredMan = CredentialManagement;
 using ServiceBouncer.ComponentModel;
+using System.Net;
+using System.Diagnostics;
 
 namespace ServiceBouncer
 {
@@ -15,16 +18,26 @@ namespace ServiceBouncer
         private readonly List<ServiceViewModel> services;
         private bool isActive;
         private string machineHostname;
-        private int backgroundRefreshSeconds = 1;
+        private int backgroundRefreshSeconds;
 
-        public MainForm()
+        public MainForm(Options options = null)
         {
             InitializeComponent();
             isActive = true;
+            backgroundRefreshSeconds = 1;
             machineHostname = Environment.MachineName;
             toolStripConnectToTextBox.Text = machineHostname;
             services = new List<ServiceViewModel>();
             Microsoft.Win32.SystemEvents.SessionSwitch += SessionSwitch;
+
+            if(options != null)
+            {
+                if(!string.IsNullOrWhiteSpace(options.Machine))
+                {
+                    machineHostname = options.Machine;
+                    toolStripConnectToTextBox.Text = machineHostname;
+                }
+            }
 #if NET45
             //In NET45 startup type requires WMI, so it doesn't auto refresh
             dataGridStatupType.HeaderText = $"{dataGridStatupType.HeaderText} (No Auto Refresh)";
@@ -234,12 +247,65 @@ namespace ServiceBouncer
                 SetTitle();
                 return true;
             }
+            catch (Exception e) when (ExceptionIsAccessDenied(e))
+            {
+                CredMan.VistaPrompt prompt = new CredMan.VistaPrompt();
+                prompt.Title = "Access denied";
+                prompt.Message = $"Enter administator credentials for {machineHostname}";
+                if (prompt.ShowDialog() == CredMan.DialogResult.OK)
+                {
+                    StartNewProcess(prompt);
+                    return false;
+                }
+                else
+                {
+                    Disconnect();
+                    MessageBox.Show($@"Unable to retrieve the services from {toolStripConnectToTextBox.Text}.{Environment.NewLine}Message: {e.Message}", @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return false;
+                }
+            }
             catch (Exception e)
             {
                 Disconnect();
                 MessageBox.Show($@"Unable to retrieve the services from {toolStripConnectToTextBox.Text}.{Environment.NewLine}Message: {e.Message}", @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
+        }
+
+        private void StartNewProcess(CredMan.BaseCredentialsPrompt promptResult)
+        {
+            string commandName = $"{Process.GetCurrentProcess().MainModule.FileName} --machine={machineHostname}";
+            string username = null;
+            string domain = null;
+
+            string[] splitCheck = promptResult.Username.Split(new char[] { '\\' });
+            if (splitCheck.Length > 1)
+            {
+                username = splitCheck[1];
+                domain = splitCheck[0];
+            }
+            else
+            {
+                username = splitCheck[0];
+            }
+            RunAs.StartProcess(username, domain, promptResult.Password, RunAs.LogonFlags.NetworkCredentialsOnly, null, commandName, RunAs.CreationFlags.NewProcessGroup, null);
+
+            machineHostname = Environment.MachineName;
+            toolStripConnectToTextBox.Text = machineHostname;
+        }
+
+        private static bool ExceptionIsAccessDenied(Exception e)
+        {
+            Exception baseException = e.GetBaseException();
+            if (baseException is Win32Exception)
+            {
+                Win32Exception nativeException = baseException as Win32Exception;
+                if (nativeException.NativeErrorCode == 5) // ERROR_ACCESS_DENIED
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private void PopulateFilteredDataview()
