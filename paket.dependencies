@@ -1,4 +1,4 @@
-framework: auto-detect
+framework: net45, net461
 source https://www.nuget.org/api/v2
 nuget CommandLineParser
 nuget CredentialManagement

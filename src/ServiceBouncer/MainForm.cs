@@ -6,7 +6,6 @@ using System.ServiceProcess;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using CredMan = CredentialManagement;
 using ServiceBouncer.ComponentModel;
 using System.Net;
 using System.Diagnostics;
@@ -20,7 +19,7 @@ namespace ServiceBouncer
         private string machineHostname;
         private int backgroundRefreshSeconds;
 
-        public MainForm()
+        public MainForm(Options options = null)
         {
             InitializeComponent();
             isActive = true;
@@ -29,32 +28,24 @@ namespace ServiceBouncer
             toolStripConnectToTextBox.Text = machineHostname;
             services = new List<ServiceViewModel>();
             Microsoft.Win32.SystemEvents.SessionSwitch += SessionSwitch;
-
+            
+            if(options != null)
+            {
+                SetOptions(options);
+            }
 #if NET45
             //In NET45 startup type requires WMI, so it doesn't auto refresh
             dataGridStatupType.HeaderText = $"{dataGridStatupType.HeaderText} (No Auto Refresh)";
 #endif
         }
 
-        public MainForm(Options options)
+        private void SetOptions(Options options)
         {
-            InitializeComponent();
-            isActive = true;
-            backgroundRefreshSeconds = 1;
-            services = new List<ServiceViewModel>();
-            Microsoft.Win32.SystemEvents.SessionSwitch += SessionSwitch;
-
             if (!string.IsNullOrWhiteSpace(options.Machine))
             {
                 machineHostname = options.Machine;
                 toolStripConnectToTextBox.Text = machineHostname;
             }
-            else
-            {
-                machineHostname = Environment.MachineName;
-                toolStripConnectToTextBox.Text = machineHostname;
-            }
-
         }
 
         private async void RefreshTimerTicked(object sender, EventArgs e)
@@ -262,10 +253,10 @@ namespace ServiceBouncer
             }
             catch (Exception e) when (ExceptionIsAccessDenied(e))
             {
-                CredMan.VistaPrompt prompt = new CredMan.VistaPrompt();
+                CredentialManagement.VistaPrompt prompt = new CredentialManagement.VistaPrompt();
                 prompt.Title = "Access denied";
                 prompt.Message = $"Enter administator credentials for {machineHostname}";
-                if (prompt.ShowDialog() == CredMan.DialogResult.OK)
+                if (prompt.ShowDialog() == CredentialManagement.DialogResult.OK)
                 {
                     StartNewProcess(prompt);
                     return false;
@@ -285,7 +276,7 @@ namespace ServiceBouncer
             }
         }
 
-        private void StartNewProcess(CredMan.BaseCredentialsPrompt promptResult)
+        private void StartNewProcess(CredentialManagement.BaseCredentialsPrompt promptResult)
         {
             string commandName = $"{Process.GetCurrentProcess().MainModule.FileName} --machine={machineHostname}";
             string username = null;
