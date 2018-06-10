@@ -19,7 +19,7 @@ namespace ServiceBouncer
             Parser.Default.ParseArguments<Options>(commandLine)
                 .WithParsed((options) =>
                 {
-                    Application.Run(new MainForm(options));
+                    Application.Run(new MainForm(options.Machine));
                 })
                 .WithNotParsed((error) =>
                 {
