@@ -19,12 +19,12 @@ namespace ServiceBouncer
         private string machineHostname;
         private int backgroundRefreshSeconds;
 
-        public MainForm(string machine = null)
+        public MainForm(string machine)
         {
             InitializeComponent();
             isActive = true;
             backgroundRefreshSeconds = 1;
-            machineHostname = machine ?? Environment.MachineName;
+            machineHostname = machine;
             toolStripConnectToTextBox.Text = machineHostname;
             services = new List<ServiceViewModel>();
             Microsoft.Win32.SystemEvents.SessionSwitch += SessionSwitch;

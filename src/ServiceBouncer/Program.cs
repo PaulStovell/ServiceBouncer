@@ -23,7 +23,7 @@ namespace ServiceBouncer
                 })
                 .WithNotParsed((error) =>
                 {
-                    Application.Run(new MainForm());
+                    Application.Run(new MainForm(Environment.MachineName));
                 });
         }
     }
