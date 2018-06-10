@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CommandLine;
+using System;
 using System.Windows.Forms;
 
 namespace ServiceBouncer
@@ -9,12 +10,21 @@ namespace ServiceBouncer
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main()
+        static void Main(string[] commandLine)
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.ThreadException += (sender, args) => MessageBox.Show(args.Exception.Message, "Unhandled error", MessageBoxButtons.OK);
-            Application.Run(new MainForm());
+
+            Parser.Default.ParseArguments<Options>(commandLine)
+                .WithParsed((options) =>
+                {
+                    Application.Run(new MainForm(options));
+                })
+                .WithNotParsed((error) =>
+                {
+                    Application.Run(new MainForm());
+                });
         }
     }
 }
