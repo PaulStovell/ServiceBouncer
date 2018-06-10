@@ -20,7 +20,7 @@ namespace ServiceBouncer
         private string machineHostname;
         private int backgroundRefreshSeconds;
 
-        public MainForm(Options options = null)
+        public MainForm()
         {
             InitializeComponent();
             isActive = true;
@@ -30,18 +30,31 @@ namespace ServiceBouncer
             services = new List<ServiceViewModel>();
             Microsoft.Win32.SystemEvents.SessionSwitch += SessionSwitch;
 
-            if(options != null)
-            {
-                if(!string.IsNullOrWhiteSpace(options.Machine))
-                {
-                    machineHostname = options.Machine;
-                    toolStripConnectToTextBox.Text = machineHostname;
-                }
-            }
 #if NET45
             //In NET45 startup type requires WMI, so it doesn't auto refresh
             dataGridStatupType.HeaderText = $"{dataGridStatupType.HeaderText} (No Auto Refresh)";
 #endif
+        }
+
+        public MainForm(Options options)
+        {
+            InitializeComponent();
+            isActive = true;
+            backgroundRefreshSeconds = 1;
+            services = new List<ServiceViewModel>();
+            Microsoft.Win32.SystemEvents.SessionSwitch += SessionSwitch;
+
+            if (!string.IsNullOrWhiteSpace(options.Machine))
+            {
+                machineHostname = options.Machine;
+                toolStripConnectToTextBox.Text = machineHostname;
+            }
+            else
+            {
+                machineHostname = Environment.MachineName;
+                toolStripConnectToTextBox.Text = machineHostname;
+            }
+
         }
 
         private async void RefreshTimerTicked(object sender, EventArgs e)
