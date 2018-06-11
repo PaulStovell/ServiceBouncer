@@ -14,12 +14,14 @@ namespace ServiceBouncer
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.ThreadException += (sender, args) => MessageBox.Show(args.Exception.Message, "Unhandled error", MessageBoxButtons.OK);
+            Application.ThreadException += (sender, args) => MessageBox.Show(args.Exception.Message, @"Unhandled error", MessageBoxButtons.OK);
 
             Parser.Default.ParseArguments<Options>(commandLine)
                 .WithParsed((options) =>
                 {
-                    Application.Run(new MainForm(options.Machine));
+                    var machineName = options.Machine;
+                    if (string.IsNullOrWhiteSpace(machineName)) machineName = Environment.MachineName;
+                    Application.Run(new MainForm(machineName));
                 })
                 .WithNotParsed((error) =>
                 {

@@ -33,7 +33,7 @@ Target.create "Build" (fun _ ->
 )
 
 Target.create "Package" (fun _ ->
-    Zip.createZip buildOutput.FullName (outputDir.FullName @@ "ServiceBouncer.zip") "" Zip.DefaultZipLevel false ((DirectoryInfo.getMatchingFilesRecursive "*.exe" buildOutput) |> Array.map(fun x -> x.FullName))
+    Zip.createZip buildOutput.FullName (outputDir.FullName @@ "ServiceBouncer.zip") "" Zip.DefaultZipLevel false ((DirectoryInfo.getMatchingFilesRecursive "*.*" buildOutput) |> Array.map(fun x -> x.FullName))
 
     let nuspec = (srcDir.FullName @@ "Deploy" @@ "ServiceBouncer.nuspec")
     let nugetExePath = currentDirectory.FullName @@ "packages" @@ "buildtools" @@ "NuGet.CommandLine" @@ "tools" @@ "NuGet.exe"

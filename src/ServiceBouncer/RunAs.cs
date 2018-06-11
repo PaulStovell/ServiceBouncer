@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Text;
 using System.Runtime.InteropServices;
-using System.Security.Principal;
 using System.Security.Permissions;
+using System.Text;
 
-[assembly: SecurityPermissionAttribute(SecurityAction.RequestMinimum, UnmanagedCode = true)]
 namespace ServiceBouncer
 {
     [SecurityPermission(SecurityAction.Demand, ControlPrincipal = true)]
@@ -170,7 +168,7 @@ namespace ServiceBouncer
         }
 
         /// <summary>
-        /// Logon option. 
+        /// Logon option.
         /// </summary>
         [FlagsAttribute]
         public enum LogonFlags
@@ -204,7 +202,7 @@ namespace ServiceBouncer
             /// </summary>
             NewProcessGroup = 0x00000200,
             /// <summary>
-            /// This flag is only valid starting a 16-bit Windows-based application. If set, the new process runs in a private Virtual DOS Machine (VDM). By default, all 16-bit Windows-based applications run in a single, shared VDM. 
+            /// This flag is only valid starting a 16-bit Windows-based application. If set, the new process runs in a private Virtual DOS Machine (VDM). By default, all 16-bit Windows-based applications run in a single, shared VDM.
             /// </summary>
             SeperateWOWVDM = 0x00000800,
             /// <summary>

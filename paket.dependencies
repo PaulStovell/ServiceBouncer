@@ -1,16 +1,18 @@
 framework: net45, net461
+redirects: on
 source https://www.nuget.org/api/v2
+
 nuget CommandLineParser
 nuget CredentialManagement
 
 group BuildTools
     framework: netstandard2.0
-    source https://www.nuget.org/api/v2    
-    
+    source https://www.nuget.org/api/v2
+
     clitool dotnet-fake
     nuget FAKE.Core.Target
     nuget FAKE.Core.Process
     nuget FAKE.IO.FileSystem
-    nuget Fake.IO.Zip 
+    nuget Fake.IO.Zip
     nuget Fake.DotNet.MSBuild
     nuget Nuget.CommandLine

@@ -1,14 +1,15 @@
-﻿using System;
+﻿using CredentialManagement;
+using ServiceBouncer.ComponentModel;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.ServiceProcess;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using ServiceBouncer.ComponentModel;
-using System.Net;
-using System.Diagnostics;
+using DialogResult = System.Windows.Forms.DialogResult;
 
 namespace ServiceBouncer
 {
@@ -28,10 +29,10 @@ namespace ServiceBouncer
             toolStripConnectToTextBox.Text = machineHostname;
             services = new List<ServiceViewModel>();
             Microsoft.Win32.SystemEvents.SessionSwitch += SessionSwitch;
-            
+
 #if NET45
             //In NET45 startup type requires WMI, so it doesn't auto refresh
-            dataGridStatupType.HeaderText = $"{dataGridStatupType.HeaderText} (No Auto Refresh)";
+            dataGridStatupType.HeaderText = $@"{dataGridStatupType.HeaderText} (No Auto Refresh)";
 #endif
         }
 
@@ -240,20 +241,21 @@ namespace ServiceBouncer
             }
             catch (Exception e) when (ExceptionIsAccessDenied(e))
             {
-                CredentialManagement.VistaPrompt prompt = new CredentialManagement.VistaPrompt();
-                prompt.Title = "Access denied";
-                prompt.Message = $"Enter administator credentials for {machineHostname}";
+                var prompt = new CredentialManagement.VistaPrompt
+                {
+                    Title = "Access denied",
+                    Message = $"Enter administator credentials for {machineHostname}"
+                };
+
                 if (prompt.ShowDialog() == CredentialManagement.DialogResult.OK)
                 {
                     StartNewProcess(prompt);
                     return false;
                 }
-                else
-                {
-                    Disconnect();
-                    MessageBox.Show($@"Unable to retrieve the services from {toolStripConnectToTextBox.Text}.{Environment.NewLine}Message: {e.Message}", @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return false;
-                }
+
+                Disconnect();
+                MessageBox.Show($@"Unable to retrieve the services from {toolStripConnectToTextBox.Text}.{Environment.NewLine}Message: {e.Message}", @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
             }
             catch (Exception e)
             {
@@ -263,13 +265,11 @@ namespace ServiceBouncer
             }
         }
 
-        private void StartNewProcess(CredentialManagement.BaseCredentialsPrompt promptResult)
+        private void StartNewProcess(BaseCredentialsPrompt promptResult)
         {
-            string commandName = $"{Process.GetCurrentProcess().MainModule.FileName} --machine={machineHostname}";
-            string username = null;
-            string domain = null;
+            string username, domain;
 
-            string[] splitCheck = promptResult.Username.Split(new char[] { '\\' });
+            var splitCheck = promptResult.Username.Split('\\');
             if (splitCheck.Length > 1)
             {
                 username = splitCheck[1];
@@ -278,19 +278,20 @@ namespace ServiceBouncer
             else
             {
                 username = splitCheck[0];
+                domain = null;
             }
+
+            var commandName = $"{Process.GetCurrentProcess().MainModule.FileName} --machine={machineHostname}";
             RunAs.StartProcess(username, domain, promptResult.Password, RunAs.LogonFlags.NetworkCredentialsOnly, null, commandName, RunAs.CreationFlags.NewProcessGroup, null);
 
-            machineHostname = Environment.MachineName;
-            toolStripConnectToTextBox.Text = machineHostname;
+            Application.Exit();
         }
 
         private static bool ExceptionIsAccessDenied(Exception e)
         {
-            Exception baseException = e.GetBaseException();
-            if (baseException is Win32Exception)
+            var baseException = e.GetBaseException();
+            if (baseException is Win32Exception nativeException)
             {
-                Win32Exception nativeException = baseException as Win32Exception;
                 if (nativeException.NativeErrorCode == 5) // ERROR_ACCESS_DENIED
                 {
                     return true;
@@ -392,16 +393,6 @@ namespace ServiceBouncer
             {
                 toolStripStatusLabel.Text = $@"Connected to {machineHostname}. - Background refresh disabled";
             }
-        }
-
-        private async Task PerformOperationWithCheck(Func<bool> check, Func<ServiceViewModel, Task> actionToPerform)
-        {
-            await PerformOperationWithCheck(i => check(), actionToPerform);
-        }
-
-        private async Task PerformBackgroundOperationWithCheck(Func<bool> check, Func<ServiceViewModel, Task> actionToPerform)
-        {
-            await PerformBackgroundOperationWithCheck(i => check(), actionToPerform);
         }
 
         private async Task PerformOperationWithCheck(Func<IReadOnlyCollection<ServiceViewModel>, bool> check, Func<ServiceViewModel, Task> actionToPerform)
