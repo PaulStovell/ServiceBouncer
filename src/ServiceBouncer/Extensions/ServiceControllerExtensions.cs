@@ -16,24 +16,39 @@ namespace ServiceBouncer.Extensions
             using (var wmiManagementObject = controller.GetNewWmiManagementObject())
             {
                 var fullPath = wmiManagementObject["PathName"].ToString();
-                string UncPath;
+                string directoryPath;
                 if (fullPath.StartsWith("\"") && fullPath.IndexOf("\"", 1) > 0)
                 {
                     var path = fullPath.Substring(1, fullPath.IndexOf("\"", 1) - 1);
-                    UncPath = $"\\\\{controller.MachineName}\\{path.Substring(0, 1)}$\\{path.Substring(3)}";
-                    return new FileInfo(UncPath);
+                    directoryPath = CreatePath(controller, path);
+                    return new FileInfo(directoryPath);
                 }
 
                 if (fullPath.Contains(" "))
                 {
                     var path = fullPath.Substring(0, fullPath.IndexOf(" "));
-                    UncPath = $"\\\\{controller.MachineName}\\{path.Substring(0, 1)}$\\{path.Substring(3)}";
-                    return new FileInfo(UncPath);
+                    directoryPath = CreatePath(controller, path);
+                    return new FileInfo(directoryPath);
                 }
 
-                UncPath = $"\\\\{controller.MachineName}\\{fullPath.Substring(0, 1)}$\\{fullPath.Substring(3)}";
-                return new FileInfo(UncPath);
+                directoryPath = CreatePath(controller, fullPath);
+                return new FileInfo(directoryPath);
             }
+        }
+
+        private static string CreatePath(ServiceController controller, string path)
+        {
+            var machineName = controller.MachineName;
+
+            var volume = path.Substring(0, 1);
+            var folder = path.Substring(3);
+
+            if (EnvHelper.IsLocalMachine(machineName))
+            {
+                return $"{volume}:\\{folder}";
+            }
+
+            return $"\\\\{machineName}\\{volume}$\\{folder}";
         }
 
         public static void SetStartupType(this ServiceController controller, ServiceStartMode newType)
