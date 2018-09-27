@@ -1,5 +1,6 @@
 using System.IO;
 using System.Management;
+using System.Runtime.InteropServices;
 using System.ServiceProcess;
 
 namespace ServiceBouncer.Extensions
@@ -38,7 +39,18 @@ namespace ServiceBouncer.Extensions
 
         private static string CreatePath(ServiceController controller, string path)
         {
-            return $"\\\\{controller.MachineName}\\{path.Substring(0, 1)}$\\{path.Substring(3)}";
+            var machineName = controller.MachineName;
+            var isLocalMachine = EnvHelper.IsLocalMachine(machineName);
+
+            var volume = path.Substring(0, 1);
+            var folder = path.Substring(3);
+
+            if (isLocalMachine)
+            {
+                return $"{volume}:\\{folder}";
+            }
+
+            return $"\\\\{machineName}\\{volume}$\\{folder}";
         }
 
         public static void SetStartupType(this ServiceController controller, ServiceStartMode newType)
