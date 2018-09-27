@@ -16,24 +16,29 @@ namespace ServiceBouncer.Extensions
             using (var wmiManagementObject = controller.GetNewWmiManagementObject())
             {
                 var fullPath = wmiManagementObject["PathName"].ToString();
-                string UncPath;
+                string uncPath;
                 if (fullPath.StartsWith("\"") && fullPath.IndexOf("\"", 1) > 0)
                 {
                     var path = fullPath.Substring(1, fullPath.IndexOf("\"", 1) - 1);
-                    UncPath = $"\\\\{controller.MachineName}\\{path.Substring(0, 1)}$\\{path.Substring(3)}";
-                    return new FileInfo(UncPath);
+                    uncPath = CreatePath(controller, path);
+                    return new FileInfo(uncPath);
                 }
 
                 if (fullPath.Contains(" "))
                 {
                     var path = fullPath.Substring(0, fullPath.IndexOf(" "));
-                    UncPath = $"\\\\{controller.MachineName}\\{path.Substring(0, 1)}$\\{path.Substring(3)}";
-                    return new FileInfo(UncPath);
+                    uncPath = CreatePath(controller, path);
+                    return new FileInfo(uncPath);
                 }
 
-                UncPath = $"\\\\{controller.MachineName}\\{fullPath.Substring(0, 1)}$\\{fullPath.Substring(3)}";
-                return new FileInfo(UncPath);
+                uncPath = CreatePath(controller, fullPath);
+                return new FileInfo(uncPath);
             }
+        }
+
+        private static string CreatePath(ServiceController controller, string path)
+        {
+            return $"\\\\{controller.MachineName}\\{path.Substring(0, 1)}$\\{path.Substring(3)}";
         }
 
         public static void SetStartupType(this ServiceController controller, ServiceStartMode newType)
