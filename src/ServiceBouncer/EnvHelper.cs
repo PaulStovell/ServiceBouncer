@@ -16,8 +16,7 @@ namespace ServiceBouncer
         public static bool IsLocalMachine(string machineHostname)
         {
             machineHostname = machineHostname.Trim();
-            var isLocalMachine = machineHostname == "." || Environment.MachineName.Equals(machineHostname, StringComparison.CurrentCultureIgnoreCase);
-            return isLocalMachine;
+            return machineHostname == "." || Environment.MachineName.Equals(machineHostname, StringComparison.CurrentCultureIgnoreCase);
         }
     }
 }

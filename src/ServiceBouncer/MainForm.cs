@@ -334,8 +334,7 @@ namespace ServiceBouncer
                 toolStripConnectButton.Tag = @"Connected";
                 toolStripConnectButton.Image = Properties.Resources.Disconnect;
 
-                var isLocalMachine = EnvHelper.IsLocalMachine(machineHostname);
-                backgroundRefreshSeconds = isLocalMachine ? 1 : 30;
+                backgroundRefreshSeconds = EnvHelper.IsLocalMachine(machineHostname) ? 1 : 30;
 
                 refreshTimer.Enabled = true;
                 refreshTimer.Interval = backgroundRefreshSeconds * 1000;

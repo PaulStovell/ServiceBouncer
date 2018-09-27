@@ -1,6 +1,5 @@
 using System.IO;
 using System.Management;
-using System.Runtime.InteropServices;
 using System.ServiceProcess;
 
 namespace ServiceBouncer.Extensions
@@ -40,12 +39,11 @@ namespace ServiceBouncer.Extensions
         private static string CreatePath(ServiceController controller, string path)
         {
             var machineName = controller.MachineName;
-            var isLocalMachine = EnvHelper.IsLocalMachine(machineName);
 
             var volume = path.Substring(0, 1);
             var folder = path.Substring(3);
 
-            if (isLocalMachine)
+            if (EnvHelper.IsLocalMachine(machineName))
             {
                 return $"{volume}:\\{folder}";
             }
