@@ -17,23 +17,23 @@ namespace ServiceBouncer.Extensions
             using (var wmiManagementObject = controller.GetNewWmiManagementObject())
             {
                 var fullPath = wmiManagementObject["PathName"].ToString();
-                string uncPath;
+                string directoryPath;
                 if (fullPath.StartsWith("\"") && fullPath.IndexOf("\"", 1) > 0)
                 {
                     var path = fullPath.Substring(1, fullPath.IndexOf("\"", 1) - 1);
-                    uncPath = CreatePath(controller, path);
-                    return new FileInfo(uncPath);
+                    directoryPath = CreatePath(controller, path);
+                    return new FileInfo(directoryPath);
                 }
 
                 if (fullPath.Contains(" "))
                 {
                     var path = fullPath.Substring(0, fullPath.IndexOf(" "));
-                    uncPath = CreatePath(controller, path);
-                    return new FileInfo(uncPath);
+                    directoryPath = CreatePath(controller, path);
+                    return new FileInfo(directoryPath);
                 }
 
-                uncPath = CreatePath(controller, fullPath);
-                return new FileInfo(uncPath);
+                directoryPath = CreatePath(controller, fullPath);
+                return new FileInfo(directoryPath);
             }
         }
 
