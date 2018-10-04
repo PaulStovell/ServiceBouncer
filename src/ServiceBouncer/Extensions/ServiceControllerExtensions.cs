@@ -17,16 +17,26 @@ namespace ServiceBouncer.Extensions
             {
                 var fullPath = wmiManagementObject["PathName"].ToString();
                 string directoryPath;
-                if (fullPath.StartsWith("\"") && fullPath.IndexOf("\"", 1) > 0)
+
+                const string quote = "\"";
+
+                if (fullPath.StartsWith(quote) && fullPath.IndexOf(quote, 1) > 0)
                 {
-                    var path = fullPath.Substring(1, fullPath.IndexOf("\"", 1) - 1);
-                    directoryPath = CreatePath(controller, path);
-                    return new FileInfo(directoryPath);
+                    //e.g. "C:\Program Files (x86)\Google\Update\GoogleUpdate.exe" /svc
+                    fullPath = fullPath.Substring(1, fullPath.IndexOf(quote, 1) - 1);
                 }
 
-                if (fullPath.Contains(" "))
+                var file = Path.GetFileName(fullPath);
+                //split filename on space for arguments - note: space in filename isn't working yet.
+                if (file.Contains(" "))
                 {
-                    var path = fullPath.Substring(0, fullPath.IndexOf(" "));
+                    var dir = Path.GetDirectoryName(fullPath);
+
+                    //e.g. fullpath C:\Windows\system32\svchost.exe -k AxInstSVGroup
+                    file = file.Substring(0, file.IndexOf(" "));
+
+                    var path = Path.Combine(dir, file);
+
                     directoryPath = CreatePath(controller, path);
                     return new FileInfo(directoryPath);
                 }
@@ -38,6 +48,13 @@ namespace ServiceBouncer.Extensions
 
         private static string CreatePath(ServiceController controller, string path)
         {
+            var isUnc = path.StartsWith(@"\\");
+            if (isUnc)
+            {
+                //no need to reformat 
+                return path;
+            }
+
             var machineName = controller.MachineName;
 
             var volume = path.Substring(0, 1);
