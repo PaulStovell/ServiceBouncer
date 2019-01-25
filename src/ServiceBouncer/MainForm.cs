@@ -71,6 +71,9 @@ namespace ServiceBouncer
                 await Connect();
                 dataGridView.Sort(dataGridName, ListSortDirection.Ascending);
             });
+
+            // UX: To make it easy to start searching as soon as you launch.
+            this.toolStripFilterBox.Focus();
         }
 
         private void FormActivated(object sender, EventArgs e)
