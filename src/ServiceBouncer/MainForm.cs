@@ -19,16 +19,25 @@ namespace ServiceBouncer
         private bool isActive;
         private string machineHostname;
         private int backgroundRefreshSeconds;
+        private DateTime mostRecentUserActionTime;
+        private int? userInactivityMinutesUntilAppTermination;
+        System.Windows.Forms.Timer appTerminationTimer = new System.Windows.Forms.Timer();
 
-        public MainForm(string machine)
+
+        public MainForm(string machine, int? terminationUserInactivityMinutes = 0)
         {
             InitializeComponent();
             isActive = true;
             backgroundRefreshSeconds = 1;
             machineHostname = machine;
+            userInactivityMinutesUntilAppTermination = terminationUserInactivityMinutes;
             toolStripConnectToTextBox.Text = machineHostname;
             services = new List<ServiceViewModel>();
             Microsoft.Win32.SystemEvents.SessionSwitch += SessionSwitch;
+            NoteUserActivity();
+            appTerminationTimer.Tick += new EventHandler(TerminateIfInactive);
+            appTerminationTimer.Interval = 60000; 
+            appTerminationTimer.Start();
 
 #if NET45
             //In NET45 startup type requires WMI, so it doesn't auto refresh
@@ -92,36 +101,43 @@ namespace ServiceBouncer
 
         private async void RefreshClicked(object sender, EventArgs e)
         {
+            NoteUserActivity();
             await PerformAction(async () => await Reload());
         }
 
         private void FilterBoxTextChanged(object sender, EventArgs e)
         {
+            NoteUserActivity();
             PopulateFilteredDataview();
         }
 
         private async void StartClicked(object sender, EventArgs e)
         {
+            NoteUserActivity();
             await PerformOperation(async x => await x.Start());
         }
 
         private async void RestartClicked(object sender, EventArgs e)
         {
+            NoteUserActivity();
             await PerformOperation(async x => await x.Restart());
         }
 
         private async void StopClicked(object sender, EventArgs e)
         {
+            NoteUserActivity();
             await PerformOperation(async x => await x.Stop());
         }
 
         private async void PauseClicked(object sender, EventArgs e)
         {
+            NoteUserActivity();
             await PerformOperation(async x => await x.Pause());
         }
 
         private async void DeleteClicked(object sender, EventArgs e)
         {
+            NoteUserActivity();
             await PerformOperationWithCheck(s =>
                 {
                     if (s.Count > 1)
@@ -144,21 +160,25 @@ namespace ServiceBouncer
 
         private async void StartupAutomaticClicked(object sender, EventArgs e)
         {
+            NoteUserActivity();
             await PerformOperation(async x => await x.SetStartupType(ServiceStartMode.Automatic));
         }
 
         private async void StartupManualClicked(object sender, EventArgs e)
         {
+            NoteUserActivity();
             await PerformOperation(async x => await x.SetStartupType(ServiceStartMode.Manual));
         }
 
         private async void StartupDisabledClick(object sender, EventArgs e)
         {
+            NoteUserActivity();
             await PerformOperation(async x => await x.SetStartupType(ServiceStartMode.Disabled));
         }
 
         private async void OpenServiceLocationClick(object sender, EventArgs e)
         {
+            NoteUserActivity();
             await PerformOperationWithCheck(s =>
                 {
                     if (s.Count > 1)
@@ -174,6 +194,7 @@ namespace ServiceBouncer
 
         private async void AssemblyInfoClick(object sender, EventArgs e)
         {
+            NoteUserActivity();
             await PerformOperationWithCheck(s =>
             {
                 if (s.Count > 1)
@@ -193,6 +214,7 @@ namespace ServiceBouncer
 
         private async void InstallClicked(object sender, EventArgs e)
         {
+            NoteUserActivity();
             await PerformAction(async () =>
             {
                 new InstallationForm().ShowDialog();
@@ -202,6 +224,7 @@ namespace ServiceBouncer
 
         private async void ConnectButtonClick(object sender, EventArgs e)
         {
+            NoteUserActivity();
             await PerformAction(async () =>
             {
                 if ((string)toolStripConnectButton.Tag == @"Connected")
@@ -217,6 +240,7 @@ namespace ServiceBouncer
 
         private async void ConnectTextBoxKeyDown(object sender, KeyEventArgs e)
         {
+            NoteUserActivity();
             if (e.KeyCode == Keys.Enter)
             {
                 await PerformAction(async () => { await Connect(); });
@@ -397,6 +421,18 @@ namespace ServiceBouncer
             {
                 toolStripStatusLabel.Text = $@"Connected to {machineHostname}. - Background refresh disabled";
             }
+        }
+
+        private void NoteUserActivity()
+        {
+            mostRecentUserActionTime = DateTime.Now;
+        }
+
+        private void TerminateIfInactive(Object obj, EventArgs args)
+        {
+            var minutesSinceMostRecentUserActivity = (DateTime.Now - this.mostRecentUserActionTime).TotalMinutes;
+            if (minutesSinceMostRecentUserActivity < this.userInactivityMinutesUntilAppTermination) return;
+            Process.GetCurrentProcess().Kill();
         }
 
         private async Task PerformOperationWithCheck(Func<IReadOnlyCollection<ServiceViewModel>, bool> check, Func<ServiceViewModel, Task> actionToPerform)
