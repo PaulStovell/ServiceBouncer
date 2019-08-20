@@ -24,13 +24,13 @@ namespace ServiceBouncer
         System.Windows.Forms.Timer appTerminationTimer = new System.Windows.Forms.Timer();
 
 
-        public MainForm(string machine, int? terminationUserInactivityMinutes = 0)
+        public MainForm(string machine, int? terminateMinutes = null)
         {
             InitializeComponent();
             isActive = true;
             backgroundRefreshSeconds = 1;
             machineHostname = machine;
-            userInactivityMinutesUntilAppTermination = terminationUserInactivityMinutes;
+            userInactivityMinutesUntilAppTermination = terminateMinutes;
             toolStripConnectToTextBox.Text = machineHostname;
             services = new List<ServiceViewModel>();
             Microsoft.Win32.SystemEvents.SessionSwitch += SessionSwitch;
@@ -415,7 +415,21 @@ namespace ServiceBouncer
             if (isActive)
             {
                 var backgroundRefreshTimeText = backgroundRefreshSeconds == 1 ? "1 second" : $"{backgroundRefreshSeconds} seconds";
-                toolStripStatusLabel.Text = $@"Connected to {machineHostname}. - Background refresh every {backgroundRefreshTimeText}.";
+
+                var inactivityCheckText = "";
+                var inactivityMinutesUntilTermination = GetInactivityMinutesUntilTermination();
+                if(inactivityMinutesUntilTermination.HasValue)
+                {
+                    inactivityMinutesUntilTermination = Math.Round(inactivityMinutesUntilTermination.Value);
+                    if (inactivityMinutesUntilTermination == 0)
+                    {
+                        inactivityMinutesUntilTermination++;
+                    }
+                    var minuteText = inactivityMinutesUntilTermination == 1 ? "minute" : "minutes";
+                    inactivityCheckText = $"Application will exit in {inactivityMinutesUntilTermination.Value} more {minuteText} of inactivity.";
+                }
+                
+                toolStripStatusLabel.Text = $@"Connected to {machineHostname}. - Background refresh every {backgroundRefreshTimeText}. {inactivityCheckText}";
             }
             else
             {
@@ -426,13 +440,29 @@ namespace ServiceBouncer
         private void NoteUserActivity()
         {
             mostRecentUserActionTime = DateTime.Now;
+            SetConnectedStatusBar();
         }
 
         private void TerminateIfInactive(Object obj, EventArgs args)
         {
-            var minutesSinceMostRecentUserActivity = (DateTime.Now - this.mostRecentUserActionTime).TotalMinutes;
-            if (minutesSinceMostRecentUserActivity < this.userInactivityMinutesUntilAppTermination) return;
-            Process.GetCurrentProcess().Kill();
+            var inactivityMinutesUntilTermination = GetInactivityMinutesUntilTermination();
+            if (!inactivityMinutesUntilTermination.HasValue) return;
+            if (inactivityMinutesUntilTermination.Value > 0)
+            {
+                SetConnectedStatusBar();
+            } else
+            {
+                Process.GetCurrentProcess().Kill();
+            }
+            
+        }
+
+        private double? GetInactivityMinutesUntilTermination()
+        {
+            if (!userInactivityMinutesUntilAppTermination.HasValue) return null;
+            var minutesSinceMostRecentUserActivity = (DateTime.Now - mostRecentUserActionTime).TotalMinutes;
+            var inactivityMinutesUntilTermination = (userInactivityMinutesUntilAppTermination.Value - minutesSinceMostRecentUserActivity);
+            return inactivityMinutesUntilTermination;
         }
 
         private async Task PerformOperationWithCheck(Func<IReadOnlyCollection<ServiceViewModel>, bool> check, Func<ServiceViewModel, Task> actionToPerform)

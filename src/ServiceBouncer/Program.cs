@@ -21,7 +21,7 @@ namespace ServiceBouncer
                 {
                     var machineName = options.Machine;
                     if (string.IsNullOrWhiteSpace(machineName)) machineName = Environment.MachineName;
-                    Application.Run(new MainForm(machineName, options.TerminationUserInactivityMinutes));
+                    Application.Run(new MainForm(machineName, options.TerminateMinutes));
                 })
                 .WithNotParsed((error) =>
                 {
