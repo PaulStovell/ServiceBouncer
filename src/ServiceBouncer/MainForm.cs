@@ -35,9 +35,13 @@ namespace ServiceBouncer
             services = new List<ServiceViewModel>();
             Microsoft.Win32.SystemEvents.SessionSwitch += SessionSwitch;
             NoteUserActivity();
-            appTerminationTimer.Tick += new EventHandler(TerminateIfInactive);
-            appTerminationTimer.Interval = 60000; 
-            appTerminationTimer.Start();
+            if (userInactivityMinutesUntilAppTermination.HasValue)
+            {
+                // Check every 1 minute to see if user has left it alone for terminateMinutes. If so, terminate this app
+                appTerminationTimer.Tick += new EventHandler(TerminateIfInactive);
+                appTerminationTimer.Interval = 60000;
+                appTerminationTimer.Start();
+            }
 
 #if NET45
             //In NET45 startup type requires WMI, so it doesn't auto refresh
