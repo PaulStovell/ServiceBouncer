@@ -9,11 +9,16 @@ The tool shows a data grid for the services, and their status. Since it's a grid
 
 ![ServiceBouncer main window - stop, start, delete, filter & manage services](https://raw.githubusercontent.com/PaulStovell/ServiceBouncer/master/.images/MainWindow.png)
 
-Usage:
+**Usage:**
+
   servicebouncer
 
-Options:
+**Options:**
+
   -m --machine  	        Machine to connect to. Defaults to local machine.
+  
   -t --terminateMinutes	    Number of minutes of user inactivity until application terminates. Defaults to never.
+  
+  
 
 Icons from https://icons8.com - [Color set](https://icons8.com/icon/new-icons/color)
