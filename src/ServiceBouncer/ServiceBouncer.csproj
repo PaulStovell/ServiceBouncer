@@ -188,7 +188,7 @@
     <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.6.1')">
       <ItemGroup>
         <Reference Include="CommandLine">
-          <HintPath>..\..\..\3rdPartyAssemblies\CommandLine.dll</HintPath>
+          <HintPath>..\..\packages\CommandLineParser\lib\net45\CommandLine.dll</HintPath>
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>
