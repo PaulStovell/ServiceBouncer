@@ -416,28 +416,27 @@ namespace ServiceBouncer
 
         private void SetConnectedStatusBar()
         {
+            var inactivityCheckText = "";
+            var inactivityMinutesUntilTermination = GetInactivityMinutesUntilTermination();
+            if (inactivityMinutesUntilTermination.HasValue)
+            {
+                inactivityMinutesUntilTermination = Math.Round(inactivityMinutesUntilTermination.Value);
+                if (inactivityMinutesUntilTermination == 0)
+                {
+                    inactivityMinutesUntilTermination++;
+                }
+                var minuteText = inactivityMinutesUntilTermination == 1 ? "minute" : "minutes";
+                inactivityCheckText = $"Application will exit in {inactivityMinutesUntilTermination.Value} more {minuteText} of inactivity.";
+            }
+
             if (isActive)
             {
                 var backgroundRefreshTimeText = backgroundRefreshSeconds == 1 ? "1 second" : $"{backgroundRefreshSeconds} seconds";
-
-                var inactivityCheckText = "";
-                var inactivityMinutesUntilTermination = GetInactivityMinutesUntilTermination();
-                if(inactivityMinutesUntilTermination.HasValue)
-                {
-                    inactivityMinutesUntilTermination = Math.Round(inactivityMinutesUntilTermination.Value);
-                    if (inactivityMinutesUntilTermination == 0)
-                    {
-                        inactivityMinutesUntilTermination++;
-                    }
-                    var minuteText = inactivityMinutesUntilTermination == 1 ? "minute" : "minutes";
-                    inactivityCheckText = $"Application will exit in {inactivityMinutesUntilTermination.Value} more {minuteText} of inactivity.";
-                }
-                
                 toolStripStatusLabel.Text = $@"Connected to {machineHostname}. - Background refresh every {backgroundRefreshTimeText}. {inactivityCheckText}";
             }
             else
             {
-                toolStripStatusLabel.Text = $@"Connected to {machineHostname}. - Background refresh disabled";
+                toolStripStatusLabel.Text = $@"Connected to {machineHostname}. - Background refresh disabled. {inactivityCheckText}";
             }
         }
 
