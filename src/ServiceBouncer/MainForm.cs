@@ -21,7 +21,7 @@ namespace ServiceBouncer
         private int backgroundRefreshSeconds;
         private DateTime mostRecentUserActionTime;
         private int? userInactivityMinutesUntilAppTermination;
-        System.Windows.Forms.Timer appTerminationTimer = new System.Windows.Forms.Timer();
+        private System.Windows.Forms.Timer appTerminationTimer = new System.Windows.Forms.Timer();
 
 
         public MainForm(string machine, int? terminateMinutes = null)
