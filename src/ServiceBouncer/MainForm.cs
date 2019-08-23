@@ -20,17 +20,16 @@ namespace ServiceBouncer
         private string machineHostname;
         private int backgroundRefreshSeconds;
         private DateTime mostRecentUserActionTime;
-        private int? userInactivityMinutesUntilAppTermination;
+        private int? userInactivityMinutesUntilAppTermination = 60;
         private System.Windows.Forms.Timer appTerminationTimer = new System.Windows.Forms.Timer();
 
 
-        public MainForm(string machine, int? terminateMinutes = null)
+        public MainForm(string machine)
         {
             InitializeComponent();
             isActive = true;
             backgroundRefreshSeconds = 1;
             machineHostname = machine;
-            userInactivityMinutesUntilAppTermination = terminateMinutes;
             toolStripConnectToTextBox.Text = machineHostname;
             services = new List<ServiceViewModel>();
             Microsoft.Win32.SystemEvents.SessionSwitch += SessionSwitch;
