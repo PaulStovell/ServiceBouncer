@@ -19,8 +19,8 @@ namespace ServiceBouncer
         private bool isActive;
         private string machineHostname;
         private int backgroundRefreshSeconds;
-        private DateTime mostRecentUserActionTime;
-        private int? userInactivityMinutesUntilAppTermination = 60;
+        private DateTime? machineInactivatedTime;
+        private int inactivityMinutesUntilAppTermination = 30;
         private System.Windows.Forms.Timer appTerminationTimer = new System.Windows.Forms.Timer();
 
 
@@ -33,14 +33,9 @@ namespace ServiceBouncer
             toolStripConnectToTextBox.Text = machineHostname;
             services = new List<ServiceViewModel>();
             Microsoft.Win32.SystemEvents.SessionSwitch += SessionSwitch;
-            NoteUserActivity();
-            if (userInactivityMinutesUntilAppTermination.HasValue)
-            {
-                // Check every 1 minute to see if user has left it alone for terminateMinutes. If so, terminate this app
-                appTerminationTimer.Tick += new EventHandler(TerminateIfInactive);
-                appTerminationTimer.Interval = 60000;
-                appTerminationTimer.Start();
-            }
+            appTerminationTimer.Tick += new EventHandler(TerminateIfInactive);
+            appTerminationTimer.Interval = 60000; 
+            appTerminationTimer.Start();
 
 #if NET45
             //In NET45 startup type requires WMI, so it doesn't auto refresh
@@ -68,10 +63,15 @@ namespace ServiceBouncer
             if (e.Reason == Microsoft.Win32.SessionSwitchReason.SessionLock || e.Reason == Microsoft.Win32.SessionSwitchReason.RemoteDisconnect)
             {
                 isActive = false;
+                if (!machineInactivatedTime.HasValue)
+                {
+                    machineInactivatedTime = DateTime.Now;
+                }
             }
             else if (e.Reason == Microsoft.Win32.SessionSwitchReason.SessionUnlock || e.Reason == Microsoft.Win32.SessionSwitchReason.RemoteConnect)
             {
                 isActive = true;
+                machineInactivatedTime = null;
             }
         }
 
@@ -104,43 +104,36 @@ namespace ServiceBouncer
 
         private async void RefreshClicked(object sender, EventArgs e)
         {
-            NoteUserActivity();
             await PerformAction(async () => await Reload());
         }
 
         private void FilterBoxTextChanged(object sender, EventArgs e)
         {
-            NoteUserActivity();
             PopulateFilteredDataview();
         }
 
         private async void StartClicked(object sender, EventArgs e)
         {
-            NoteUserActivity();
             await PerformOperation(async x => await x.Start());
         }
 
         private async void RestartClicked(object sender, EventArgs e)
         {
-            NoteUserActivity();
             await PerformOperation(async x => await x.Restart());
         }
 
         private async void StopClicked(object sender, EventArgs e)
         {
-            NoteUserActivity();
             await PerformOperation(async x => await x.Stop());
         }
 
         private async void PauseClicked(object sender, EventArgs e)
         {
-            NoteUserActivity();
             await PerformOperation(async x => await x.Pause());
         }
 
         private async void DeleteClicked(object sender, EventArgs e)
         {
-            NoteUserActivity();
             await PerformOperationWithCheck(s =>
                 {
                     if (s.Count > 1)
@@ -163,25 +156,21 @@ namespace ServiceBouncer
 
         private async void StartupAutomaticClicked(object sender, EventArgs e)
         {
-            NoteUserActivity();
             await PerformOperation(async x => await x.SetStartupType(ServiceStartMode.Automatic));
         }
 
         private async void StartupManualClicked(object sender, EventArgs e)
         {
-            NoteUserActivity();
             await PerformOperation(async x => await x.SetStartupType(ServiceStartMode.Manual));
         }
 
         private async void StartupDisabledClick(object sender, EventArgs e)
         {
-            NoteUserActivity();
             await PerformOperation(async x => await x.SetStartupType(ServiceStartMode.Disabled));
         }
 
         private async void OpenServiceLocationClick(object sender, EventArgs e)
         {
-            NoteUserActivity();
             await PerformOperationWithCheck(s =>
                 {
                     if (s.Count > 1)
@@ -197,7 +186,6 @@ namespace ServiceBouncer
 
         private async void AssemblyInfoClick(object sender, EventArgs e)
         {
-            NoteUserActivity();
             await PerformOperationWithCheck(s =>
             {
                 if (s.Count > 1)
@@ -217,7 +205,6 @@ namespace ServiceBouncer
 
         private async void InstallClicked(object sender, EventArgs e)
         {
-            NoteUserActivity();
             await PerformAction(async () =>
             {
                 new InstallationForm().ShowDialog();
@@ -227,7 +214,6 @@ namespace ServiceBouncer
 
         private async void ConnectButtonClick(object sender, EventArgs e)
         {
-            NoteUserActivity();
             await PerformAction(async () =>
             {
                 if ((string)toolStripConnectButton.Tag == @"Connected")
@@ -243,7 +229,6 @@ namespace ServiceBouncer
 
         private async void ConnectTextBoxKeyDown(object sender, KeyEventArgs e)
         {
-            NoteUserActivity();
             if (e.KeyCode == Keys.Enter)
             {
                 await PerformAction(async () => { await Connect(); });
@@ -415,56 +400,28 @@ namespace ServiceBouncer
 
         private void SetConnectedStatusBar()
         {
-            var inactivityCheckText = "";
-            var inactivityMinutesUntilTermination = GetInactivityMinutesUntilTermination();
-            if (inactivityMinutesUntilTermination.HasValue)
-            {
-                inactivityMinutesUntilTermination = Math.Round(inactivityMinutesUntilTermination.Value);
-                if (inactivityMinutesUntilTermination == 0)
-                {
-                    inactivityMinutesUntilTermination++;
-                }
-                var minuteText = inactivityMinutesUntilTermination == 1 ? "minute" : "minutes";
-                inactivityCheckText = $"Application will exit in {inactivityMinutesUntilTermination.Value} more {minuteText} of inactivity.";
-            }
-
             if (isActive)
             {
                 var backgroundRefreshTimeText = backgroundRefreshSeconds == 1 ? "1 second" : $"{backgroundRefreshSeconds} seconds";
-                toolStripStatusLabel.Text = $@"Connected to {machineHostname}. - Background refresh every {backgroundRefreshTimeText}. {inactivityCheckText}";
+                toolStripStatusLabel.Text = $@"Connected to {machineHostname}. - Background refresh every {backgroundRefreshTimeText}.";
             }
             else
             {
-                toolStripStatusLabel.Text = $@"Connected to {machineHostname}. - Background refresh disabled. {inactivityCheckText}";
+                toolStripStatusLabel.Text = $@"Connected to {machineHostname}. - Background refresh disabled";
             }
-        }
-
-        private void NoteUserActivity()
-        {
-            mostRecentUserActionTime = DateTime.Now;
-            SetConnectedStatusBar();
         }
 
         private void TerminateIfInactive(Object obj, EventArgs args)
         {
-            var inactivityMinutesUntilTermination = GetInactivityMinutesUntilTermination();
-            if (!inactivityMinutesUntilTermination.HasValue) return;
-            if (inactivityMinutesUntilTermination.Value > 0)
-            {
-                SetConnectedStatusBar();
-            } else
+            // Check to see if machine has been in an inactive state for inactivityMinutesUntilAppTermination
+            // Inactive state caused by machine (where app is running) being locked or remotely disconnected
+            // If so, terminate this app
+            if (!machineInactivatedTime.HasValue) return;
+            var minutesSinceInactivated = (DateTime.Now - machineInactivatedTime.Value).TotalMinutes;
+            if (minutesSinceInactivated > inactivityMinutesUntilAppTermination) 
             {
                 Process.GetCurrentProcess().Kill();
             }
-            
-        }
-
-        private double? GetInactivityMinutesUntilTermination()
-        {
-            if (!userInactivityMinutesUntilAppTermination.HasValue) return null;
-            var minutesSinceMostRecentUserActivity = (DateTime.Now - mostRecentUserActionTime).TotalMinutes;
-            var inactivityMinutesUntilTermination = (userInactivityMinutesUntilAppTermination.Value - minutesSinceMostRecentUserActivity);
-            return inactivityMinutesUntilTermination;
         }
 
         private async Task PerformOperationWithCheck(Func<IReadOnlyCollection<ServiceViewModel>, bool> check, Func<ServiceViewModel, Task> actionToPerform)
