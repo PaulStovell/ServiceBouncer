@@ -19,6 +19,9 @@ namespace ServiceBouncer
         private bool isActive;
         private string machineHostname;
         private int backgroundRefreshSeconds;
+        private static DateTime? machineInactivatedTime;
+        private static TimeSpan inactivityTimeUntilAppTermination = TimeSpan.FromMinutes(30);
+        private System.Threading.Timer appTerminationTimer = new System.Threading.Timer(new TimerCallback(TerminateIfInactive), null, Timeout.Infinite, Timeout.Infinite);
 
         public MainForm(string machine)
         {
@@ -56,10 +59,17 @@ namespace ServiceBouncer
             if (e.Reason == Microsoft.Win32.SessionSwitchReason.SessionLock || e.Reason == Microsoft.Win32.SessionSwitchReason.RemoteDisconnect)
             {
                 isActive = false;
+                if (!machineInactivatedTime.HasValue)
+                {
+                    machineInactivatedTime = DateTime.Now;
+                    appTerminationTimer.Change(0, (int)TimeSpan.FromMinutes(1).TotalMilliseconds);
+                }
             }
             else if (e.Reason == Microsoft.Win32.SessionSwitchReason.SessionUnlock || e.Reason == Microsoft.Win32.SessionSwitchReason.RemoteConnect)
             {
                 isActive = true;
+                machineInactivatedTime = null;
+                appTerminationTimer.Change(Timeout.Infinite, Timeout.Infinite);
             }
         }
 
@@ -396,6 +406,14 @@ namespace ServiceBouncer
             else
             {
                 toolStripStatusLabel.Text = $@"Connected to {machineHostname}. - Background refresh disabled";
+            }
+        }
+
+        private static void TerminateIfInactive(Object obj)
+        {
+            if (machineInactivatedTime.HasValue && (DateTime.Now - machineInactivatedTime.Value) > inactivityTimeUntilAppTermination) 
+            {
+                Application.Exit();
             }
         }
 
