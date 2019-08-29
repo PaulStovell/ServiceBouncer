@@ -19,9 +19,9 @@ namespace ServiceBouncer
         private bool isActive;
         private string machineHostname;
         private int backgroundRefreshSeconds;
-        private DateTime? machineInactivatedTime;
-        private int inactivityMinutesUntilAppTermination = 30;
-        private System.Windows.Forms.Timer appTerminationTimer = new System.Windows.Forms.Timer();
+        private static DateTime? machineInactivatedTime;
+        private static TimeSpan inactivityMinutesUntilAppTermination = TimeSpan.FromMinutes(2);
+        private System.Threading.Timer appTerminationTimer = new System.Threading.Timer(new TimerCallback(TerminateIfInactive), null, Timeout.Infinite, Timeout.Infinite);
 
 
         public MainForm(string machine)
@@ -33,9 +33,6 @@ namespace ServiceBouncer
             toolStripConnectToTextBox.Text = machineHostname;
             services = new List<ServiceViewModel>();
             Microsoft.Win32.SystemEvents.SessionSwitch += SessionSwitch;
-            appTerminationTimer.Tick += new EventHandler(TerminateIfInactive);
-            appTerminationTimer.Interval = 60000; 
-            appTerminationTimer.Start();
 
 #if NET45
             //In NET45 startup type requires WMI, so it doesn't auto refresh
@@ -66,12 +63,14 @@ namespace ServiceBouncer
                 if (!machineInactivatedTime.HasValue)
                 {
                     machineInactivatedTime = DateTime.Now;
+                    appTerminationTimer.Change(0, (int)TimeSpan.FromMinutes(1).TotalMilliseconds);
                 }
             }
             else if (e.Reason == Microsoft.Win32.SessionSwitchReason.SessionUnlock || e.Reason == Microsoft.Win32.SessionSwitchReason.RemoteConnect)
             {
                 isActive = true;
                 machineInactivatedTime = null;
+                appTerminationTimer.Change(Timeout.Infinite, Timeout.Infinite);
             }
         }
 
@@ -411,16 +410,11 @@ namespace ServiceBouncer
             }
         }
 
-        private void TerminateIfInactive(Object obj, EventArgs args)
+        private static void TerminateIfInactive(Object obj)
         {
-            // Check to see if machine has been in an inactive state for inactivityMinutesUntilAppTermination
-            // Inactive state caused by machine (where app is running) being locked or remotely disconnected
-            // If so, terminate this app
-            if (!machineInactivatedTime.HasValue) return;
-            var minutesSinceInactivated = (DateTime.Now - machineInactivatedTime.Value).TotalMinutes;
-            if (minutesSinceInactivated > inactivityMinutesUntilAppTermination) 
+            if (machineInactivatedTime.HasValue && (DateTime.Now - machineInactivatedTime.Value) > inactivityMinutesUntilAppTermination) 
             {
-                Process.GetCurrentProcess().Kill();
+                Application.Exit();
             }
         }
 
