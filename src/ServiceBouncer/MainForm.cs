@@ -16,17 +16,15 @@ namespace ServiceBouncer
     public partial class MainForm : Form
     {
         private readonly List<ServiceViewModel> services;
-        private bool isActive;
         private string machineHostname;
         private int backgroundRefreshSeconds;
-        private static DateTime? machineInactivatedTime;
-        private static TimeSpan inactivityTimeUntilAppTermination = TimeSpan.FromMinutes(30);
-        private System.Threading.Timer appTerminationTimer = new System.Threading.Timer(new TimerCallback(TerminateIfInactive), null, Timeout.Infinite, Timeout.Infinite);
+        private DateTime? machineLockedTime;
+        private DateTime? appDeactivatedTime;
+        private bool IsActive => machineLockedTime == null || appDeactivatedTime == null;
 
         public MainForm(string machine)
         {
             InitializeComponent();
-            isActive = true;
             backgroundRefreshSeconds = 1;
             machineHostname = machine;
             toolStripConnectToTextBox.Text = machineHostname;
@@ -39,9 +37,22 @@ namespace ServiceBouncer
 #endif
         }
 
+        private void AppTerminationTimerTick(object sender, EventArgs e)
+        {
+            if (machineLockedTime.HasValue && DateTime.Now.Subtract(machineLockedTime.Value) > TimeSpan.FromMinutes(30))
+            {
+                Application.Exit();
+            }
+
+            if (appDeactivatedTime.HasValue && DateTime.Now.Subtract(appDeactivatedTime.Value) > TimeSpan.FromMinutes(60))
+            {
+                Application.Exit();
+            }
+        }
+
         private async void RefreshTimerTicked(object sender, EventArgs e)
         {
-            if (isActive)
+            if (IsActive)
             {
 #if NET45
                 //Only refresh things which do not use WMI
@@ -58,18 +69,11 @@ namespace ServiceBouncer
         {
             if (e.Reason == Microsoft.Win32.SessionSwitchReason.SessionLock || e.Reason == Microsoft.Win32.SessionSwitchReason.RemoteDisconnect)
             {
-                isActive = false;
-                if (!machineInactivatedTime.HasValue)
-                {
-                    machineInactivatedTime = DateTime.Now;
-                    appTerminationTimer.Change(0, (int)TimeSpan.FromMinutes(1).TotalMilliseconds);
-                }
+                machineLockedTime = DateTime.Now;
             }
             else if (e.Reason == Microsoft.Win32.SessionSwitchReason.SessionUnlock || e.Reason == Microsoft.Win32.SessionSwitchReason.RemoteConnect)
             {
-                isActive = true;
-                machineInactivatedTime = null;
-                appTerminationTimer.Change(Timeout.Infinite, Timeout.Infinite);
+                machineLockedTime = null;
             }
         }
 
@@ -82,20 +86,19 @@ namespace ServiceBouncer
                 dataGridView.Sort(dataGridName, ListSortDirection.Ascending);
             });
 
-            // UX: To make it easy to start searching as soon as you launch.
-            this.toolStripFilterBox.Focus();
+            toolStripFilterBox.Focus();
         }
 
         private void FormActivated(object sender, EventArgs e)
         {
-            isActive = true;
+            appDeactivatedTime = null;
             SetTitle();
             SetConnectedStatusBar();
         }
 
         private void FormDeactivated(object sender, EventArgs e)
         {
-            isActive = false;
+            appDeactivatedTime = DateTime.Now;
             SetTitle();
             SetConnectedStatusBar();
         }
@@ -148,7 +151,6 @@ namespace ServiceBouncer
                     await x.Delete();
                     Thread.Sleep(500);
                     await Reload();
-
                 });
         }
 
@@ -173,7 +175,7 @@ namespace ServiceBouncer
                 {
                     if (s.Count > 1)
                     {
-                        MessageBox.Show(@"Please only select 1 sevice to view in explorer", @"View In Explorer", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(@"Please only select 1 service to view in explorer", @"View In Explorer", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return false;
                     }
 
@@ -188,7 +190,7 @@ namespace ServiceBouncer
             {
                 if (s.Count > 1)
                 {
-                    MessageBox.Show(@"Please only select 1 sevice to view assembly info", @"Assembly Info", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(@"Please only select 1 service to view assembly info", @"Assembly Info", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return false;
                 }
 
@@ -254,10 +256,10 @@ namespace ServiceBouncer
             }
             catch (Exception e) when (ExceptionIsAccessDenied(e))
             {
-                var prompt = new CredentialManagement.VistaPrompt
+                var prompt = new VistaPrompt
                 {
                     Title = "Access denied",
-                    Message = $"Enter administator credentials for {machineHostname}"
+                    Message = $"Enter administrator credentials for {machineHostname}"
                 };
 
                 if (prompt.ShowDialog() == CredentialManagement.DialogResult.OK)
@@ -385,7 +387,7 @@ namespace ServiceBouncer
 
         private void SetTitle()
         {
-            if (isActive && services.Any())
+            if (IsActive && services.Any())
             {
                 var titles = services.GroupBy(s => s.Status).Select(s => (string.IsNullOrWhiteSpace(s.Key) ? "Unknown" : s.Key) + ": " + s.Count());
                 Text = $@"Service Bouncer - Total: {services.Count}, {string.Join(", ", titles)}";
@@ -398,7 +400,7 @@ namespace ServiceBouncer
 
         private void SetConnectedStatusBar()
         {
-            if (isActive)
+            if (IsActive)
             {
                 var backgroundRefreshTimeText = backgroundRefreshSeconds == 1 ? "1 second" : $"{backgroundRefreshSeconds} seconds";
                 toolStripStatusLabel.Text = $@"Connected to {machineHostname}. - Background refresh every {backgroundRefreshTimeText}.";
@@ -406,14 +408,6 @@ namespace ServiceBouncer
             else
             {
                 toolStripStatusLabel.Text = $@"Connected to {machineHostname}. - Background refresh disabled";
-            }
-        }
-
-        private static void TerminateIfInactive(Object obj)
-        {
-            if (machineInactivatedTime.HasValue && (DateTime.Now - machineInactivatedTime.Value) > inactivityTimeUntilAppTermination) 
-            {
-                Application.Exit();
             }
         }
 
@@ -466,7 +460,6 @@ namespace ServiceBouncer
                 }, disableToolstrip);
             }
         }
-
 
         private async Task PerformAction(Func<Task> actionToPerform, bool disableToolstrip = true)
         {
