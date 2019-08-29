@@ -20,9 +20,8 @@ namespace ServiceBouncer
         private string machineHostname;
         private int backgroundRefreshSeconds;
         private static DateTime? machineInactivatedTime;
-        private static TimeSpan inactivityMinutesUntilAppTermination = TimeSpan.FromMinutes(2);
+        private static TimeSpan inactivityTimeUntilAppTermination = TimeSpan.FromMinutes(30);
         private System.Threading.Timer appTerminationTimer = new System.Threading.Timer(new TimerCallback(TerminateIfInactive), null, Timeout.Infinite, Timeout.Infinite);
-
 
         public MainForm(string machine)
         {
@@ -412,7 +411,7 @@ namespace ServiceBouncer
 
         private static void TerminateIfInactive(Object obj)
         {
-            if (machineInactivatedTime.HasValue && (DateTime.Now - machineInactivatedTime.Value) > inactivityMinutesUntilAppTermination) 
+            if (machineInactivatedTime.HasValue && (DateTime.Now - machineInactivatedTime.Value) > inactivityTimeUntilAppTermination) 
             {
                 Application.Exit();
             }
