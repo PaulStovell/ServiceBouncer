@@ -328,9 +328,16 @@ namespace ServiceBouncer
             var sortOrder = ListSortDirection.Ascending;
             if (dataGridView.SortOrder == SortOrder.Descending) sortOrder = ListSortDirection.Descending;
 
-            if (!string.IsNullOrWhiteSpace(toolStripFilterBox.Text))
+            var searchTerm = toolStripFilterBox.Text;
+            if (!string.IsNullOrWhiteSpace(searchTerm))
             {
-                dataGridView.DataSource = new SortableBindingList<ServiceViewModel>(services.Where(service => service.Name.IndexOf(toolStripFilterBox.Text, StringComparison.OrdinalIgnoreCase) >= 0).ToList());
+                var filteredServices = services
+                    .Where(service =>
+                        service.Name.IndexOf(searchTerm, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                        (service.Description ?? string.Empty).IndexOf(searchTerm, StringComparison.OrdinalIgnoreCase) >= 0)
+                    .ToList();
+
+                dataGridView.DataSource = new SortableBindingList<ServiceViewModel>(filteredServices);
             }
             else
             {
