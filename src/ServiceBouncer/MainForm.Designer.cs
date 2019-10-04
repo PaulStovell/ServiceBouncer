@@ -38,6 +38,7 @@
             this.dataGridView = new System.Windows.Forms.DataGridView();
             this.dataGridStatusIcon = new System.Windows.Forms.DataGridViewImageColumn();
             this.dataGridName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridDescription = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridStatupType = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.contextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
@@ -146,6 +147,7 @@
             this.dataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.dataGridStatusIcon,
             this.dataGridName,
+            this.dataGridDescription,
             this.dataGridStatus,
             this.dataGridStatupType});
             this.dataGridView.ContextMenuStrip = this.contextMenu;
@@ -200,6 +202,15 @@
             this.dataGridName.HeaderText = "Display Name";
             this.dataGridName.Name = "dataGridName";
             this.dataGridName.ReadOnly = true;
+            // 
+            // dataGridDescription
+            // 
+            this.dataGridDescription.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.dataGridDescription.DataPropertyName = "Description";
+            this.dataGridName.FillWeight = 40.125F;
+            this.dataGridDescription.HeaderText = "Description";
+            this.dataGridDescription.Name = "dataGridDescription";
+            this.dataGridDescription.ReadOnly = true;
             // 
             // dataGridStatus
             // 
@@ -636,6 +647,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.DataGridViewImageColumn dataGridStatusIcon;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridName;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridDescription;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridStatus;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridStatupType;
         private System.Windows.Forms.StatusStrip statusStrip;

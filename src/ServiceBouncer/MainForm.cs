@@ -55,9 +55,10 @@ namespace ServiceBouncer
             if (IsActive)
             {
 #if NET45
-                //Only refresh things which do not use WMI
+                //Only refresh things which do not use WMI (i.e. Startup Type and Description are not refreshed)
                 await PerformBackgroundOperation(x => x.Refresh(ServiceViewModel.RefreshData.DisplayName, ServiceViewModel.RefreshData.ServiceName, ServiceViewModel.RefreshData.Status));
 #elif NET461
+                //Only refresh things which do not use WMI (i.e. Description is not refreshed)
                 await PerformBackgroundOperation(x => x.Refresh(ServiceViewModel.RefreshData.DisplayName, ServiceViewModel.RefreshData.ServiceName, ServiceViewModel.RefreshData.Status, ServiceViewModel.RefreshData.Startup));
 #endif
                 SetTitle();
@@ -249,7 +250,13 @@ namespace ServiceBouncer
                     services.Add(model);
                 }
 
-                await PerformBackgroundOperation(x => x.Refresh(ServiceViewModel.RefreshData.DisplayName, ServiceViewModel.RefreshData.ServiceName, ServiceViewModel.RefreshData.Status, ServiceViewModel.RefreshData.Startup));
+                await PerformBackgroundOperation(x => x.Refresh(
+                    ServiceViewModel.RefreshData.DisplayName,
+                    ServiceViewModel.RefreshData.ServiceName,
+                    ServiceViewModel.RefreshData.Description,
+                    ServiceViewModel.RefreshData.Status,
+                    ServiceViewModel.RefreshData.Startup));
+
                 PopulateFilteredDataview();
                 SetTitle();
                 return true;

@@ -18,6 +18,7 @@ namespace ServiceBouncer
         public event PropertyChangedEventHandler PropertyChanged;
         public string Name { get; private set; }
         public string ServiceName { get; private set; }
+        public string Description { get; private set; }
         public string Status { get; private set; }
         public string StartupType { get; private set; }
         public Image StatusIcon { get; private set; }
@@ -174,6 +175,7 @@ namespace ServiceBouncer
         {
             DisplayName,
             ServiceName,
+            Description,
             Status,
             Startup
         }
@@ -205,6 +207,16 @@ namespace ServiceBouncer
                             {
                                 ServiceName = controller.ServiceName;
                                 changedEvents.Add("ServiceName");
+                            }
+                        }
+
+                        if (refreshData.Contains(RefreshData.Description))
+                        {
+                            var description = controller.GetDescription();
+                            if (Description != description)
+                            {
+                                Description = description;
+                                changedEvents.Add("Description");
                             }
                         }
 
