@@ -55,9 +55,10 @@ namespace ServiceBouncer
             if (IsActive)
             {
 #if NET45
-                //Only refresh things which do not use WMI
+                //Only refresh things which do not use WMI (i.e. Startup Type and Description are not refreshed)
                 await PerformBackgroundOperation(x => x.Refresh(ServiceViewModel.RefreshData.DisplayName, ServiceViewModel.RefreshData.ServiceName, ServiceViewModel.RefreshData.Status));
 #elif NET461
+                //Only refresh things which do not use WMI (i.e. Description is not refreshed)
                 await PerformBackgroundOperation(x => x.Refresh(ServiceViewModel.RefreshData.DisplayName, ServiceViewModel.RefreshData.ServiceName, ServiceViewModel.RefreshData.Status, ServiceViewModel.RefreshData.Startup));
 #endif
                 SetTitle();
@@ -249,7 +250,13 @@ namespace ServiceBouncer
                     services.Add(model);
                 }
 
-                await PerformBackgroundOperation(x => x.Refresh(ServiceViewModel.RefreshData.DisplayName, ServiceViewModel.RefreshData.ServiceName, ServiceViewModel.RefreshData.Status, ServiceViewModel.RefreshData.Startup));
+                await PerformBackgroundOperation(x => x.Refresh(
+                    ServiceViewModel.RefreshData.DisplayName,
+                    ServiceViewModel.RefreshData.ServiceName,
+                    ServiceViewModel.RefreshData.Description,
+                    ServiceViewModel.RefreshData.Status,
+                    ServiceViewModel.RefreshData.Startup));
+
                 PopulateFilteredDataview();
                 SetTitle();
                 return true;
@@ -321,9 +328,16 @@ namespace ServiceBouncer
             var sortOrder = ListSortDirection.Ascending;
             if (dataGridView.SortOrder == SortOrder.Descending) sortOrder = ListSortDirection.Descending;
 
-            if (!string.IsNullOrWhiteSpace(toolStripFilterBox.Text))
+            var searchTerm = toolStripFilterBox.Text;
+            if (!string.IsNullOrWhiteSpace(searchTerm))
             {
-                dataGridView.DataSource = new SortableBindingList<ServiceViewModel>(services.Where(service => service.Name.IndexOf(toolStripFilterBox.Text, StringComparison.OrdinalIgnoreCase) >= 0).ToList());
+                var filteredServices = services
+                    .Where(service =>
+                        service.Name.IndexOf(searchTerm, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                        (service.Description ?? string.Empty).IndexOf(searchTerm, StringComparison.OrdinalIgnoreCase) >= 0)
+                    .ToList();
+
+                dataGridView.DataSource = new SortableBindingList<ServiceViewModel>(filteredServices);
             }
             else
             {

@@ -78,6 +78,14 @@ namespace ServiceBouncer.Extensions
             }
         }
 
+        public static string GetDescription(this ServiceController controller)
+        {
+            using (var wmiManagementObject = controller.GetNewWmiManagementObject())
+            {
+                return wmiManagementObject["Description"].ToString();
+            }
+        }
+
 #if NET45
         //NET45 PolyFil as controller doesn't have StartType
         public static string GetStartupType(this ServiceController controller)
