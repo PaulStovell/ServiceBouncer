@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Management;
 using System.ServiceProcess;
@@ -82,7 +83,23 @@ namespace ServiceBouncer.Extensions
         {
             using (var wmiManagementObject = controller.GetNewWmiManagementObject())
             {
-                return wmiManagementObject["Description"].ToString();
+                return wmiManagementObject["Description"]?.ToString();
+            }
+        }
+
+        public static string GetLogOnAs(this ServiceController controller)
+        {
+            using (var wmiManagementObject = controller.GetNewWmiManagementObject())
+            {
+                const string localSystemAccountName = "LocalSystem";
+
+                var logOnAs = wmiManagementObject["StartName"]?.ToString();
+                if (string.IsNullOrWhiteSpace(logOnAs) || logOnAs.Equals(localSystemAccountName, StringComparison.OrdinalIgnoreCase))
+                {
+                    logOnAs = localSystemAccountName;
+                }
+
+                return logOnAs;
             }
         }
 
