@@ -41,6 +41,7 @@
             this.dataGridDescription = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridStatupType = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridLogOnAs = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.contextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.contextMenuStartItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStopItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -149,7 +150,8 @@
             this.dataGridName,
             this.dataGridDescription,
             this.dataGridStatus,
-            this.dataGridStatupType});
+            this.dataGridStatupType,
+            this.dataGridLogOnAs});
             this.dataGridView.ContextMenuStrip = this.contextMenu;
             this.dataGridView.DataSource = this.serviceViewModelBindingSource;
             dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
@@ -231,6 +233,16 @@
             this.dataGridStatupType.Name = "dataGridStatupType";
             this.dataGridStatupType.ReadOnly = true;
             this.dataGridStatupType.Width = 101;
+            // 
+            // dataGridLogOnAs
+            // 
+            this.dataGridLogOnAs.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.dataGridLogOnAs.DataPropertyName = "LogOnAs";
+            this.dataGridLogOnAs.FillWeight = 209.125F;
+            this.dataGridLogOnAs.HeaderText = "Log On As";
+            this.dataGridLogOnAs.Name = "dataGridLogOnAs";
+            this.dataGridLogOnAs.ReadOnly = true;
+            this.dataGridLogOnAs.Width = 101;
             // 
             // contextMenu
             // 
@@ -650,6 +662,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridDescription;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridStatus;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridStatupType;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridLogOnAs;
         private System.Windows.Forms.StatusStrip statusStrip;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel;
         private System.Windows.Forms.Timer appTerminationTimer;

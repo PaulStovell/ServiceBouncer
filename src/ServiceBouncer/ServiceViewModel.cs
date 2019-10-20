@@ -21,6 +21,7 @@ namespace ServiceBouncer
         public string Description { get; private set; }
         public string Status { get; private set; }
         public string StartupType { get; private set; }
+        public string LogOnAs { get; private set; }
         public Image StatusIcon { get; private set; }
 
         public ServiceViewModel(ServiceController controller)
@@ -177,7 +178,8 @@ namespace ServiceBouncer
             ServiceName,
             Description,
             Status,
-            Startup
+            Startup,
+            LogOnAs,
         }
 
         public async Task Refresh(params RefreshData[] refreshData)
@@ -239,6 +241,16 @@ namespace ServiceBouncer
                             {
                                 StartupType = startup;
                                 changedEvents.Add("StartupType");
+                            }
+                        }
+
+                        if (refreshData.Contains(RefreshData.LogOnAs))
+                        {
+                            var logOnAs = controller.GetLogOnAs();
+                            if (LogOnAs != logOnAs)
+                            {
+                                LogOnAs = logOnAs;
+                                changedEvents.Add("LogOnAs");
                             }
                         }
                     }
