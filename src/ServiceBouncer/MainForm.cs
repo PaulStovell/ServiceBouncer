@@ -33,8 +33,10 @@ namespace ServiceBouncer
 
 #if NET45
             //In NET45 startup type requires WMI, so it doesn't auto refresh
-            dataGridStatupType.HeaderText = $@"{dataGridStatupType.HeaderText} (No Auto Refresh)";
+            dataGridStatupType.HeaderText = $@"{dataGridStatupType.HeaderText}*";
 #endif
+            dataGridDescription.HeaderText = $@"{dataGridDescription.HeaderText}*";
+            dataGridLogOnAs.HeaderText = $@"{dataGridLogOnAs.HeaderText}*";
         }
 
         private void AppTerminationTimerTick(object sender, EventArgs e)
@@ -418,7 +420,7 @@ namespace ServiceBouncer
             if (IsActive)
             {
                 var backgroundRefreshTimeText = backgroundRefreshSeconds == 1 ? "1 second" : $"{backgroundRefreshSeconds} seconds";
-                toolStripStatusLabel.Text = $@"Connected to {machineHostname}. - Background refresh every {backgroundRefreshTimeText}.";
+                toolStripStatusLabel.Text = $@"Connected to {machineHostname}. - Background refresh every {backgroundRefreshTimeText}. - Columns marked '*' will not refresh.";
             }
             else
             {
