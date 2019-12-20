@@ -30,6 +30,8 @@ Target.create "Build" (fun _ ->
 
     MSBuild.build (setParams "NET45") (srcDir.FullName @@ "ServiceBouncer.sln")
     MSBuild.build (setParams "NET461") (srcDir.FullName @@ "ServiceBouncer.sln")
+	MSBuild.build (setParams "NET471") (srcDir.FullName @@ "ServiceBouncer.sln")
+	MSBuild.build (setParams "NET48") (srcDir.FullName @@ "ServiceBouncer.sln")
 )
 
 Target.create "Package" (fun _ ->

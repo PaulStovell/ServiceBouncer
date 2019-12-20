@@ -11,6 +11,8 @@
   <files>
     <file src="ServiceBouncer\bin\Release\NET45\**" target="Content\NET45" />
     <file src="ServiceBouncer\bin\Release\NET461\**" target="Content\NET461" />
+	<file src="ServiceBouncer\bin\Release\NET471\**" target="Content\NET471" />
+	<file src="ServiceBouncer\bin\Release\NET48\**" target="Content\NET48" />
     <file src="Deploy\deploy.ps1" target="deploy.ps1" />
   </files>
 </package>

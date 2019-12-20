@@ -1,4 +1,4 @@
-framework: net45, net461
+framework: net45, net461, net471, net48
 redirects: on
 source https://www.nuget.org/api/v2
 
@@ -14,3 +14,4 @@ group BuildTools
     nuget Fake.IO.Zip
     nuget Nuget.CommandLine
     clitool dotnet-fake
+

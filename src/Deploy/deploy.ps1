@@ -20,9 +20,17 @@ elseif($FrameworkValue -lt 394254)
 {
 	$FrameworkNeeded = "NET45"
 }
-else
+elseif($FrameworkValue -lt 461308)
 {
 	$FrameworkNeeded = "NET461"
+}
+elseif($FrameworkValue -lt 528040)
+{
+	$FrameworkNeeded = "NET471"
+}
+else
+{
+	$FrameworkNeeded = "NET48"
 }
 
 $ServiceBouncer = Get-Process ServiceBouncer -ErrorAction SilentlyContinue
