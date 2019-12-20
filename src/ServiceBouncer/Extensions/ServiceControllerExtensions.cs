@@ -52,7 +52,7 @@ namespace ServiceBouncer.Extensions
             var isUnc = path.StartsWith(@"\\");
             if (isUnc)
             {
-                //no need to reformat 
+                //no need to reformat
                 return path;
             }
 
@@ -112,11 +112,13 @@ namespace ServiceBouncer.Extensions
                 return wmiManagementObject["StartMode"].ToString();
             }
         }
-#elif NET461
+#elif NET461 || NET471 || NET48
+
         public static string GetStartupType(this ServiceController controller)
         {
             return controller.StartType.ToString();
         }
+
 #endif
     }
 }

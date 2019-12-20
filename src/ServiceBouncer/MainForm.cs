@@ -57,7 +57,7 @@ namespace ServiceBouncer
 #if NET45
                 //Only refresh things which do not use WMI (i.e. Startup Type, Description, and Log On As are not refreshed)
                 await PerformBackgroundOperation(x => x.Refresh(ServiceViewModel.RefreshData.DisplayName, ServiceViewModel.RefreshData.ServiceName, ServiceViewModel.RefreshData.Status));
-#elif NET461
+#elif NET461 || NET471 || NET48
                 //Only refresh things which do not use WMI (i.e. Description and Log On As are not refreshed)
                 await PerformBackgroundOperation(x => x.Refresh(ServiceViewModel.RefreshData.DisplayName, ServiceViewModel.RefreshData.ServiceName, ServiceViewModel.RefreshData.Status, ServiceViewModel.RefreshData.Startup));
 #endif

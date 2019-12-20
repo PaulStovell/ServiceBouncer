@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ServiceBouncer
 {
-    static class EnvHelper
+    public static class EnvHelper
     {
         /// <summary>
         /// Is this the current local machine?
