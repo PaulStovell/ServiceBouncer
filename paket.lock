@@ -11,7 +11,6 @@ NUGET
   remote: https://www.nuget.org/api/v2
     BlackFox.VsWhere (1.0)
       FSharp.Core (>= 4.2.3)
-    dotnet-fake (5.19) - clitool: true
     Fake.Core.CommandLineParsing (5.19)
       FParsec (>= 1.0.3)
       FSharp.Core (>= 4.7)
@@ -47,7 +46,7 @@ NUGET
       Fake.Core.Environment (>= 5.19)
       Fake.Core.FakeVar (>= 5.19)
       FSharp.Core (>= 4.7)
-    Fake.DotNet.MsBuild (5.19)
+    Fake.DotNet.MSBuild (5.19)
       BlackFox.VsWhere (>= 1.0)
       Fake.Core.Environment (>= 5.19)
       Fake.Core.Process (>= 5.19)

@@ -13,5 +13,4 @@ group BuildTools
     nuget Fake.DotNet.MSBuild
     nuget Fake.IO.Zip
     nuget Nuget.CommandLine
-    clitool dotnet-fake
 

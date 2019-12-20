@@ -1,29 +1,30 @@
 @echo off
 setlocal
-set PAKET_SKIP_RESTORE_TARGETS=true
 color 07
+pushd %~dp0
+cd .fake-script
 cls
 
 ECHO ----------------------------
-ECHO Restore Tools
+ECHO Update Paket
 ECHO ----------------------------
-dotnet tool restore
+dotnet tool update paket
 if errorlevel 1 (
   GOTO :end
 )
 
 ECHO ----------------------------
-ECHO Restore
+ECHO Update Fake
 ECHO ----------------------------
-dotnet paket restore
+dotnet tool update fake-cli
 if errorlevel 1 (
   GOTO :end
 )
 
 ECHO ----------------------------
-ECHO Run Fake
+ECHO Paket Update
 ECHO ----------------------------
-dotnet fake run build.fsx
+dotnet paket update
 
 :end
 exit /b %errorlevel%
