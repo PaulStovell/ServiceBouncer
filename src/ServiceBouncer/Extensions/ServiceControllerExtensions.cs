@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 using System.Management;
 using System.ServiceProcess;
@@ -78,47 +77,5 @@ namespace ServiceBouncer.Extensions
                 wmiManagementObject.InvokeMethod("ChangeStartMode", parameters);
             }
         }
-
-        public static string GetDescription(this ServiceController controller)
-        {
-            using (var wmiManagementObject = controller.GetNewWmiManagementObject())
-            {
-                return wmiManagementObject["Description"]?.ToString();
-            }
-        }
-
-        public static string GetLogOnAs(this ServiceController controller)
-        {
-            using (var wmiManagementObject = controller.GetNewWmiManagementObject())
-            {
-                const string localSystemAccountName = "LocalSystem";
-
-                var logOnAs = wmiManagementObject["StartName"]?.ToString();
-                if (string.IsNullOrWhiteSpace(logOnAs) || logOnAs.Equals(localSystemAccountName, StringComparison.OrdinalIgnoreCase))
-                {
-                    logOnAs = localSystemAccountName;
-                }
-
-                return logOnAs;
-            }
-        }
-
-#if NET45
-        //NET45 PolyFil as controller doesn't have StartType
-        public static string GetStartupType(this ServiceController controller)
-        {
-            using (var wmiManagementObject = controller.GetNewWmiManagementObject())
-            {
-                return wmiManagementObject["StartMode"].ToString();
-            }
-        }
-#elif NET461 || NET471 || NET48
-
-        public static string GetStartupType(this ServiceController controller)
-        {
-            return controller.StartType.ToString();
-        }
-
-#endif
     }
 }

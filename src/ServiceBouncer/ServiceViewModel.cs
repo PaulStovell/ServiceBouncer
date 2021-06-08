@@ -1,10 +1,11 @@
 using ServiceBouncer.Extensions;
+using ServiceBouncer.Properties;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
+using System.Management;
 using System.Reflection;
 using System.ServiceProcess;
 using System.Text;
@@ -14,7 +15,6 @@ namespace ServiceBouncer
 {
     public sealed class ServiceViewModel : INotifyPropertyChanged
     {
-        private readonly ServiceController controller;
         public event PropertyChangedEventHandler PropertyChanged;
         public string Name { get; private set; }
         public string ServiceName { get; private set; }
@@ -23,119 +23,152 @@ namespace ServiceBouncer
         public string StartupType { get; private set; }
         public string LogOnAs { get; private set; }
         public Image StatusIcon { get; private set; }
+        public string MachineName { get; private set; }
 
-        public ServiceViewModel(ServiceController controller)
+        private const string LOCAL_SYSTEM_ACCOUNT_NAME = "LocalSystem";
+
+        public ServiceViewModel(string machineName, ManagementBaseObject wmiObject)
         {
-            this.controller = controller;
+            MachineName = machineName;
+            FillFromWmiObject(wmiObject);
+        }
+
+        private void FillFromWmiObject(ManagementBaseObject wmiObject)
+        {
+            Name = wmiObject["DisplayName"]?.ToString();
+            ServiceName = wmiObject["Name"]?.ToString();
+            Description = wmiObject["Description"]?.ToString();
+            Status = wmiObject["State"].ToString();
+            StatusIcon = GetIcon(Status);
+            StartupType = wmiObject["StartMode"].ToString();
+
+            LogOnAs = wmiObject["StartName"]?.ToString();
+            if (string.IsNullOrWhiteSpace(LogOnAs) || LogOnAs.Equals(LOCAL_SYSTEM_ACCOUNT_NAME, StringComparison.OrdinalIgnoreCase))
+            {
+                LogOnAs = LOCAL_SYSTEM_ACCOUNT_NAME;
+            }
         }
 
         public async Task Start()
         {
-            if (controller.Status == ServiceControllerStatus.Stopped)
+            using (var controller = new ServiceController(Name, MachineName))
             {
-                await Task.Run(() => controller.Start());
-                await Refresh(RefreshData.Status);
-            }
-            else if (controller.Status == ServiceControllerStatus.Paused)
-            {
-                await Task.Run(() => controller.Continue());
-                await Refresh(RefreshData.Status);
+                if (controller.Status == ServiceControllerStatus.Stopped)
+                    await Task.Run(() => controller.Start());
+                else if (controller.Status == ServiceControllerStatus.Paused)
+                    await Task.Run(() => controller.Continue());
             }
         }
 
         public async Task Restart()
         {
-            if (controller.Status == ServiceControllerStatus.Running || controller.Status == ServiceControllerStatus.Paused)
+            using (var controller = new ServiceController(Name, MachineName))
             {
-                await Task.Run(() =>
+                if (controller.Status == ServiceControllerStatus.Running || controller.Status == ServiceControllerStatus.Paused)
                 {
-                    controller.Stop();
-                    controller.WaitForStatus(ServiceControllerStatus.Stopped, TimeSpan.FromSeconds(60));
-
-                    if (controller.Status != ServiceControllerStatus.Stopped)
+                    await Task.Run(() =>
                     {
-                        throw new Exception("The service did not stop within 60 seconds, you will need to start manually");
-                    }
+                        controller.Stop();
+                        controller.WaitForStatus(ServiceControllerStatus.Stopped, TimeSpan.FromSeconds(60));
 
-                    controller.Start();
-                });
+                        if (controller.Status != ServiceControllerStatus.Stopped)
+                        {
+                            throw new Exception("The service did not stop within 60 seconds, you will need to start manually");
+                        }
 
-                await Refresh(RefreshData.Status);
+                        controller.Start();
+                    });
+                }
             }
         }
 
         public async Task Stop()
         {
-            if (controller.Status == ServiceControllerStatus.Running || controller.Status == ServiceControllerStatus.Paused)
+            using (var controller = new ServiceController(Name, MachineName))
             {
-                await Task.Run(() => controller.Stop());
-                await Refresh(RefreshData.Status);
+                if (controller.Status == ServiceControllerStatus.Running || controller.Status == ServiceControllerStatus.Paused)
+                {
+                    await Task.Run(() => controller.Stop());
+                }
             }
         }
 
         public async Task Pause()
         {
-            if (controller.Status == ServiceControllerStatus.Running)
+            using (var controller = new ServiceController(Name, MachineName))
             {
-                if (controller.CanPauseAndContinue)
+                if (controller.Status == ServiceControllerStatus.Running)
                 {
-                    await Task.Run(() => controller.Pause());
-                    await Refresh(RefreshData.Status);
-                }
-                else
-                {
-                    throw new Exception("Cannot pause this service");
+                    if (controller.CanPauseAndContinue)
+                    {
+                        await Task.Run(() => controller.Pause());
+                    }
+                    else
+                    {
+                        throw new Exception("Cannot pause this service");
+                    }
                 }
             }
         }
 
         public async Task Delete()
         {
-            if (controller.Status == ServiceControllerStatus.Running)
+            using (var controller = new ServiceController(Name, MachineName))
             {
-                await Task.Run(() => controller.Stop());
+                if (controller.Status == ServiceControllerStatus.Running)
+                {
+                    await Task.Run(() => controller.Stop());
+                }
+                await Task.Run(() => Process.Start("sc.exe", "delete \"" + ServiceName + "\""));
             }
-            await Task.Run(() => Process.Start("sc.exe", "delete \"" + ServiceName + "\""));
         }
 
         public async Task SetStartupType(ServiceStartMode newType)
         {
-            await Task.Run(() => controller.SetStartupType(newType));
-            await Refresh(RefreshData.Startup);
+            using (var controller = new ServiceController(Name, MachineName))
+            {
+                await Task.Run(() => controller.SetStartupType(newType));
+            }
         }
 
         public async Task OpenServiceInExplorer()
         {
-            await Task.Run(() =>
+            using (var controller = new ServiceController(Name, MachineName))
             {
-                var path = controller.GetExecutablePath();
-                Process.Start("explorer.exe", $"/select, \"{path.FullName}\"");
-            });
+                await Task.Run(() =>
+                {
+                    var path = controller.GetExecutablePath();
+                    Process.Start("explorer.exe", $"/select, \"{path.FullName}\"");
+                });
+            }
         }
 
         public async Task<string> GetAssemblyInfo()
         {
-            return await Task.Run(() =>
+            using (var controller = new ServiceController(Name, MachineName))
             {
-                var path = controller.GetExecutablePath();
-                try
+                return await Task.Run(() =>
                 {
-                    var assembly = Assembly.LoadFrom(path.FullName);
-                    return BuildAssemblyInfoText(assembly);
-                }
-                catch (Exception)
-                {
+                    var path = controller.GetExecutablePath();
                     try
                     {
-                        var versionInfo = FileVersionInfo.GetVersionInfo(path.FullName);
-                        return BuildAssemblyInfoText(versionInfo);
+                        var assembly = Assembly.LoadFrom(path.FullName);
+                        return BuildAssemblyInfoText(assembly);
                     }
                     catch (Exception)
                     {
-                        throw new Exception("Unable to find property values");
+                        try
+                        {
+                            var versionInfo = FileVersionInfo.GetVersionInfo(path.FullName);
+                            return BuildAssemblyInfoText(versionInfo);
+                        }
+                        catch (Exception)
+                        {
+                            throw new Exception("Unable to find property values");
+                        }
                     }
-                }
-            });
+                });
+            }
         }
 
         private string BuildAssemblyInfoText(Assembly assembly)
@@ -172,124 +205,87 @@ namespace ServiceBouncer
             return output.ToString();
         }
 
-        public enum RefreshData
+        private Image GetIcon(string status)
         {
-            DisplayName,
-            ServiceName,
-            Description,
-            Status,
-            Startup,
-            LogOnAs,
+            switch (status.ToLower())
+            {
+                case "running":
+                    return Resources.Running_State_Running;
+                case "stopped":
+                    return Resources.Running_State_Stopped;
+                case "startpending":
+                    return Resources.Running_State_StartPending;
+                case "stoppending":
+                    return Resources.Running_State_StopPending;
+                case "paused":
+                    return Resources.Running_State_Paused;
+                default:
+                    return Resources.Running_State_Unknown;
+            }
         }
 
-        public async Task Refresh(params RefreshData[] refreshData)
+        internal void UpdateFromWmi(ManagementBaseObject targetInstance)
         {
+            var changedEvents = new List<string>();
+
             try
             {
-                var changed = await Task.Run(() =>
+                var name = targetInstance["DisplayName"]?.ToString();
+                if (Name != name)
                 {
-                    var changedEvents = new List<string>();
+                    Name = name;
+                    changedEvents.Add("Name");
+                }
 
-                    try
-                    {
-                        controller.Refresh();
-
-                        if (refreshData.Contains(RefreshData.DisplayName))
-                        {
-                            if (Name != controller.DisplayName)
-                            {
-                                Name = controller.DisplayName;
-                                changedEvents.Add("Name");
-                            }
-                        }
-
-                        if (refreshData.Contains(RefreshData.ServiceName))
-                        {
-                            if (ServiceName != controller.ServiceName)
-                            {
-                                ServiceName = controller.ServiceName;
-                                changedEvents.Add("ServiceName");
-                            }
-                        }
-
-                        if (refreshData.Contains(RefreshData.Description))
-                        {
-                            var description = controller.GetDescription();
-                            if (Description != description)
-                            {
-                                Description = description;
-                                changedEvents.Add("Description");
-                            }
-                        }
-
-                        if (refreshData.Contains(RefreshData.Status))
-                        {
-                            var statusText = controller.Status.ToString();
-                            if (Status != statusText)
-                            {
-                                Status = controller.Status.ToString();
-                                StatusIcon = GetIcon(Status);
-                                changedEvents.Add("Status");
-                                changedEvents.Add("StatusIcon");
-                            }
-                        }
-
-                        if (refreshData.Contains(RefreshData.Startup))
-                        {
-                            var startup = controller.GetStartupType();
-                            if (StartupType != startup)
-                            {
-                                StartupType = startup;
-                                changedEvents.Add("StartupType");
-                            }
-                        }
-
-                        if (refreshData.Contains(RefreshData.LogOnAs))
-                        {
-                            var logOnAs = controller.GetLogOnAs();
-                            if (LogOnAs != logOnAs)
-                            {
-                                LogOnAs = logOnAs;
-                                changedEvents.Add("LogOnAs");
-                            }
-                        }
-                    }
-                    catch (Exception)
-                    {
-
-                        //Ignored
-                    }
-
-                    return changedEvents;
-                });
-
-                foreach (var item in changed)
+                var serviceName = targetInstance["Name"]?.ToString();
+                if (ServiceName != serviceName)
                 {
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(item));
+                    ServiceName = serviceName;
+                    changedEvents.Add("ServiceName");
+                }
+
+                var description = targetInstance["Description"]?.ToString();
+                if (Description != description)
+                {
+                    Description = description;
+                    changedEvents.Add("Description");
+                }
+
+                var status = targetInstance["State"].ToString();
+                if (Status != status)
+                {
+                    Status = status;
+                    StatusIcon = GetIcon(Status);
+                    changedEvents.Add("Status");
+                    changedEvents.Add("StatusIcon");
+                }
+
+                var startupType = targetInstance["StartMode"].ToString();
+                if (StartupType != startupType)
+                {
+                    StartupType = startupType;
+                    changedEvents.Add("StartupType");
+                }
+
+                var logOnAs = targetInstance["StartName"]?.ToString();
+                if (string.IsNullOrWhiteSpace(logOnAs) || logOnAs.Equals(LOCAL_SYSTEM_ACCOUNT_NAME, StringComparison.OrdinalIgnoreCase))
+                {
+                    logOnAs = LOCAL_SYSTEM_ACCOUNT_NAME;
+                }
+                if (LogOnAs != logOnAs)
+                {
+                    LogOnAs = logOnAs;
+                    changedEvents.Add("LogOnAs");
                 }
             }
             catch (Exception)
             {
                 //Ignored
             }
-        }
 
-        private Image GetIcon(string status)
-        {
-            switch (status.ToLower())
+            foreach (var item in changedEvents)
             {
-                case "running":
-                    return Properties.Resources.Running_State_Running;
-                case "stopped":
-                    return Properties.Resources.Running_State_Stopped;
-                case "startpending":
-                    return Properties.Resources.Running_State_StartPending;
-                case "stoppending":
-                    return Properties.Resources.Running_State_StopPending;
-                case "paused":
-                    return Properties.Resources.Running_State_Paused;
-                default:
-                    return Properties.Resources.Running_State_Unknown;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(item));
             }
         }
     }

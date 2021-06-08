@@ -8,7 +8,7 @@ namespace ServiceBouncer
 {
     public partial class InstallationForm : Form
     {
-        private bool m_installationInProgress;
+        private bool mInstallationInProgress;
 
         public InstallationForm()
         {
@@ -48,13 +48,13 @@ namespace ServiceBouncer
 
         private async void btnInstall_Click(object sender, EventArgs e)
         {
-            if (m_installationInProgress)
+            if (mInstallationInProgress)
             {
                 MessageBox.Show("One installation is in progress. Please wait until completion.", "One installation is in progress");
                 return;
             }
 
-            m_installationInProgress = true;
+            mInstallationInProgress = true;
 
             Enabled = false;
             Refresh();
@@ -73,9 +73,11 @@ namespace ServiceBouncer
                 case "Automatic":
                     startMode = "auto";
                     break;
+
                 case "Manual":
                     startMode = "demand";
                     break;
+
                 default:
                     startMode = "disabled";
                     break;
@@ -96,11 +98,13 @@ namespace ServiceBouncer
                 {
                     using (var installationProcess = Process.Start(startInfo))
                     {
-                        installationProcess.OutputDataReceived += InstallationProcess_OutputDataReceived;
-                        installationProcess.BeginOutputReadLine();
-                        installationProcess.WaitForExit();
+                        if (installationProcess != null)
+                        {
+                            installationProcess.OutputDataReceived += InstallationProcess_OutputDataReceived;
+                            installationProcess.BeginOutputReadLine();
+                            installationProcess.WaitForExit();
+                        }
                     }
-
                 });
             }
             catch (Exception ex)
@@ -113,7 +117,7 @@ namespace ServiceBouncer
                 MessageBox.Show(ex.Message, "An error occurred during installation", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
-            m_installationInProgress = false;
+            mInstallationInProgress = false;
             Enabled = true;
             Refresh();
             btnInstall.Text = "Install";
@@ -124,7 +128,9 @@ namespace ServiceBouncer
             lblProcessResult.Invoke(new MethodInvoker(() =>
             {
                 if (string.IsNullOrEmpty(e.Data))
+                {
                     return;
+                }
 
                 lblProcessResult.Text += e.Data;
                 lblProcessResult.ForeColor = lblProcessResult.Text.IndexOf("failed", StringComparison.OrdinalIgnoreCase) > -1 ? Color.Red : Color.Green;
@@ -134,7 +140,7 @@ namespace ServiceBouncer
 
         private void InstallationForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (m_installationInProgress)
+            if (mInstallationInProgress)
             {
                 MessageBox.Show("One installation is in progress. Please wait until completion.", "One installation is in progress");
                 e.Cancel = true;

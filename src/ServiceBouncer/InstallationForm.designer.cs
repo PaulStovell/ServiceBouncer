@@ -1,11 +1,14 @@
-﻿namespace ServiceBouncer
+﻿using System.ComponentModel;
+using System.Windows.Forms;
+
+namespace ServiceBouncer
 {
     partial class InstallationForm
     {
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -181,17 +184,17 @@
 
         #endregion
 
-        private System.Windows.Forms.OpenFileDialog installSvcFileSelectionDialog;
-        private System.Windows.Forms.TextBox txtBxServiceExePath;
-        private System.Windows.Forms.Button btnSelectService;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.TextBox txtBxServiceName;
-        private System.Windows.Forms.ComboBox cmbBxOptionStart;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.TextBox txtBxDisplayName;
-        private System.Windows.Forms.Button btnInstall;
-        private System.Windows.Forms.Label lblProcessResult;
+        private OpenFileDialog installSvcFileSelectionDialog;
+        private TextBox txtBxServiceExePath;
+        private Button btnSelectService;
+        private Label label1;
+        private Label label2;
+        private TextBox txtBxServiceName;
+        private ComboBox cmbBxOptionStart;
+        private Label label3;
+        private Label label4;
+        private TextBox txtBxDisplayName;
+        private Button btnInstall;
+        private Label lblProcessResult;
     }
 }
