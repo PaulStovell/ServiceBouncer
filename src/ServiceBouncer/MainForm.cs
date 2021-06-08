@@ -1,16 +1,17 @@
 ﻿using CredentialManagement;
+using Microsoft.Win32;
 using ServiceBouncer.ComponentModel;
+using ServiceBouncer.Properties;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Management;
 using System.ServiceProcess;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DialogResult = System.Windows.Forms.DialogResult;
-using System.Management;
 
 namespace ServiceBouncer
 {
@@ -18,24 +19,22 @@ namespace ServiceBouncer
     {
         private readonly List<ServiceViewModel> services;
         private string machineHostname;
-        private int backgroundRefreshSeconds;
         private DateTime? machineLockedTime;
         private DateTime? appDeactivatedTime;
-        private bool IsActive => machineLockedTime == null || appDeactivatedTime == null;
 
         // WMI Events
         private ManagementEventWatcher modificationEventWatcher;
+
         private ManagementEventWatcher creationEventWatcher;
         private ManagementEventWatcher deletionEventWatcher;
 
         public MainForm(string machine)
         {
             InitializeComponent();
-            backgroundRefreshSeconds = 1;
             machineHostname = machine;
             toolStripConnectToTextBox.Text = machineHostname;
             services = new List<ServiceViewModel>();
-            Microsoft.Win32.SystemEvents.SessionSwitch += SessionSwitch;  // not sure what to do with this after converting to WMI events.  probably good to do something.  perhaps stop listening and reload services on unlock?
+            SystemEvents.SessionSwitch += SessionSwitch;
         }
 
         private void AppTerminationTimerTick(object sender, EventArgs e)
@@ -52,13 +51,13 @@ namespace ServiceBouncer
         }
 
         // PC Locked
-        private void SessionSwitch(object sender, Microsoft.Win32.SessionSwitchEventArgs e)
+        private void SessionSwitch(object sender, SessionSwitchEventArgs e)
         {
-            if (e.Reason == Microsoft.Win32.SessionSwitchReason.SessionLock || e.Reason == Microsoft.Win32.SessionSwitchReason.RemoteDisconnect)
+            if (e.Reason == SessionSwitchReason.SessionLock || e.Reason == SessionSwitchReason.RemoteDisconnect)
             {
                 machineLockedTime = DateTime.Now;
             }
-            else if (e.Reason == Microsoft.Win32.SessionSwitchReason.SessionUnlock || e.Reason == Microsoft.Win32.SessionSwitchReason.RemoteConnect)
+            else if (e.Reason == SessionSwitchReason.SessionUnlock || e.Reason == SessionSwitchReason.RemoteConnect)
             {
                 machineLockedTime = null;
             }
@@ -79,15 +78,11 @@ namespace ServiceBouncer
         private void FormActivated(object sender, EventArgs e)
         {
             appDeactivatedTime = null;
-            SetTitle();
-            SetConnectedStatusBar();
         }
 
         private void FormDeactivated(object sender, EventArgs e)
         {
             appDeactivatedTime = DateTime.Now;
-            SetTitle();
-            SetConnectedStatusBar();
         }
 
         private async void RefreshClicked(object sender, EventArgs e)
@@ -125,11 +120,15 @@ namespace ServiceBouncer
             await PerformOperationWithCheck(s =>
                 {
                     if (s.Count > 1)
+                    {
                         return MessageBox.Show($@"You have selected {s.Count} services(s) to delete, are you sure you want to delete them all?", @"Confirm delete", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.Yes;
+                    }
 
                     var service = s.FirstOrDefault();
                     if (service != null)
+                    {
                         return MessageBox.Show($@"Are you sure you want to delete the '{service.Name}'", @"Confirm delete", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.Yes;
+                    }
 
                     return false;
                 },
@@ -222,7 +221,7 @@ namespace ServiceBouncer
         {
             try
             {
-                ManagementObjectCollection win32_Services = null;
+                ManagementObjectCollection win32Services = null;
 
                 await Task.Run(() =>
                 {
@@ -230,13 +229,12 @@ namespace ServiceBouncer
 
                     if (!string.IsNullOrEmpty(machineHostname) && machineHostname != Environment.MachineName)
                     {
-                        ConnectionOptions options = new ConnectionOptions();
-                        options.Impersonation = System.Management.ImpersonationLevel.Impersonate;
+                        var options = new ConnectionOptions { Impersonation = ImpersonationLevel.Impersonate };
 
-                        ManagementScope scope = new ManagementScope("\\\\" + machineHostname + "\\root\\cimv2", options);
+                        var scope = new ManagementScope("\\\\" + machineHostname + "\\root\\cimv2", options);
                         scope.Connect();
 
-                        ObjectQuery query = new ObjectQuery("SELECT * FROM Win32_Service");
+                        var query = new ObjectQuery("SELECT * FROM Win32_Service");
                         searcher = new ManagementObjectSearcher(scope, query);
                     }
                     else
@@ -244,30 +242,27 @@ namespace ServiceBouncer
                         searcher = new ManagementObjectSearcher("SELECT * FROM Win32_Service");
                     }
 
-                    win32_Services = searcher.Get();
+                    win32Services = searcher.Get();
 
                     modificationEventWatcher?.Dispose();
-                    modificationEventWatcher = new ManagementEventWatcher(searcher.Scope,
-                        new EventQuery("SELECT * FROM __InstanceModificationEvent WITHIN 2 WHERE TargetInstance ISA 'Win32_Service'"));
+                    modificationEventWatcher = new ManagementEventWatcher(searcher.Scope, new EventQuery("SELECT * FROM __InstanceModificationEvent WITHIN 2 WHERE TargetInstance ISA 'Win32_Service'"));
                     modificationEventWatcher.EventArrived += ModificationEventWatcher_EventArrived;
                     modificationEventWatcher.Start();
 
                     creationEventWatcher?.Dispose();
-                    creationEventWatcher = new ManagementEventWatcher(searcher.Scope,
-                        new EventQuery("SELECT * FROM __InstanceCreationEvent WITHIN 2 WHERE TargetInstance ISA 'Win32_Service'"));
+                    creationEventWatcher = new ManagementEventWatcher(searcher.Scope, new EventQuery("SELECT * FROM __InstanceCreationEvent WITHIN 2 WHERE TargetInstance ISA 'Win32_Service'"));
                     creationEventWatcher.EventArrived += CreationEventWatcher_EventArrived;
                     creationEventWatcher.Start();
 
                     deletionEventWatcher?.Dispose();
-                    deletionEventWatcher = new ManagementEventWatcher(searcher.Scope,
-                        new EventQuery("SELECT * FROM __InstanceDeletionEvent WITHIN 2 WHERE TargetInstance ISA 'Win32_Service'"));
-                    deletionEventWatcher.EventArrived += DeletionEventWatcher_EventArrived; ;
+                    deletionEventWatcher = new ManagementEventWatcher(searcher.Scope, new EventQuery("SELECT * FROM __InstanceDeletionEvent WITHIN 2 WHERE TargetInstance ISA 'Win32_Service'"));
+                    deletionEventWatcher.EventArrived += DeletionEventWatcher_EventArrived;
                     deletionEventWatcher.Start();
                 });
 
                 services.Clear();
 
-                foreach (var model in win32_Services)
+                foreach (var model in win32Services)
                 {
                     services.Add(new ServiceViewModel(machineHostname, model));
                 }
@@ -308,7 +303,8 @@ namespace ServiceBouncer
             var serviceName = targetInstance["Name"].ToString();
             services.RemoveAll(x => x.ServiceName == serviceName);
 
-            this.Invoke(new MethodInvoker(delegate {
+            Invoke(new MethodInvoker(delegate
+            {
                 PopulateFilteredDataview();
                 SetTitle();
             }));
@@ -320,7 +316,8 @@ namespace ServiceBouncer
 
             services.Add(new ServiceViewModel(machineHostname, targetInstance));
 
-            this.Invoke(new MethodInvoker(delegate {
+            Invoke(new MethodInvoker(delegate
+            {
                 PopulateFilteredDataview();
                 SetTitle();
             }));
@@ -328,16 +325,15 @@ namespace ServiceBouncer
 
         private void ModificationEventWatcher_EventArrived(object sender, EventArrivedEventArgs e)
         {
-            var previousInstance = (ManagementBaseObject)e.NewEvent["PreviousInstance"];
             var targetInstance = (ManagementBaseObject)e.NewEvent["TargetInstance"];
 
             var serviceName = targetInstance["Name"].ToString();
 
             var modifiedService = services.Find(x => x.ServiceName == serviceName);
-            if (modifiedService == null)
-                return;
 
-            modifiedService.UpdateFromWmi(targetInstance);
+            modifiedService?.UpdateFromWmi(targetInstance);
+
+            Invoke(new MethodInvoker(SetTitle));
         }
 
         private void StartNewProcess(BaseCredentialsPrompt promptResult)
@@ -356,7 +352,7 @@ namespace ServiceBouncer
                 domain = null;
             }
 
-            var commandName = $"{Process.GetCurrentProcess().MainModule.FileName} --machine={machineHostname}";
+            var commandName = $"{Process.GetCurrentProcess().MainModule?.FileName} --machine={machineHostname}";
             RunAs.StartProcess(username, domain, promptResult.Password, RunAs.LogonFlags.NetworkCredentialsOnly, null, commandName, RunAs.CreationFlags.NewProcessGroup, null);
 
             Application.Exit();
@@ -379,7 +375,10 @@ namespace ServiceBouncer
         {
             var sortColumn = dataGridView.SortedColumn;
             var sortOrder = ListSortDirection.Ascending;
-            if (dataGridView.SortOrder == SortOrder.Descending) sortOrder = ListSortDirection.Descending;
+            if (dataGridView.SortOrder == SortOrder.Descending)
+            {
+                sortOrder = ListSortDirection.Descending;
+            }
 
             var searchTerm = toolStripFilterBox.Text;
             if (!string.IsNullOrWhiteSpace(searchTerm))
@@ -414,11 +413,9 @@ namespace ServiceBouncer
                 toolStripConnectButton.Text = @"Disconnect";
                 toolStripConnectButton.ToolTipText = @"Disconnect";
                 toolStripConnectButton.Tag = @"Connected";
-                toolStripConnectButton.Image = Properties.Resources.Disconnect;
+                toolStripConnectButton.Image = Resources.Disconnect;
 
-                backgroundRefreshSeconds = EnvHelper.IsLocalMachine(machineHostname) ? 1 : 30;
-
-                SetConnectedStatusBar();
+                toolStripStatusLabel.Text = $@"Connected to {machineHostname}.";
 
                 foreach (ToolStripItem toolStripItem in toolStrip.Items)
                 {
@@ -434,7 +431,7 @@ namespace ServiceBouncer
             toolStripConnectButton.Text = @"Connect";
             toolStripConnectButton.ToolTipText = @"Connect";
             toolStripConnectButton.Tag = @"Disconnected";
-            toolStripConnectButton.Image = Properties.Resources.Connect;
+            toolStripConnectButton.Image = Resources.Connect;
             toolStripStatusLabel.Text = @"Disconnected";
             services.Clear();
             PopulateFilteredDataview();
@@ -450,7 +447,7 @@ namespace ServiceBouncer
 
         private void SetTitle()
         {
-            if (IsActive && services.Any())
+            if (services.Any())
             {
                 var titles = services.GroupBy(s => s.Status).Select(s => (string.IsNullOrWhiteSpace(s.Key) ? "Unknown" : s.Key) + ": " + s.Count());
                 Text = $@"Service Bouncer - Total: {services.Count}, {string.Join(", ", titles)}";
@@ -461,20 +458,10 @@ namespace ServiceBouncer
             }
         }
 
-        private void SetConnectedStatusBar()
-        {
-            toolStripStatusLabel.Text = $@"Connected to {machineHostname}.";
-        }
-
         private async Task PerformOperationWithCheck(Func<IReadOnlyCollection<ServiceViewModel>, bool> check, Func<ServiceViewModel, Task> actionToPerform)
         {
             var selectedServices = dataGridView.SelectedRows.OfType<DataGridViewRow>().Select(g => g.DataBoundItem).OfType<ServiceViewModel>().ToList();
-            await PerformOperation(check, actionToPerform, selectedServices, true);
-        }
-
-        private async Task PerformBackgroundOperationWithCheck(Func<IReadOnlyCollection<ServiceViewModel>, bool> check, Func<ServiceViewModel, Task> actionToPerform)
-        {
-            await PerformOperation(check, actionToPerform, services.ToList(), false);
+            await PerformOperation(check, actionToPerform, selectedServices);
         }
 
         private async Task PerformOperation(Func<ServiceViewModel, Task> actionToPerform)
@@ -482,12 +469,7 @@ namespace ServiceBouncer
             await PerformOperationWithCheck(i => true, actionToPerform);
         }
 
-        private async Task PerformBackgroundOperation(Func<ServiceViewModel, Task> actionToPerform)
-        {
-            await PerformBackgroundOperationWithCheck(i => true, actionToPerform);
-        }
-
-        private async Task PerformOperation(Func<IReadOnlyCollection<ServiceViewModel>, bool> check, Func<ServiceViewModel, Task> actionToPerform, IReadOnlyCollection<ServiceViewModel> servicesToAction, bool disableToolstrip)
+        private async Task PerformOperation(Func<IReadOnlyCollection<ServiceViewModel>, bool> check, Func<ServiceViewModel, Task> actionToPerform, IReadOnlyCollection<ServiceViewModel> servicesToAction)
         {
             if (check(servicesToAction))
             {
@@ -512,29 +494,25 @@ namespace ServiceBouncer
                     }
 
                     await Task.WhenAll(tasks);
-                }, disableToolstrip);
+                });
             }
         }
 
-        private async Task PerformAction(Func<Task> actionToPerform, bool disableToolstrip = true)
+        private async Task PerformAction(Func<Task> actionToPerform)
         {
-            if (disableToolstrip)
+            foreach (ToolStripItem toolStripItem in toolStrip.Items)
             {
-                foreach (ToolStripItem toolStripItem in toolStrip.Items)
-                {
-                    toolStripItem.Enabled = false;
-                }
+                toolStripItem.Enabled = false;
             }
 
             await actionToPerform();
 
-            if (disableToolstrip)
+            foreach (ToolStripItem toolStripItem in toolStrip.Items)
             {
-                foreach (ToolStripItem toolStripItem in toolStrip.Items)
-                {
-                    toolStripItem.Enabled = true;
-                }
+                toolStripItem.Enabled = true;
             }
+
+            toolStripDeleteButton.Enabled = machineHostname == Environment.MachineName;
         }
     }
 }

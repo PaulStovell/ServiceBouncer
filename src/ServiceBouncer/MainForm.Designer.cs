@@ -1,3 +1,6 @@
+using System.ComponentModel;
+using System.Windows.Forms;
+
 namespace ServiceBouncer
 {
     partial class MainForm
@@ -5,7 +8,7 @@ namespace ServiceBouncer
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -610,54 +613,54 @@ namespace ServiceBouncer
 
         #endregion
 
-        private System.Windows.Forms.ToolStripContainer toolStripContainer;
-        private System.Windows.Forms.ToolStripButton toolStripStartButton;
-        private System.Windows.Forms.ToolStripButton toolStripStopButton;
-        private System.Windows.Forms.DataGridView dataGridView;
-        private System.Windows.Forms.BindingSource serviceViewModelBindingSource;
-        private System.Windows.Forms.ToolStripButton toolStripRestartButton;
-        private System.Windows.Forms.ToolStripTextBox toolStripFilterBox;
-        private System.Windows.Forms.ToolStripButton toolStripRefreshButton;
-        private System.Windows.Forms.ToolStripButton toolStripDeleteButton;
-        private System.Windows.Forms.ContextMenuStrip contextMenu;
-        private System.Windows.Forms.ToolStripMenuItem contextMenuStartItem;
-        private System.Windows.Forms.ToolStripMenuItem contextMenuStopItem;
-        private System.Windows.Forms.ToolStripMenuItem contextMenuRestartItem;
-        private System.Windows.Forms.ToolStripSeparator contextMenuSpacer2;
-        private System.Windows.Forms.ToolStripMenuItem contextMenuRefreshItem;
-        private System.Windows.Forms.ToolStripSeparator contextMenuSpacer1;
-        private System.Windows.Forms.ToolStripMenuItem contextMenuDeleteItem;
-        private System.Windows.Forms.ToolStripDropDownButton toolStripStartupTypeButton;
-        private System.Windows.Forms.ToolStripMenuItem toolStripStartupTypeAutomaticItem;
-        private System.Windows.Forms.ToolStripMenuItem toolStripStartupTypeManualItem;
-        private System.Windows.Forms.ToolStripMenuItem toolStripStartupTypeDisabledItem;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
-        private System.Windows.Forms.ToolStripLabel toolStripFilterIcon;
-        private System.Windows.Forms.ToolStripButton toolStripPauseButton;
-        private System.Windows.Forms.ToolStripMenuItem contextMenuStartupTypeItem;
-        private System.Windows.Forms.ToolStripMenuItem contextStatupTypeAutomatic;
-        private System.Windows.Forms.ToolStripMenuItem contextStartupTypeManual;
-        private System.Windows.Forms.ToolStripMenuItem contextStartupTypeDisabled;
-        private System.Windows.Forms.ToolStrip toolStrip;
-        private System.Windows.Forms.ToolStripSeparator contextMenuSpacer3;
-        private System.Windows.Forms.ToolStripMenuItem contextMenuOpenLocation;
-        private System.Windows.Forms.ToolStripMenuItem contextMenuAssemblyInfo;
-        private System.Windows.Forms.ToolStripButton toolStripExplorerButton;
-        private System.Windows.Forms.ToolStripButton toolStripInfoButton;
-        private System.Windows.Forms.ToolStripButton toolStripInstallButton;
-        private System.Windows.Forms.ToolStripButton toolStripConnectButton;
-        private System.Windows.Forms.ToolStripTextBox toolStripConnectToTextBox;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
-        private System.Windows.Forms.DataGridViewImageColumn dataGridStatusIcon;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridName;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridDescription;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridStatus;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridStatupType;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridLogOnAs;
-        private System.Windows.Forms.StatusStrip statusStrip;
-        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel;
-        private System.Windows.Forms.Timer appTerminationTimer;
+        private ToolStripContainer toolStripContainer;
+        private ToolStripButton toolStripStartButton;
+        private ToolStripButton toolStripStopButton;
+        private DataGridView dataGridView;
+        private BindingSource serviceViewModelBindingSource;
+        private ToolStripButton toolStripRestartButton;
+        private ToolStripTextBox toolStripFilterBox;
+        private ToolStripButton toolStripRefreshButton;
+        private ToolStripButton toolStripDeleteButton;
+        private ContextMenuStrip contextMenu;
+        private ToolStripMenuItem contextMenuStartItem;
+        private ToolStripMenuItem contextMenuStopItem;
+        private ToolStripMenuItem contextMenuRestartItem;
+        private ToolStripSeparator contextMenuSpacer2;
+        private ToolStripMenuItem contextMenuRefreshItem;
+        private ToolStripSeparator contextMenuSpacer1;
+        private ToolStripMenuItem contextMenuDeleteItem;
+        private ToolStripDropDownButton toolStripStartupTypeButton;
+        private ToolStripMenuItem toolStripStartupTypeAutomaticItem;
+        private ToolStripMenuItem toolStripStartupTypeManualItem;
+        private ToolStripMenuItem toolStripStartupTypeDisabledItem;
+        private ToolStripSeparator toolStripSeparator1;
+        private ToolStripSeparator toolStripSeparator2;
+        private ToolStripLabel toolStripFilterIcon;
+        private ToolStripButton toolStripPauseButton;
+        private ToolStripMenuItem contextMenuStartupTypeItem;
+        private ToolStripMenuItem contextStatupTypeAutomatic;
+        private ToolStripMenuItem contextStartupTypeManual;
+        private ToolStripMenuItem contextStartupTypeDisabled;
+        private ToolStrip toolStrip;
+        private ToolStripSeparator contextMenuSpacer3;
+        private ToolStripMenuItem contextMenuOpenLocation;
+        private ToolStripMenuItem contextMenuAssemblyInfo;
+        private ToolStripButton toolStripExplorerButton;
+        private ToolStripButton toolStripInfoButton;
+        private ToolStripButton toolStripInstallButton;
+        private ToolStripButton toolStripConnectButton;
+        private ToolStripTextBox toolStripConnectToTextBox;
+        private ToolStripSeparator toolStripSeparator3;
+        private DataGridViewImageColumn dataGridStatusIcon;
+        private DataGridViewTextBoxColumn dataGridName;
+        private DataGridViewTextBoxColumn dataGridDescription;
+        private DataGridViewTextBoxColumn dataGridStatus;
+        private DataGridViewTextBoxColumn dataGridStatupType;
+        private DataGridViewTextBoxColumn dataGridLogOnAs;
+        private StatusStrip statusStrip;
+        private ToolStripStatusLabel toolStripStatusLabel;
+        private Timer appTerminationTimer;
     }
 }
 

@@ -17,13 +17,13 @@ namespace ServiceBouncer
             Application.ThreadException += (sender, args) => MessageBox.Show(args.Exception.Message, @"Unhandled error", MessageBoxButtons.OK);
 
             Parser.Default.ParseArguments<Options>(commandLine)
-                .WithParsed((options) =>
+                .WithParsed(options =>
                 {
                     var machineName = options.Machine;
                     if (string.IsNullOrWhiteSpace(machineName)) machineName = Environment.MachineName;
                     Application.Run(new MainForm(machineName));
                 })
-                .WithNotParsed((error) =>
+                .WithNotParsed(error =>
                 {
                     Application.Run(new MainForm(Environment.MachineName));
                 });

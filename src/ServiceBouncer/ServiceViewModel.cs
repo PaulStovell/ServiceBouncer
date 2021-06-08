@@ -1,4 +1,5 @@
 using ServiceBouncer.Extensions;
+using ServiceBouncer.Properties;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -114,7 +115,6 @@ namespace ServiceBouncer
         {
             using (var controller = new ServiceController(Name, MachineName))
             {
-                // TODO: log bug.  This needs to be disabled for remote machines since the process is only executed locally.
                 if (controller.Status == ServiceControllerStatus.Running)
                 {
                     await Task.Run(() => controller.Stop());
@@ -205,31 +205,22 @@ namespace ServiceBouncer
             return output.ToString();
         }
 
-        public enum RefreshData
-        {
-            DisplayName,
-            ServiceName,
-            Description,
-            Status,
-            Startup,
-            LogOnAs,
-        }
         private Image GetIcon(string status)
         {
             switch (status.ToLower())
             {
                 case "running":
-                    return Properties.Resources.Running_State_Running;
+                    return Resources.Running_State_Running;
                 case "stopped":
-                    return Properties.Resources.Running_State_Stopped;
+                    return Resources.Running_State_Stopped;
                 case "startpending":
-                    return Properties.Resources.Running_State_StartPending;
+                    return Resources.Running_State_StartPending;
                 case "stoppending":
-                    return Properties.Resources.Running_State_StopPending;
+                    return Resources.Running_State_StopPending;
                 case "paused":
-                    return Properties.Resources.Running_State_Paused;
+                    return Resources.Running_State_Paused;
                 default:
-                    return Properties.Resources.Running_State_Unknown;
+                    return Resources.Running_State_Unknown;
             }
         }
 

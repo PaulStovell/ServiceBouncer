@@ -32,7 +32,7 @@ namespace ServiceBouncer
                 else
                 {
                     var releaseKey = Convert.ToInt32(ndpKey.GetValue("Release"));
-                    if (releaseKey < FrameworkChecker.MinReleaseKey)
+                    if (releaseKey < MinReleaseKey)
                     {
                         validFramework = false;
                     }

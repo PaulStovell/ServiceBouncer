@@ -132,8 +132,7 @@
     <Compile Include="EnvHelper.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="RunAs.cs" />
-    <Compile Include="Extensions\AssemblyExtensions.cs" />
-    <Compile Include="ComponentModel\SortableBindingList`1.cs" />
+    <Compile Include="ComponentModel\SortableBindingList.cs" />
     <Compile Include="FrameworkChecker.cs" />
     <Compile Include="InstallationForm.cs">
       <SubType>Form</SubType>

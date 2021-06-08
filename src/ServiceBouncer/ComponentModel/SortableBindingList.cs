@@ -9,35 +9,16 @@ namespace ServiceBouncer.ComponentModel
         private bool isSorted;
         private ListSortDirection sortDirection = ListSortDirection.Ascending;
         private PropertyDescriptor sortProperty;
-
-        public SortableBindingList()
-        {
-        }
-
+        
         public SortableBindingList(IList<T> list)
             : base(list)
         {
         }
 
-        protected override bool SupportsSortingCore
-        {
-            get { return true; }
-        }
-
-        protected override bool IsSortedCore
-        {
-            get { return isSorted; }
-        }
-
-        protected override ListSortDirection SortDirectionCore
-        {
-            get { return sortDirection; }
-        }
-
-        protected override PropertyDescriptor SortPropertyCore
-        {
-            get { return sortProperty; }
-        }
+        protected override bool SupportsSortingCore => true;
+        protected override bool IsSortedCore => isSorted;
+        protected override ListSortDirection SortDirectionCore => sortDirection;
+        protected override PropertyDescriptor SortPropertyCore => sortProperty;
 
         protected override void RemoveSortCore()
         {
@@ -51,8 +32,7 @@ namespace ServiceBouncer.ComponentModel
             sortProperty = prop;
             sortDirection = direction;
 
-            var list = Items as List<T>;
-            if (list == null)
+            if (!(Items is List<T> list))
             {
                 return;
             }
@@ -90,8 +70,7 @@ namespace ServiceBouncer.ComponentModel
                 return 1;
             }
 
-            var value = xValue as IComparable;
-            if (value != null)
+            if (xValue is IComparable value)
             {
                 return value.CompareTo(yValue);
             }
