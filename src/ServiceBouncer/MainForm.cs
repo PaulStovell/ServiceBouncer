@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DialogResult = System.Windows.Forms.DialogResult;
+using System.Management;
 
 namespace ServiceBouncer
 {
@@ -22,6 +23,11 @@ namespace ServiceBouncer
         private DateTime? appDeactivatedTime;
         private bool IsActive => machineLockedTime == null || appDeactivatedTime == null;
 
+        // WMI Events
+        private ManagementEventWatcher modificationEventWatcher;
+        private ManagementEventWatcher creationEventWatcher;
+        private ManagementEventWatcher deletionEventWatcher;
+
         public MainForm(string machine)
         {
             InitializeComponent();
@@ -29,14 +35,7 @@ namespace ServiceBouncer
             machineHostname = machine;
             toolStripConnectToTextBox.Text = machineHostname;
             services = new List<ServiceViewModel>();
-            Microsoft.Win32.SystemEvents.SessionSwitch += SessionSwitch;
-
-#if NET45
-            //In NET45 startup type requires WMI, so it doesn't auto refresh
-            dataGridStatupType.HeaderText = $@"{dataGridStatupType.HeaderText}*";
-#endif
-            dataGridDescription.HeaderText = $@"{dataGridDescription.HeaderText}*";
-            dataGridLogOnAs.HeaderText = $@"{dataGridLogOnAs.HeaderText}*";
+            Microsoft.Win32.SystemEvents.SessionSwitch += SessionSwitch;  // not sure what to do with this after converting to WMI events.  probably good to do something.  perhaps stop listening and reload services on unlock?
         }
 
         private void AppTerminationTimerTick(object sender, EventArgs e)
@@ -49,21 +48,6 @@ namespace ServiceBouncer
             if (appDeactivatedTime.HasValue && DateTime.Now.Subtract(appDeactivatedTime.Value) > TimeSpan.FromMinutes(60))
             {
                 Application.Exit();
-            }
-        }
-
-        private async void RefreshTimerTicked(object sender, EventArgs e)
-        {
-            if (IsActive)
-            {
-#if NET45
-                //Only refresh things which do not use WMI (i.e. Startup Type, Description, and Log On As are not refreshed)
-                await PerformBackgroundOperation(x => x.Refresh(ServiceViewModel.RefreshData.DisplayName, ServiceViewModel.RefreshData.ServiceName, ServiceViewModel.RefreshData.Status));
-#elif NET461 || NET471 || NET48
-                //Only refresh things which do not use WMI (i.e. Description and Log On As are not refreshed)
-                await PerformBackgroundOperation(x => x.Refresh(ServiceViewModel.RefreshData.DisplayName, ServiceViewModel.RefreshData.ServiceName, ServiceViewModel.RefreshData.Status, ServiceViewModel.RefreshData.Startup));
-#endif
-                SetTitle();
             }
         }
 
@@ -152,8 +136,6 @@ namespace ServiceBouncer
                 async x =>
                 {
                     await x.Delete();
-                    Thread.Sleep(500);
-                    await Reload();
                 });
         }
 
@@ -206,13 +188,9 @@ namespace ServiceBouncer
             });
         }
 
-        private async void InstallClicked(object sender, EventArgs e)
+        private void InstallClicked(object sender, EventArgs e)
         {
-            await PerformAction(async () =>
-            {
-                new InstallationForm().ShowDialog();
-                await Reload();
-            });
+            new InstallationForm().ShowDialog();
         }
 
         private async void ConnectButtonClick(object sender, EventArgs e)
@@ -244,21 +222,55 @@ namespace ServiceBouncer
         {
             try
             {
-                var systemServices = await Task.Run(() => ServiceController.GetServices(machineHostname));
+                ManagementObjectCollection win32_Services = null;
+
+                await Task.Run(() =>
+                {
+                    ManagementObjectSearcher searcher;
+
+                    if (!string.IsNullOrEmpty(machineHostname) && machineHostname != Environment.MachineName)
+                    {
+                        ConnectionOptions options = new ConnectionOptions();
+                        options.Impersonation = System.Management.ImpersonationLevel.Impersonate;
+
+                        ManagementScope scope = new ManagementScope("\\\\" + machineHostname + "\\root\\cimv2", options);
+                        scope.Connect();
+
+                        ObjectQuery query = new ObjectQuery("SELECT * FROM Win32_Service");
+                        searcher = new ManagementObjectSearcher(scope, query);
+                    }
+                    else
+                    {
+                        searcher = new ManagementObjectSearcher("SELECT * FROM Win32_Service");
+                    }
+
+                    win32_Services = searcher.Get();
+
+                    modificationEventWatcher?.Dispose();
+                    modificationEventWatcher = new ManagementEventWatcher(searcher.Scope,
+                        new EventQuery("SELECT * FROM __InstanceModificationEvent WITHIN 2 WHERE TargetInstance ISA 'Win32_Service'"));
+                    modificationEventWatcher.EventArrived += ModificationEventWatcher_EventArrived;
+                    modificationEventWatcher.Start();
+
+                    creationEventWatcher?.Dispose();
+                    creationEventWatcher = new ManagementEventWatcher(searcher.Scope,
+                        new EventQuery("SELECT * FROM __InstanceCreationEvent WITHIN 2 WHERE TargetInstance ISA 'Win32_Service'"));
+                    creationEventWatcher.EventArrived += CreationEventWatcher_EventArrived;
+                    creationEventWatcher.Start();
+
+                    deletionEventWatcher?.Dispose();
+                    deletionEventWatcher = new ManagementEventWatcher(searcher.Scope,
+                        new EventQuery("SELECT * FROM __InstanceDeletionEvent WITHIN 2 WHERE TargetInstance ISA 'Win32_Service'"));
+                    deletionEventWatcher.EventArrived += DeletionEventWatcher_EventArrived; ;
+                    deletionEventWatcher.Start();
+                });
+
                 services.Clear();
 
-                foreach (var model in systemServices.Select(service => new ServiceViewModel(service)))
+                foreach (var model in win32_Services)
                 {
-                    services.Add(model);
+                    services.Add(new ServiceViewModel(machineHostname, model));
                 }
-
-                await PerformBackgroundOperation(x => x.Refresh(
-                    ServiceViewModel.RefreshData.DisplayName,
-                    ServiceViewModel.RefreshData.ServiceName,
-                    ServiceViewModel.RefreshData.Description,
-                    ServiceViewModel.RefreshData.Status,
-                    ServiceViewModel.RefreshData.Startup,
-                    ServiceViewModel.RefreshData.LogOnAs));
 
                 PopulateFilteredDataview();
                 SetTitle();
@@ -288,6 +300,44 @@ namespace ServiceBouncer
                 MessageBox.Show($@"Unable to retrieve the services from {toolStripConnectToTextBox.Text}.{Environment.NewLine}Message: {e.Message}", @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
+        }
+
+        private void DeletionEventWatcher_EventArrived(object sender, EventArrivedEventArgs e)
+        {
+            var targetInstance = (ManagementBaseObject)e.NewEvent["TargetInstance"];
+            var serviceName = targetInstance["Name"].ToString();
+            services.RemoveAll(x => x.ServiceName == serviceName);
+
+            this.Invoke(new MethodInvoker(delegate {
+                PopulateFilteredDataview();
+                SetTitle();
+            }));
+        }
+
+        private void CreationEventWatcher_EventArrived(object sender, EventArrivedEventArgs e)
+        {
+            var targetInstance = (ManagementBaseObject)e.NewEvent["TargetInstance"];
+
+            services.Add(new ServiceViewModel(machineHostname, targetInstance));
+
+            this.Invoke(new MethodInvoker(delegate {
+                PopulateFilteredDataview();
+                SetTitle();
+            }));
+        }
+
+        private void ModificationEventWatcher_EventArrived(object sender, EventArrivedEventArgs e)
+        {
+            var previousInstance = (ManagementBaseObject)e.NewEvent["PreviousInstance"];
+            var targetInstance = (ManagementBaseObject)e.NewEvent["TargetInstance"];
+
+            var serviceName = targetInstance["Name"].ToString();
+
+            var modifiedService = services.Find(x => x.ServiceName == serviceName);
+            if (modifiedService == null)
+                return;
+
+            modifiedService.UpdateFromWmi(targetInstance);
         }
 
         private void StartNewProcess(BaseCredentialsPrompt promptResult)
@@ -368,9 +418,6 @@ namespace ServiceBouncer
 
                 backgroundRefreshSeconds = EnvHelper.IsLocalMachine(machineHostname) ? 1 : 30;
 
-                refreshTimer.Enabled = true;
-                refreshTimer.Interval = backgroundRefreshSeconds * 1000;
-
                 SetConnectedStatusBar();
 
                 foreach (ToolStripItem toolStripItem in toolStrip.Items)
@@ -399,7 +446,6 @@ namespace ServiceBouncer
 
             toolStripConnectToTextBox.Visible = true;
             toolStripConnectButton.Visible = true;
-            refreshTimer.Enabled = false;
         }
 
         private void SetTitle()
@@ -417,15 +463,7 @@ namespace ServiceBouncer
 
         private void SetConnectedStatusBar()
         {
-            if (IsActive)
-            {
-                var backgroundRefreshTimeText = backgroundRefreshSeconds == 1 ? "1 second" : $"{backgroundRefreshSeconds} seconds";
-                toolStripStatusLabel.Text = $@"Connected to {machineHostname}. - Background refresh every {backgroundRefreshTimeText}. - Columns marked '*' will not refresh.";
-            }
-            else
-            {
-                toolStripStatusLabel.Text = $@"Connected to {machineHostname}. - Background refresh disabled";
-            }
+            toolStripStatusLabel.Text = $@"Connected to {machineHostname}.";
         }
 
         private async Task PerformOperationWithCheck(Func<IReadOnlyCollection<ServiceViewModel>, bool> check, Func<ServiceViewModel, Task> actionToPerform)
