@@ -331,9 +331,11 @@ namespace ServiceBouncer
 
             var modifiedService = services.Find(x => x.ServiceName == serviceName);
 
-            modifiedService?.UpdateFromWmi(targetInstance);
-
-            Invoke(new MethodInvoker(SetTitle));
+            Invoke(new MethodInvoker(delegate
+            {
+                modifiedService?.UpdateFromWmi(targetInstance);
+                SetTitle();
+            }));
         }
 
         private void StartNewProcess(BaseCredentialsPrompt promptResult)
