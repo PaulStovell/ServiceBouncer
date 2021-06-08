@@ -1,4 +1,4 @@
-﻿namespace ServiceBouncer
+namespace ServiceBouncer
 {
     partial class MainForm
     {
@@ -79,7 +79,6 @@
             this.toolStripRefreshButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripFilterIcon = new System.Windows.Forms.ToolStripLabel();
             this.toolStripFilterBox = new System.Windows.Forms.ToolStripTextBox();
-            this.refreshTimer = new System.Windows.Forms.Timer(this.components);
             this.appTerminationTimer = new System.Windows.Forms.Timer(this.components);
             this.toolStripContainer.BottomToolStripPanel.SuspendLayout();
             this.toolStripContainer.ContentPanel.SuspendLayout();
@@ -570,12 +569,6 @@
             this.toolStripFilterBox.ToolTipText = "Type a name here to filter";
             this.toolStripFilterBox.TextChanged += new System.EventHandler(this.FilterBoxTextChanged);
             // 
-            // refreshTimer
-            // 
-            this.refreshTimer.Enabled = true;
-            this.refreshTimer.Interval = 1000;
-            this.refreshTimer.Tick += new System.EventHandler(this.RefreshTimerTicked);
-            // 
             // appTerminationTimer
             // 
             this.appTerminationTimer.Enabled = true;
@@ -620,7 +613,6 @@
         private System.Windows.Forms.ToolStripContainer toolStripContainer;
         private System.Windows.Forms.ToolStripButton toolStripStartButton;
         private System.Windows.Forms.ToolStripButton toolStripStopButton;
-        private System.Windows.Forms.Timer refreshTimer;
         private System.Windows.Forms.DataGridView dataGridView;
         private System.Windows.Forms.BindingSource serviceViewModelBindingSource;
         private System.Windows.Forms.ToolStripButton toolStripRestartButton;
